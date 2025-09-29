@@ -280,9 +280,7 @@ function HomeContent() {
     setShowGenerationOrchestrator(false);
   };
 
-  const handleTrendingTopicSelect = (
-    topic: ITrendingTopic | string
-  ) => {
+  const handleTrendingTopicSelect = (topic: ITrendingTopic | string) => {
     // 处理 string 或 ITrendingTopic 类型
     const topicText = typeof topic === 'string' ? topic : topic.title;
     setTopicInput(topicText);

@@ -9,7 +9,12 @@ import {
   DropdownTrigger,
   Image,
 } from '@heroui/react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import {
+  AnimatePresence,
+  motion,
+  useScroll,
+  useTransform,
+} from 'framer-motion';
 import {
   lazy,
   Suspense,
@@ -32,8 +37,11 @@ import {
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 
+import { HowToUse } from './HowToUse';
+
 import { goToStepAfterStableSameAnchor } from '@/utils/tutorial';
 
+import { useArticleStore } from '@/stores/articleStore';
 import { BackgroundGradientAnimation } from '../ui/background-gradient-animation';
 
 const TrendingTopicsPage = lazy(() =>
@@ -41,6 +49,8 @@ const TrendingTopicsPage = lazy(() =>
     default: module.NewTrendingTopicsPage,
   })),
 );
+
+const ONBOARDING_KEY = 'ifw_onboarding_completed_v2';
 
 interface WelcomeScreenProps {
   onTrendingTopicSelect: (topic: ITrendingTopic | string) => void;
@@ -82,6 +92,13 @@ export const WelcomeScreen = ({
   onScrollProgressChange,
 }: WelcomeScreenProps) => {
   const { user, isAuthenticated } = useAuthStore();
+  const { articles } = useArticleStore();
+  const [isFreshUser, setIsFreshUser] = useState(true); // 是否是默认是非新手
+
+  useEffect(() => {
+    setIsFreshUser(articles.length === 0);
+  }, [articles]);
+
   const [selectedContentFormat, setSelectedContentFormat] =
     useState<IContentFormat>('longform');
   const [selectedMode, setSelectedMode] = useState<IMode>('analysis');
@@ -113,6 +130,7 @@ export const WelcomeScreen = ({
 
   // 自动调整textarea高度
   const adjustTextareaHeight = () => {
+    if (!isComplexMode) return;
     const textarea = textareaRef.current;
     if (textarea) {
       // 重置高度以获取正确的scrollHeight
@@ -122,6 +140,22 @@ export const WelcomeScreen = ({
       textarea.style.height = `${newHeight}px`;
     }
   };
+
+  const [isFocus, setIsFocus] = useState(false);
+
+  const isComplexMode = useMemo(() => {
+    if (typeof window === 'undefined') return;
+
+    const hasCompleted = window.localStorage.getItem(ONBOARDING_KEY) === 'true';
+
+    return !isFreshUser || isFocus || !hasCompleted;
+  }, [isFreshUser, isFocus]);
+
+  console.log(
+    '%c [ isComplexMode ]-147',
+    'font-size:13px; background:pink; color:#bf2c9f;',
+    isComplexMode,
+  );
 
   useEffect(() => {
     adjustTextareaHeight();
@@ -171,8 +205,6 @@ export const WelcomeScreen = ({
 
     // 在页面等待2000ms后，再进入新手引导
     setTimeout(() => {
-      const ONBOARDING_KEY = 'ifw_onboarding_completed_v2';
-
       if (typeof window === 'undefined') return;
 
       const hasCompleted =
@@ -206,7 +238,7 @@ export const WelcomeScreen = ({
         },
         steps: [
           {
-            element: '#textarea-ref',
+            element: '#textarea-ref-complex',
             popover: {
               title: 'Choose Format & Mode',
               description: `
@@ -348,8 +380,10 @@ export const WelcomeScreen = ({
           },
         ],
         onHighlightStarted: (el) => {
-          (el as HTMLElement).setAttribute('inert', ''); // 禁用交互/焦点
-          (el as HTMLElement).classList.add('tour-noninteractive'); // 叠加指针禁用（双保险）
+          if (el) {
+            (el as HTMLElement).setAttribute('inert', ''); // 禁用交互/焦点
+            (el as HTMLElement).classList.add('tour-noninteractive'); // 叠加指针禁用（双保险）
+          }
         },
         onDestroyStarted: () => {}, // 什么都不做，禁止用户点击非高亮处
       });
@@ -371,6 +405,234 @@ export const WelcomeScreen = ({
       });
     }, 2000);
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (isFocus) {
+      textareaRef.current?.focus();
+
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 360);
+    }
+  }, [isFocus]);
+
+  const renderSimpleMode = () => {
+    return (
+      <motion.div
+        key="simple-mode"
+        id="textarea-ref-simple"
+        className="relative mt-[24px] w-[400px] mx-auto"
+        initial={{ width: 640, borderRadius: '16px' }}
+        animate={{ width: 400, borderRadius: '20px' }}
+        exit={{ width: 640, borderRadius: '16px' }}
+        transition={{
+          duration: 0.3,
+          ease: [0.4, 0.0, 0.2, 1],
+        }}
+      >
+        <motion.textarea
+          ref={textareaRef}
+          id="textarea-simple"
+          placeholder="You can start with a topic or an opinion."
+          value={topicInput}
+          onChange={(e) => onTopicInputChange(e.target.value)}
+          onWheel={(e) => {
+            e.stopPropagation();
+          }}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onInput={adjustTextareaHeight}
+          className="w-full rounded-full resize-none pt-[8px] pl-[16px] text-gray-700  placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-1"
+          style={{
+            height: '40px',
+          }}
+          initial={{ height: '120px', borderRadius: '16px' }}
+          animate={{ height: '40px', borderRadius: '20px' }}
+          exit={{ height: '120px', borderRadius: '16px' }}
+          transition={{
+            duration: 0.3,
+            ease: [0.4, 0.0, 0.2, 1],
+          }}
+        />
+
+        <Button
+          isIconOnly
+          color="primary"
+          className="absolute top-[0] right-[0px] size-[40px] min-w-0 rounded-full"
+          onPress={handleTopicSubmit}
+          disabled={!topicInput.trim()}
+        >
+          <Image
+            src="/icons/send.svg"
+            alt="发送"
+            width={40}
+            height={40}
+            className="pointer-events-none"
+          />
+        </Button>
+      </motion.div>
+    );
+  };
+
+  const renderComplexMode = () => {
+    return (
+      <motion.div
+        key="complex-mode"
+        id="textarea-ref-complex"
+        className="relative mt-[24px] w-[640px] mx-auto"
+        initial={{ width: 400, borderRadius: '20px' }}
+        animate={{ width: 640, borderRadius: '16px' }}
+        exit={{ width: 400, borderRadius: '20px' }}
+        transition={{
+          duration: 0.3,
+          ease: [0.4, 0.0, 0.2, 1],
+        }}
+      >
+        <motion.textarea
+          ref={textareaRef}
+          id="textarea-complex"
+          placeholder="You can start with a topic or an opinion."
+          value={topicInput}
+          onChange={(e) => onTopicInputChange(e.target.value)}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onKeyDown={(e) => {
+            if (
+              e.key === 'Enter' &&
+              !e.shiftKey &&
+              !e.nativeEvent.isComposing
+            ) {
+              e.preventDefault();
+              handleTopicSubmit();
+            }
+          }}
+          onWheel={(e) => {
+            e.stopPropagation();
+          }}
+          onInput={adjustTextareaHeight}
+          className="w-full resize-none rounded-2xl p-4 pb-[58px] pr-12 text-gray-700  placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-1"
+          style={{
+            minHeight: '120px',
+            maxHeight: '300px',
+            height: '120px',
+          }}
+          initial={{ height: '40px', borderRadius: '20px' }}
+          animate={{ height: '120px', borderRadius: '16px' }}
+          exit={{ height: '40px', borderRadius: '20px' }}
+          transition={{
+            duration: 0.3,
+            ease: [0.4, 0.0, 0.2, 1],
+          }}
+        />
+
+        <div className="absolute inset-x-0 bottom-[7px] flex items-center justify-start gap-[4px] rounded-b-2xl bg-white py-3 pl-3">
+          <Dropdown placement="bottom-end">
+            <DropdownTrigger>
+              <Button
+                size="sm"
+                variant="flat"
+                className="mr-[6px] min-w-[100px] rounded-full border border-gray-200 bg-transparent px-[10px] py-[4px] text-gray-700 backdrop-blur-sm hover:bg-gray-50"
+                endContent={
+                  <svg
+                    className="ml-1 size-3 opacity-60"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                }
+              >
+                {
+                  ContentFormatOptions.find(
+                    (opt) => opt.key === selectedContentFormat,
+                  )?.label
+                }
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="Content format selection"
+              selectedKeys={[selectedContentFormat]}
+              selectionMode="single"
+              onSelectionChange={(keys) => {
+                const selectedKey = Array.from(keys)[0] as IContentFormat;
+                if (selectedKey) {
+                  setSelectedContentFormat(selectedKey);
+                }
+              }}
+            >
+              {ContentFormatOptions.map((option) => (
+                <DropdownItem key={option.key}>{option.label}</DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+
+          {!isDeepResearch && (
+            <Dropdown placement="bottom-end">
+              <DropdownTrigger>
+                <Button
+                  size="sm"
+                  variant="flat"
+                  className={cn(
+                    'min-w-[100px] rounded-full border border-gray-200 bg-transparent px-[10px] py-[4px] text-gray-700 backdrop-blur-sm hover:bg-gray-50',
+                  )}
+                  endContent={
+                    <svg
+                      className="ml-1 size-3 opacity-60"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  }
+                >
+                  {ModeOptions.find((opt) => opt.key === selectedMode)?.label}
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="mode selection"
+                selectedKeys={[selectedMode]}
+                selectionMode="single"
+                onSelectionChange={(keys) => {
+                  const selectedKey = Array.from(keys)[0] as IMode;
+                  if (selectedKey) {
+                    setSelectedMode(selectedKey);
+                  }
+                }}
+              >
+                {ModeOptions.map((option) => (
+                  <DropdownItem key={option.key}>{option.label}</DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          )}
+        </div>
+
+        <Button
+          isIconOnly
+          color="primary"
+          className="absolute bottom-[12px] right-[12px] mb-[3px] size-[40px] min-w-0 rounded-full"
+          onPress={handleTopicSubmit}
+          disabled={!topicInput.trim()}
+        >
+          <Image
+            src="/icons/send.svg"
+            alt="发送"
+            width={40}
+            height={40}
+            className="pointer-events-none"
+          />
+        </Button>
+      </motion.div>
+    );
+  };
 
   return (
     <div className="relative size-full min-w-[1000px]">
@@ -396,153 +658,23 @@ export const WelcomeScreen = ({
             containerClassName="absolute inset-0 -z-10 h-full w-full"
             interactive={true}
           />
-          <div className="relative flex flex-col px-[24px] text-center">
-            <h2 className="text-[24px] font-[400] text-black">
-              Hey {isAuthenticated ? user?.name || 'there' : 'there'}, what
-              would you like to write about today?
-            </h2>
+          <div className="relative flex flex-col px-[24px] text-center items-center">
+            {!isFreshUser && (
+              <h2 className="text-[24px] font-[400] text-black">
+                Hey {isAuthenticated ? user?.name || 'there' : 'there'}, what
+                would you like to write about today?
+              </h2>
+            )}
 
-            <div id="textarea-ref" className="relative mt-[24px]">
-              <textarea
-                ref={textareaRef}
-                placeholder="You can start with a topic or an opinion."
-                value={topicInput}
-                onChange={(e) => onTopicInputChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (
-                    e.key === 'Enter' &&
-                    !e.shiftKey &&
-                    !e.nativeEvent.isComposing
-                  ) {
-                    e.preventDefault();
-                    handleTopicSubmit();
-                  }
-                }}
-                onWheel={(e) => {
-                  e.stopPropagation();
-                }}
-                onInput={adjustTextareaHeight}
-                className="w-full resize-none rounded-2xl p-4 pb-[58px] pr-12 text-gray-700  placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-1"
-                style={{
-                  minHeight: '120px',
-                  maxHeight: '300px',
-                  height: '120px',
-                }}
-              />
-              {/* Content Format Dropdown */}
-              <div className="absolute inset-x-0 bottom-[7px] flex items-center justify-start gap-[4px] rounded-b-2xl bg-white py-3 pl-3">
-                <Dropdown placement="bottom-end">
-                  <DropdownTrigger>
-                    <Button
-                      size="sm"
-                      variant="flat"
-                      className="mr-[6px] min-w-[100px] rounded-full border border-gray-200 bg-transparent px-[10px] py-[4px] text-gray-700 backdrop-blur-sm hover:bg-gray-50"
-                      endContent={
-                        <svg
-                          className="ml-1 size-3 opacity-60"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      }
-                    >
-                      {
-                        ContentFormatOptions.find(
-                          (opt) => opt.key === selectedContentFormat,
-                        )?.label
-                      }
-                    </Button>
-                  </DropdownTrigger>
-                  <DropdownMenu
-                    aria-label="Content format selection"
-                    selectedKeys={[selectedContentFormat]}
-                    selectionMode="single"
-                    onSelectionChange={(keys) => {
-                      const selectedKey = Array.from(keys)[0] as IContentFormat;
-                      if (selectedKey) {
-                        setSelectedContentFormat(selectedKey);
-                      }
-                    }}
-                  >
-                    {ContentFormatOptions.map((option) => (
-                      <DropdownItem key={option.key}>
-                        {option.label}
-                      </DropdownItem>
-                    ))}
-                  </DropdownMenu>
-                </Dropdown>
+            <AnimatePresence mode="wait">
+              {isComplexMode ? renderComplexMode() : renderSimpleMode()}
+            </AnimatePresence>
 
-                {!isDeepResearch && (
-                  <Dropdown placement="bottom-end">
-                    <DropdownTrigger>
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        className={cn(
-                          'min-w-[100px] rounded-full border border-gray-200 bg-transparent px-[10px] py-[4px] text-gray-700 backdrop-blur-sm hover:bg-gray-50',
-                        )}
-                        endContent={
-                          <svg
-                            className="ml-1 size-3 opacity-60"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        }
-                      >
-                        {
-                          ModeOptions.find((opt) => opt.key === selectedMode)
-                            ?.label
-                        }
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      aria-label="mode selection"
-                      selectedKeys={[selectedMode]}
-                      selectionMode="single"
-                      onSelectionChange={(keys) => {
-                        const selectedKey = Array.from(keys)[0] as IMode;
-                        if (selectedKey) {
-                          setSelectedMode(selectedKey);
-                        }
-                      }}
-                    >
-                      {ModeOptions.map((option) => (
-                        <DropdownItem key={option.key}>
-                          {option.label}
-                        </DropdownItem>
-                      ))}
-                    </DropdownMenu>
-                  </Dropdown>
-                )}
+            {isFreshUser && (
+              <div className="mt-[200px]">
+                <HowToUse showInModal={false} />
               </div>
-
-              <Button
-                isIconOnly
-                color="primary"
-                className="absolute bottom-[12px] right-[12px] mb-[3px] size-[40px] min-w-0 rounded-full"
-                onPress={handleTopicSubmit}
-                disabled={!topicInput.trim()}
-              >
-                <Image
-                  src="/icons/send.svg"
-                  alt="发送"
-                  width={40}
-                  height={40}
-                  className="pointer-events-none"
-                />
-              </Button>
-            </div>
+            )}
 
             {selectedTweets && selectedTweets.length > 0 && (
               <div className="mt-[14px] grid max-w-[700px] grid-cols-3 gap-[8px]">
@@ -553,6 +685,7 @@ export const WelcomeScreen = ({
                   >
                     <Image
                       src={'/icons/x-icon.svg'}
+                      alt=""
                       width={32}
                       height={32}
                       className="shrink-0 rounded-[8px]"
@@ -602,6 +735,7 @@ export const WelcomeScreen = ({
               <ScrollHint scrollY={scrollY} />
             </div>
           </div> */}
+          {!isFreshUser && <HowToUse showInModal={true} />}
         </motion.div>
 
         {/* Trending Topics Section */}

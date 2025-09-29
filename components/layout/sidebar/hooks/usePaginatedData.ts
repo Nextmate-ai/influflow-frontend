@@ -210,7 +210,7 @@ export const usePaginatedData = (
       initializeData();
     } else {
       // 清空数据
-      setData([]);
+      // setData([]);
       setError(null);
       setHasMore(false);
       setTotal(0);

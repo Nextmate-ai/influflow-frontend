@@ -27,7 +27,6 @@ import { usePaginatedData } from './hooks/usePaginatedData';
 import { useScrollPositionRestore } from './hooks/useScrollPositionRestore';
 import { ProfileDropdown } from './ProfileDropdown';
 import { SidebarItem as SidebarItemType } from './types/sidebar.types';
-import router from 'next/router';
 
 interface AppSidebarProps {
   onItemClick?: (item: SidebarItemType) => void;
@@ -151,7 +150,7 @@ export const AppSidebar = forwardRef<AppSidebarRef, AppSidebarProps>(
             {/* <ProfileDropdown collapsed={collapsed} /> */}
             <Link href="/">
               <Image src={'/images/logo.png'} width={82} height={24} />
-            </Link> 
+            </Link>
             {/* 收起按钮 */}
             {onToggleCollapse && (
               <Button
