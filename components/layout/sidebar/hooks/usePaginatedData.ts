@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { IS_FRESH_USER_KEY } from '@/constants';
 import {
   fetchPaginatedSidebarData,
   getErrorRecoveryAction,
@@ -129,6 +130,16 @@ export const usePaginatedData = (
     try {
       const firstPageData = await loadPage(initialPage, false);
       setData(firstPageData);
+
+      const isFresh = localStorage.getItem(IS_FRESH_USER_KEY);
+
+      if (isFresh == 'false') {
+        return;
+      }
+
+      if (firstPageData.length > 0) {
+        localStorage.setItem(IS_FRESH_USER_KEY, 'false');
+      }
     } catch (error) {
       // 错误已经在 loadPage 中处理了
     }
@@ -210,7 +221,7 @@ export const usePaginatedData = (
       initializeData();
     } else {
       // 清空数据
-      setData([]);
+      // setData([]);
       setError(null);
       setHasMore(false);
       setTotal(0);

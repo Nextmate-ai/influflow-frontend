@@ -18,15 +18,15 @@ export default function HomePage() {
           width={159}
           height={48}
         />
-        <button 
-        className="mr-3 h-[40px] w-[80px] rounded-[12px] bg-black text-white"
-        onClick={() => {
-          if (isAuthenticated) {
-            logout();
-          } else {
-            openLoginModal();
-          }
-        }}
+        <button
+          className="mr-3 h-[40px] w-[80px] rounded-[12px] bg-black text-white"
+          onClick={() => {
+            if (isAuthenticated) {
+              logout();
+            } else {
+              openLoginModal();
+            }
+          }}
         >
           {isAuthenticated ? 'Log Out' : 'Login'}
         </button>
@@ -44,7 +44,9 @@ export default function HomePage() {
             <br className="hidden md:block" /> In Your Own Voice
           </p>
           <p className="mx-auto mt-6 w-[590px] text-[20px] text-[#575757] leading-[25px]">
-            Build your digital self and unlock a one-stop content engine that speaks, thinks, and creates just like you.</p>
+            Build your digital self and unlock a one-stop content engine that
+            speaks, thinks, and creates just like you.
+          </p>
           <div className="mt-10 flex justify-center">
             {isAuthenticated ? (
               <Link
@@ -114,10 +116,13 @@ export default function HomePage() {
         <section className="mx-auto px-[15%] py-16 pb-[120px] pt-[72px] text-center">
           <p className="text-[40px] font-semibold italic">Our Vision</p>
           <p className="mx-auto mt-20 text-center text-[20px] w-[780px]">
-            We envision a future where AI deeply understands every creator—their voice, style, and values—and amplifies their unique strengths.
+            We envision a future where AI deeply understands every creator—their
+            voice, style, and values—and amplifies their unique strengths.
           </p>
           <p className="mx-auto mt-10 text-center text-[20px] w-[840px]">
-          Through this, creators, brands, and communities can collaborate on an open, intelligent platform that makes influence measurable, scalable, and truly impactful.
+            Through this, creators, brands, and communities can collaborate on
+            an open, intelligent platform that makes influence measurable,
+            scalable, and truly impactful.
           </p>
         </section>
 
@@ -201,7 +206,7 @@ function Feature({
         <p className="mt-3 text-[14px] leading-5 text-[#757575]">
           {description}
         </p>
-        <button 
+        <button
           className="mt-[24px] rounded-[12px] bg-black px-4 py-3 text-[14px] text-white"
           onClick={() => {
             if (isAuthenticated) {
