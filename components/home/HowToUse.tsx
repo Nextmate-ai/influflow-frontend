@@ -32,7 +32,7 @@ export const HowToUse = ({
   const renderContext = () => {
     return (
       <div className="flex flex-col items-center justify-center">
-        <h2 className="text-[36px] font-[400] text-black cursor-pointer">
+        <h2 className="text-[36px] font-[400] text-black ">
           How to use Influxy?
         </h2>
 
@@ -72,11 +72,11 @@ export const HowToUse = ({
       {!hidden && (
         <div
           onClick={() => setIsOpen(true)}
-          className="absolute left-[50%] translate-x-[-50%] bottom-[24px] px-[24px] text-[#828282] h-[45px] flex items-center justify-center bg-[#F2F7FF] rounded-full"
+          className="absolute left-[50%] text-[12px] translate-x-[-50%] bottom-[24px] px-[16px] text-[#828282] h-[45px] flex items-center justify-center bg-[#F2F7FF] rounded-full cursor-pointer hover:bg-[#E2E8F0]"
         >
           How to use Influxy{' '}
           <Image
-            className="ml-[24px] cursor-pointer"
+            className="ml-[16px] cursor-pointer"
             src="/icons/close.svg"
             alt="close"
             width={16}
