@@ -9,12 +9,7 @@ import {
   DropdownTrigger,
   Image,
 } from '@heroui/react';
-import {
-  AnimatePresence,
-  motion,
-  useScroll,
-  useTransform,
-} from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import {
   lazy,
   Suspense,
@@ -123,7 +118,6 @@ export const WelcomeScreen = ({
 
   // 自动调整textarea高度
   const adjustTextareaHeight = () => {
-    if (!isComplexMode) return;
     const textarea = textareaRef.current;
     if (textarea) {
       // 重置高度以获取正确的scrollHeight
@@ -143,14 +137,6 @@ export const WelcomeScreen = ({
 
     return isFresh == 'true';
   }, []);
-
-  const isComplexMode = useMemo(() => {
-    if (typeof window === 'undefined') return false; // 服务端渲染时默认为简单模式
-
-    const hasCompleted = window.localStorage.getItem(ONBOARDING_KEY) === 'true';
-
-    return !isFreshUser || isFocus || !hasCompleted;
-  }, [isFocus, isFreshUser]);
 
   useEffect(() => {
     adjustTextareaHeight();
@@ -505,7 +491,7 @@ export const WelcomeScreen = ({
             e.stopPropagation();
           }}
           onInput={adjustTextareaHeight}
-          className="w-full resize-none rounded-2xl p-4 pb-[58px] pr-12 text-gray-700  placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-1"
+          className="shadow-lg w-full resize-none rounded-2xl p-4 pb-[58px] pr-12 text-gray-700  placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-1"
           style={{
             minHeight: '120px',
             maxHeight: '300px',
@@ -661,9 +647,11 @@ export const WelcomeScreen = ({
               </h2>
             )}
 
-            <AnimatePresence mode="wait">
+            {/* <AnimatePresence mode="wait">
               {isComplexMode ? renderComplexMode() : renderSimpleMode()}
-            </AnimatePresence>
+            </AnimatePresence> */}
+
+            {renderComplexMode()}
 
             {isFreshUser && (
               <div className="mt-[80px]">
