@@ -135,7 +135,7 @@ export const WelcomeScreen = ({
 
     const isFresh = localStorage.getItem(IS_FRESH_USER_KEY);
 
-    return isFresh == 'true';
+    return isFresh == 'true' || isFresh == null;
   }, []);
 
   useEffect(() => {
