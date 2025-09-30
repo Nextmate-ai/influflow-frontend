@@ -40,7 +40,7 @@ export default function HomePage() {
             interactive={true}
           />
           <p className="text-[65px] text-black h-[150px] leading-[80px]">
-            One-Stop Content Creation - test
+            One-Stop Content Creation
             <br className="hidden md:block" /> In Your Own Voice
           </p>
           <p className="mx-auto mt-6 w-[590px] text-[20px] text-[#575757] leading-[25px]">
