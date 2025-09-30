@@ -144,7 +144,7 @@ export const WelcomeScreen = ({
   const [isFocus, setIsFocus] = useState(false);
 
   const isComplexMode = useMemo(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return false; // 服务端渲染时默认为简单模式
 
     const hasCompleted = window.localStorage.getItem(ONBOARDING_KEY) === 'true';
 
@@ -422,7 +422,7 @@ export const WelcomeScreen = ({
         key="simple-mode"
         id="textarea-ref-simple"
         className="relative mt-[24px] w-[400px] mx-auto"
-        initial={{ width: 640, borderRadius: '16px' }}
+        initial={{ width: 400, borderRadius: '20px' }}
         animate={{ width: 400, borderRadius: '20px' }}
         exit={{ width: 640, borderRadius: '16px' }}
         transition={{
@@ -446,7 +446,7 @@ export const WelcomeScreen = ({
           style={{
             height: '40px',
           }}
-          initial={{ height: '120px', borderRadius: '16px' }}
+          initial={{ height: '40px', borderRadius: '20px' }}
           animate={{ height: '40px', borderRadius: '20px' }}
           exit={{ height: '120px', borderRadius: '16px' }}
           transition={{
@@ -480,7 +480,7 @@ export const WelcomeScreen = ({
         key="complex-mode"
         id="textarea-ref-complex"
         className="relative mt-[24px] w-[640px] mx-auto"
-        initial={{ width: 400, borderRadius: '20px' }}
+        initial={{ width: 640, borderRadius: '16px' }}
         animate={{ width: 640, borderRadius: '16px' }}
         exit={{ width: 400, borderRadius: '20px' }}
         transition={{
@@ -516,7 +516,7 @@ export const WelcomeScreen = ({
             maxHeight: '300px',
             height: '120px',
           }}
-          initial={{ height: '40px', borderRadius: '20px' }}
+          initial={{ height: '120px', borderRadius: '16px' }}
           animate={{ height: '120px', borderRadius: '16px' }}
           exit={{ height: '40px', borderRadius: '20px' }}
           transition={{

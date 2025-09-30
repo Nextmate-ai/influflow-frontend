@@ -58,6 +58,11 @@ export function LoginModal({ isOpen, onClose, authError }: LoginModalProps) {
       typeof window !== 'undefined'
         ? window.location.origin
         : process.env.NEXT_PUBLIC_SITE_URL!;
+    console.log(
+      '%c [ origin ]-58',
+      'font-size:13px; background:pink; color:#bf2c9f;',
+      origin,
+    );
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'twitter',
       options: {

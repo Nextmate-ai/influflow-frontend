@@ -12,19 +12,19 @@ export const HowToUse = ({
 
   const steps = [
     {
-      src: '/home/StepOne.svg',
+      src: '/home/StepOne.png',
       alt: 'Step One',
     },
     {
-      src: '/home/StepTwo.svg',
+      src: '/home/StepTwo.png',
       alt: 'Step Two',
     },
     {
-      src: '/home/StepThree.svg',
+      src: '/home/StepThree.png',
       alt: 'Step Three',
     },
     {
-      src: '/home/StepFour.svg',
+      src: '/home/StepFour.png',
       alt: 'Step Four',
     },
   ];
