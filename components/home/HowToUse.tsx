@@ -32,7 +32,7 @@ export const HowToUse = ({
   const renderContext = () => {
     return (
       <div className="flex flex-col items-center justify-center">
-        <h2 className="text-[36px] font-[400] text-black">
+        <h2 className="text-[36px] font-[400] text-black cursor-pointer">
           How to use Influxy?
         </h2>
 

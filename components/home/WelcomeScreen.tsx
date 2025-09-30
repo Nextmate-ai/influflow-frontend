@@ -41,7 +41,7 @@ import { HowToUse } from './HowToUse';
 
 import { goToStepAfterStableSameAnchor } from '@/utils/tutorial';
 
-import { useArticleStore } from '@/stores/articleStore';
+import { IS_FRESH_USER_KEY } from '@/constants';
 import { BackgroundGradientAnimation } from '../ui/background-gradient-animation';
 
 const TrendingTopicsPage = lazy(() =>
@@ -92,13 +92,6 @@ export const WelcomeScreen = ({
   onScrollProgressChange,
 }: WelcomeScreenProps) => {
   const { user, isAuthenticated } = useAuthStore();
-  const { articles } = useArticleStore();
-  const [isFreshUser, setIsFreshUser] = useState(true); // 是否是默认是非新手
-
-  useEffect(() => {
-    setIsFreshUser(articles.length === 0);
-  }, [articles]);
-
   const [selectedContentFormat, setSelectedContentFormat] =
     useState<IContentFormat>('longform');
   const [selectedMode, setSelectedMode] = useState<IMode>('analysis');
@@ -143,19 +136,21 @@ export const WelcomeScreen = ({
 
   const [isFocus, setIsFocus] = useState(false);
 
+  const isFreshUser = useMemo(() => {
+    if (typeof window === 'undefined') return true;
+
+    const isFresh = localStorage.getItem(IS_FRESH_USER_KEY);
+
+    return isFresh == 'true';
+  }, []);
+
   const isComplexMode = useMemo(() => {
     if (typeof window === 'undefined') return false; // 服务端渲染时默认为简单模式
 
     const hasCompleted = window.localStorage.getItem(ONBOARDING_KEY) === 'true';
 
     return !isFreshUser || isFocus || !hasCompleted;
-  }, [isFreshUser, isFocus]);
-
-  console.log(
-    '%c [ isComplexMode ]-147',
-    'font-size:13px; background:pink; color:#bf2c9f;',
-    isComplexMode,
-  );
+  }, [isFocus, isFreshUser]);
 
   useEffect(() => {
     adjustTextareaHeight();
@@ -671,7 +666,7 @@ export const WelcomeScreen = ({
             </AnimatePresence>
 
             {isFreshUser && (
-              <div className="mt-[200px]">
+              <div className="mt-[80px]">
                 <HowToUse showInModal={false} />
               </div>
             )}
