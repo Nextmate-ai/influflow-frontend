@@ -1,4 +1,4 @@
-import { Modal, ModalBody, ModalContent } from '@heroui/react';
+import { Button, Modal, ModalBody, ModalContent } from '@heroui/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -80,12 +80,8 @@ export const HowToUse = ({
             return (
               <div
                 key={step.alt}
-                className={`relative flex-1 rounded-[12px] transition-all duration-300 ease-in-out ${
-                  isHoverable
-                    ? 'hover:transform hover:-translate-y-2 cursor-pointer'
-                    : ''
-                }`}
-                onClick={isHoverable ? handleClick : undefined}
+                className={`relative flex-1 rounded-[12px] transition-all duration-300 ease-in-out`}
+                // onClick={isHoverable ? handleClick : undefined}
               >
                 <Image
                   key={step.alt}
@@ -95,6 +91,15 @@ export const HowToUse = ({
                   height={260}
                   className="w-full h-auto"
                 />
+
+                {isHoverable && (
+                  <Button
+                    className="absolute bottom-[10%] left-[50%] translate-x-[-50%] w-[67px] h-[24px] text-[11px] rounded-[6px] font-[400] text-white bg-black hover:bg-black/80"
+                    onClick={isHoverable ? handleClick : undefined}
+                  >
+                    Try Now
+                  </Button>
+                )}
               </div>
             );
           })}
