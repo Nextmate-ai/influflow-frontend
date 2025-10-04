@@ -94,7 +94,7 @@ export const HowToUse = ({
 
                 {isHoverable && (
                   <Button
-                    className="absolute bottom-[10%] left-[50%] translate-x-[-50%] w-[67px] h-[24px] text-[11px] rounded-[6px] font-[400] text-white bg-black hover:bg-black/80"
+                    className="absolute bottom-[10%] left-[50%] translate-x-[-50%] w-[67px] h-[24px] text-[11px] rounded-[6px] font-[400] text-white bg-black hover:bg-[#448aff]"
                     onClick={isHoverable ? handleClick : undefined}
                   >
                     Try Now
