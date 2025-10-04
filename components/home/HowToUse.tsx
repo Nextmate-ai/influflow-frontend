@@ -1,5 +1,6 @@
 import { Modal, ModalBody, ModalContent } from '@heroui/react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export const HowToUse = ({
@@ -9,6 +10,31 @@ export const HowToUse = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const router = useRouter();
+
+  // 处理 stepOne 点击 - 跳转到设置页面
+  const handleStepOneClick = () => {
+    router.push('/profile');
+  };
+
+  // 处理 stepTwo 点击 - 关闭弹窗并滚动到 Trending Topics
+  const handleStepTwoClick = () => {
+    if (showInModal && isOpen) {
+      setIsOpen(false); // 关闭弹窗
+    }
+
+    // 滚动到 Trending Topics 模块
+    setTimeout(() => {
+      const trendingElement = document.querySelector('#trending-topics');
+      if (trendingElement) {
+        trendingElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest',
+        });
+      }
+    }, 300); // 等待弹窗关闭动画完成
+  };
 
   const steps = [
     {
@@ -37,18 +63,46 @@ export const HowToUse = ({
         </h2>
 
         <div className="flex flex-row items-center justify-center gap-[8px]">
-          {steps.map((step) => (
-            <div key={step.alt} className="flex-1 rounded-[12px]">
-              <Image
+          {steps.map((step, index) => {
+            // 为 stepone 和 steptwo 添加特殊的 hover 动画
+            const isHoverable =
+              step.alt === 'Step One' || step.alt === 'Step Two';
+
+            // 根据步骤类型添加不同的点击处理
+            const handleClick = () => {
+              if (step.alt === 'Step One') {
+                handleStepOneClick();
+              } else if (step.alt === 'Step Two') {
+                handleStepTwoClick();
+              }
+            };
+
+            return (
+              <div
                 key={step.alt}
-                src={step.src}
-                alt={step.alt}
-                width={220}
-                height={260}
-                className="w-full h-auto"
-              />
-            </div>
-          ))}
+                className={`relative flex-1 rounded-[12px] `}
+                // onClick={isHoverable ? handleClick : undefined}
+              >
+                <Image
+                  key={step.alt}
+                  src={step.src}
+                  alt={step.alt}
+                  width={220}
+                  height={260}
+                  className="w-full h-auto"
+                />
+
+                {isHoverable && (
+                  <div
+                    className="transition-all duration-300 ease-in-out flex items-center justify-center absolute cursor-pointer bottom-[10%] left-[50%] translate-x-[-50%] w-[67px] h-[24px] text-[11px] rounded-[6px] font-[400] text-white bg-black hover:bg-[#448aff] hover:opacity-100!"
+                    onClick={isHoverable ? handleClick : undefined}
+                  >
+                    Try Now
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     );
