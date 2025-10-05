@@ -109,11 +109,11 @@ export const useSubscriptionStore = create<ISubscriptionState>()(
       updateShowLowCreditsBanner: () => {
         const state = get();
 
-        // 只有付费用户才显示横幅
-        if (state.currentPlan === 'free') {
-          set({ showLowCreditsBanner: false });
-          return;
-        }
+        // 只有付费用户才显示横幅 => 10.5 取消非付费用户的限制
+        // if (state.currentPlan === 'free') {
+        //   set({ showLowCreditsBanner: false });
+        //   return;
+        // }
 
         // 检查是否积分不足
         const lowCredits = state.credits < 10;
