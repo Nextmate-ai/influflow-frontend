@@ -129,7 +129,8 @@ export const useSubscriptionStore = create<ISubscriptionState>()(
           nearExpiry = daysUntilExpiry <= 7 && daysUntilExpiry >= 0;
         }
 
-        set({ showLowCreditsBanner: lowCredits || nearExpiry });
+        // 暂时移除即将到期横幅，仅处理积分不足的情况
+        set({ showLowCreditsBanner: lowCredits });
       },
 
       reset: () => set(initialState),

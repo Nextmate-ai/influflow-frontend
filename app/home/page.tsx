@@ -379,6 +379,7 @@ function HomeContent() {
         {isShowingHomePage && scrollProgress && (
           <ScrollProgressIndicator scrollProgress={scrollProgress} />
         )}
+
         {/* Profile Complete Prompt */}
         <ProfileCompletePrompt
           isVisible={showProfileCompletePrompt}
@@ -438,12 +439,10 @@ function HomeContent() {
           </div>
         )}
 
-        <CreditBanner />
-
         {/* Main Content */}
         <div
           className={cn(
-            'flex h-screen overflow-hidden bg-gray-50',
+            'flex flex-col h-screen overflow-hidden bg-gray-50',
             showContentGeneration && currentTopic ? 'hidden' : 'flex',
             showDraftConfirmation && !hasCreatedContentGeneration
               ? 'hidden'
@@ -451,30 +450,34 @@ function HomeContent() {
             showGenerationOrchestrator ? 'hidden' : 'flex',
           )}
         >
-          <AnimatePresence>
-            <AppSidebar
-              ref={sidebarRef}
-              onItemClick={handleSidebarItemClick}
-              selectedId={selectedItemId}
-              collapsed={sidebarCollapsed}
-              onToggleCollapse={() => setSidebarCollapsed(true)}
-            />
-          </AnimatePresence>
+          <CreditBanner />
 
-          <MainContent
-            sidebarCollapsed={sidebarCollapsed}
-            onToggleSidebar={() => setSidebarCollapsed(false)}
-            onTrendingTopicSelect={handleTrendingTopicSelect}
-            onTrendingTweetsSelect={handleTrendingTweetsSelect}
-            onTrendingSearchConfirm={handleTrendingSearchConfirm}
-            selectedTweets={selectedTweets}
-            onRemoveSelectedTweet={handleRemoveSelectedTweet}
-            topicInput={topicInput}
-            onTopicInputChange={setTopicInput}
-            onTopicSubmit={handleTopicSubmit}
-            onScrollProgressChange={setScrollProgress}
-            hasCompletedOnboarding={hasCompletedOnboarding}
-          />
+          <div className="flex-1 flex h-full overflow-hidden relative">
+            <AnimatePresence>
+              <AppSidebar
+                ref={sidebarRef}
+                onItemClick={handleSidebarItemClick}
+                selectedId={selectedItemId}
+                collapsed={sidebarCollapsed}
+                onToggleCollapse={() => setSidebarCollapsed(true)}
+              />
+            </AnimatePresence>
+
+            <MainContent
+              sidebarCollapsed={sidebarCollapsed}
+              onToggleSidebar={() => setSidebarCollapsed(false)}
+              onTrendingTopicSelect={handleTrendingTopicSelect}
+              onTrendingTweetsSelect={handleTrendingTweetsSelect}
+              onTrendingSearchConfirm={handleTrendingSearchConfirm}
+              selectedTweets={selectedTweets}
+              onRemoveSelectedTweet={handleRemoveSelectedTweet}
+              topicInput={topicInput}
+              onTopicInputChange={setTopicInput}
+              onTopicSubmit={handleTopicSubmit}
+              onScrollProgressChange={setScrollProgress}
+              hasCompletedOnboarding={hasCompletedOnboarding}
+            />
+          </div>
         </div>
       </div>
     </GenerationProvider>

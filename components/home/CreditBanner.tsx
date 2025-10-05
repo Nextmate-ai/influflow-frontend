@@ -22,7 +22,6 @@ const CreditBanner = () => {
       initial={{ y: -50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-x-0 top-0 z-50"
     >
       <Link
         href={'/subscription'}

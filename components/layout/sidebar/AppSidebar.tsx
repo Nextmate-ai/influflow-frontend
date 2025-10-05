@@ -140,7 +140,7 @@ export const AppSidebar = forwardRef<AppSidebarRef, AppSidebarProps>(
     return (
       <div
         className={cn(
-          'fixed left-0 z-10 flex h-screen w-[320px] flex-col border-gray-200 bg-[#FAFAFA] transition-transform duration-300',
+          'absolute left-0 top-0 z-10 flex h-full w-[320px] flex-col border-gray-200 bg-[#FAFAFA] transition-transform duration-300',
           showLowCreditsBanner ? 'pt-[36px]' : '',
           collapsed ? '-translate-x-full' : 'translate-x-0',
         )}
