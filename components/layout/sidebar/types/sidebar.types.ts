@@ -62,6 +62,7 @@ export interface SidebarItemProps {
   item: SidebarItem;
   onClick: (item: SidebarItem) => void;
   isSelected?: boolean;
+  onRefresh?: () => Promise<void>; // 添加刷新回调
 }
 
 // 分页数据 Hook 选项

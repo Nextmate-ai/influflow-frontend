@@ -219,6 +219,7 @@ export const AppSidebar = forwardRef<AppSidebarRef, AppSidebarProps>(
                     item={item}
                     onClick={handleItemClick}
                     isSelected={selectedId === item.id}
+                    onRefresh={handleRefresh}
                   />
                 ))}
 
