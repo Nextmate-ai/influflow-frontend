@@ -22,7 +22,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           toastOffset={20}
           toastProps={{
             classNames: {
-              base: 'max-w-[350px]',
+              base: 'max-w-fit min-w-[100px]',
               content: 'min-w-0',
               wrapper: 'min-w-0',
               title: 'break-words whitespace-normal',

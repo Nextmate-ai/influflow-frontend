@@ -125,7 +125,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
       setIsDeleting(true);
 
       addToast({
-        title: 'Is deleting article',
+        title: 'Deleting',
         color: 'primary',
       });
 
@@ -349,7 +349,11 @@ export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        handleDelete();
+                        // handleDelete();
+                        addToast({
+                          title: 'Deleting',
+                          color: 'primary',
+                        });
                       }}
                       className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
