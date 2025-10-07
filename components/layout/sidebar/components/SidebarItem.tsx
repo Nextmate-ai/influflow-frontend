@@ -28,9 +28,6 @@ export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [deletingStatus, setDeletingStatus] = useState<
-      'idle' | 'deleting' | 'success' | 'error'
-    >('idle');
     const dropdownRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -124,11 +121,6 @@ export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
 
       setIsDeleting(true);
 
-      addToast({
-        title: 'Deleting',
-        color: 'primary',
-      });
-
       try {
         // 1. 从本地状态中移除
         removeArticle(item.id);
@@ -147,7 +139,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
           throw error;
         }
 
-        // 3. 显示成功提示
+        // 3. 删除成功后，立即显示成功提示（覆盖"Deleting"Toast）
         addToast({
           title: 'Deleted',
           color: 'success',
@@ -165,6 +157,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
           await onRefresh();
         }
 
+        // 删除失败时，显示错误提示（覆盖"Deleting"Toast）
         addToast({
           title: 'Error',
           color: 'danger',
@@ -237,7 +230,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
       <>
         <div
           className={`
-            group flex h-[40px] cursor-pointer items-center justify-between rounded-[8px] px-[8px] py-[2px]
+            group relative flex h-[40px] cursor-pointer items-center justify-between rounded-[8px] px-[8px] py-[2px]
             transition-all duration-200 ease-in-out
             ${isRenaming ? '' : 'hover:bg-[#E8E8E8] hover:shadow-sm'}
             ${isSelected ? 'border-l-4 border-blue-500 bg-blue-50' : ''}
@@ -361,6 +354,20 @@ export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
               )}
             </div>
           </div>
+
+          {/* 删除Loading遮罩 */}
+          {isDeleting && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[8px] bg-[#E8E8E8] opacity-[0.9]">
+              <div className="flex items-center">
+                <Image
+                  src="/icons/loading.gif"
+                  width={24}
+                  height={24}
+                  alt="Loading"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 删除确认弹窗 - 使用 @heroui Modal */}
