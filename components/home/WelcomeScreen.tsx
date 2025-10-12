@@ -123,8 +123,20 @@ export const WelcomeScreen = ({
       // 重置高度以获取正确的scrollHeight
       textarea.style.height = 'auto';
       // 设置最小高度为100px，最大高度为300px
-      const newHeight = Math.max(100, Math.min(300, textarea.scrollHeight));
+      const maxHeight = 300;
+      const newHeight = Math.max(
+        100,
+        Math.min(maxHeight, textarea.scrollHeight),
+      );
       textarea.style.height = `${newHeight}px`;
+
+      // 使用 requestAnimationFrame 确保在 DOM 更新后滚动到底部
+      // 只有当内容超过最大高度时才需要滚动
+      requestAnimationFrame(() => {
+        if (textarea.scrollHeight > maxHeight) {
+          textarea.scrollTop = textarea.scrollHeight;
+        }
+      });
     }
   };
 
@@ -491,15 +503,12 @@ export const WelcomeScreen = ({
             e.stopPropagation();
           }}
           onInput={adjustTextareaHeight}
-          className="shadow-lg w-full resize-none rounded-2xl p-4 pb-[58px] pr-12 text-gray-700  placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-1"
+          className="shadow-lg w-full resize-none rounded-2xl p-4 pb-[58px] pr-12 text-gray-700  placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-1 overflow-y-auto"
           style={{
             minHeight: '120px',
             maxHeight: '300px',
             height: '120px',
           }}
-          initial={{ height: '120px', borderRadius: '16px' }}
-          animate={{ height: '120px', borderRadius: '16px' }}
-          exit={{ height: '40px', borderRadius: '20px' }}
           transition={{
             duration: 0.3,
             ease: [0.4, 0.0, 0.2, 1],
