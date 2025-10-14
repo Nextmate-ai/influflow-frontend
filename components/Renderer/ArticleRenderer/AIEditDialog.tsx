@@ -34,7 +34,7 @@ export const AIEditDialog: React.FC<AIEditDialogProps> = React.memo(
               <textarea
                 value={instruction}
                 onChange={(e) => {
-                  const words = e.target.value.trim().split(/\s+/);
+                  const words = e.target.value.split(/\s+/);
                   const clipped = words.slice(0, 1000).join(' ');
                   onInstructionChange(clipped);
                 }}
