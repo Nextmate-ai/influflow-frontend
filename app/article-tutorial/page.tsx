@@ -209,7 +209,7 @@ export default function ArticleDirectPage() {
               const ONBOARDING_KEY = 'ifw_onboarding_completed_v2';
               // Set ONBOARDING_KEY
               window.localStorage.setItem(ONBOARDING_KEY, 'true');
-              window.location.href = '/';
+              window.location.href = '/home';
             },
           },
         },
