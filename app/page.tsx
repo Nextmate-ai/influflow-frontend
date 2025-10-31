@@ -13,10 +13,10 @@ export default function HomePage() {
       {/* 顶部导航栏 */}
       <div className="flex w-full items-center justify-between bg-[#FAFAFA] py-3">
         <img
-          className="ml-3"
+          className="ml-3 h-[24px] w-auto"
           src={'/images/logo.png'}
           width={159}
-          height={48}
+          height={30}
         />
         <button
           className="mr-3 h-[40px] w-[80px] rounded-[12px] bg-black text-white"
@@ -39,22 +39,26 @@ export default function HomePage() {
             containerClassName="absolute inset-0 -z-10 h-full w-full"
             interactive={true}
           />
-          <p className="text-[65px] text-black h-[150px] leading-[80px]">
-            One-Stop Content Creation
-            <br className="hidden md:block" /> In Your Own Voice
+          <p className="text-[65px] text-black h-[100px] leading-[80px]">
+            Turn opinions into assets
+            {/* <br className="hidden md:block" /> In Your Own Voice */}
           </p>
           <p className="mx-auto mt-6 w-[590px] text-[20px] text-[#575757] leading-[25px]">
-            Build your digital self and unlock a one-stop content engine that
-            speaks, thinks, and creates just like you.
+            A socialized UGC prediction market empowering creators and fans
           </p>
           <div className="mt-10 flex justify-center">
             {isAuthenticated ? (
-              <Link
-                className="rounded-[16px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90"
-                href="/home"
-              >
-                Get Started
-              </Link>
+              <div className="flex flex-col items-center">
+                <div className="rounded-[16px] mr-[12px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90">
+                  Coming Soon
+                </div>
+                <Link
+                  className="rounded-[16px] h-[24px] mt-[20px] px-4 py-1 text-[12px] font-medium text-[#0000EE] hover:opacity-90"
+                  href="/home"
+                >
+                  Go to Influxy
+                </Link>
+              </div>
             ) : (
               <button
                 className="rounded-[16px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90"
