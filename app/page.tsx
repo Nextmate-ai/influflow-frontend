@@ -60,12 +60,23 @@ export default function HomePage() {
                 </Link>
               </div>
             ) : (
-              <button
-                className="rounded-[16px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90"
-                onClick={() => openLoginModal()}
-              >
-                Get Started
-              </button>
+              // <button
+              //   className="rounded-[16px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90"
+              //   onClick={() => openLoginModal()}
+              // >
+              //   Get Started
+              // </button>
+              <div className="flex flex-col items-center">
+                <div className="rounded-[16px] mr-[12px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90">
+                  Coming Soon
+                </div>
+                <button
+                  className="rounded-[16px] h-[24px] mt-[20px] px-4 py-1 text-[12px] font-medium text-[#0000EE] hover:opacity-90"
+                  onClick={() => openLoginModal()}
+                >
+                  Go to Influxy
+                </button>
+              </div>
             )}
           </div>
           {/* TODO: 跳转链接 */}
