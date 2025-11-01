@@ -44,7 +44,8 @@ export default function HomePage() {
             {/* <br className="hidden md:block" /> In Your Own Voice */}
           </p>
           <p className="mx-auto mt-6 w-[590px] text-[20px] text-[#575757] leading-[25px]">
-            A socialized UGC prediction market empowering creators and fans
+            A platform where creators turn opinions into prediction markets and
+            earn from fan participation.
           </p>
           <div className="mt-10 flex justify-center">
             {isAuthenticated ? (
@@ -84,32 +85,31 @@ export default function HomePage() {
 
         <section className="mx-auto px-[15%] pt-[30px]">
           <p className="mb-[12px] text-center text-[56px] font-medium italic text-black ">
-            Why Influxy
+            Why Nextmate.fun
           </p>
           <p className="mx-auto mb-[80px] w-[640px] text-center text-[20px] text-[#757575]">
-            Influxy helps creators use AI to produce personalized content
-            faster, at scale, and with consistency.
+            Empowering creators to turn opinions into value.
           </p>
 
           <Feature
-            image="/home/PersonalizeYourTone.svg"
-            title="Personalize Your Tone"
-            description="Create your digital persona—AI that understands your tone, mimics the styles you love, and writes with a human touch. Add your intro to unlock content that feels truly like you."
+            image="/home/ForKol.jpg"
+            title="For KOL Creators"
+            description="Use Influxy AI Agent to quickly craft high-quality posts and instantly create prediction events from your opinions. Fans can bet on your predictions, and you earn a share of the trading fees from the market."
             reversed={false}
             isAuthenticated={isAuthenticated}
             openLoginModal={openLoginModal}
           />
 
           <Feature
-            image="/home/FromDraftTweet.svg"
-            title="From Draft to Tweet in One Step"
-            description="Our editor infuses Twitter's format into what you write—ready to post threads, generate visuals, or refine your content in one click."
+            image="/home/ForFan.jpg"
+            title="For Fans"
+            description="Join prediction markets created by your favorite KOLs, bet on opinions you believe in, and earn rewards when your predictions are right.  Transform your opinions into real value while engaging with creators you love. "
             reversed={true}
             isAuthenticated={isAuthenticated}
             openLoginModal={openLoginModal}
           />
 
-          <Feature
+          {/* <Feature
             image="/home/GetTheOutline.svg"
             title="Get the Outline"
             description="Influxy makes insights instantly translatable into clear outlines and deeper understanding. Generate narrative maps and accelerate growth through an intuitive mind-map tool."
@@ -125,19 +125,20 @@ export default function HomePage() {
             reversed={true}
             isAuthenticated={isAuthenticated}
             openLoginModal={openLoginModal}
-          />
+          /> */}
         </section>
 
         <section className="mx-auto px-[15%] py-16 pb-[120px] pt-[72px] text-center">
           <p className="text-[40px] font-semibold italic">Our Vision</p>
           <p className="mx-auto mt-20 text-center text-[20px] w-[780px]">
-            We envision a future where AI deeply understands every creator—their
-            voice, style, and values—and amplifies their unique strengths.
+            We’re redefining how creators earn.Instead of relying on ads or
+            agencies, creators can now turn their opinions into real value — by
+            launching prediction events where fans engage, stake, and share
+            rewards.
           </p>
           <p className="mx-auto mt-10 text-center text-[20px] w-[840px]">
-            Through this, creators, brands, and communities can collaborate on
-            an open, intelligent platform that makes influence measurable,
-            scalable, and truly impactful.
+            A new era of socialized prediction markets, where expression itself
+            becomes an asset.
           </p>
         </section>
 
@@ -146,6 +147,20 @@ export default function HomePage() {
             FAQ
           </p>
           <div className="space-y-3">
+            <FAQ q="What is Nextmate.fun?">
+              Nextmate.fun is a platform where creators turn opinions into
+              prediction events and earn from fan participation. Creators can
+              publish articles, launch prediction events, and earn commissions.
+              Fans can stake on events, express their views, and earn rewards
+              for accurate predictions — creating a user-driven economy that
+              rewards both creators and fans.
+            </FAQ>
+            <FAQ q="How to earn Nextmate.fun points? ">
+              Points are earned by participating in prediction events, creating
+              markets, subscribing to Influxy, and other engagement activities.
+              These points will serve as a key reference for future token
+              airdrops.
+            </FAQ>
             <FAQ q="What is Influxy?">
               More than a writing tool, Influxy is an all-in-one AI workspace
               that models your unique style. It helps you work smarter, not
@@ -170,10 +185,10 @@ export default function HomePage() {
           </p>
           <div className="relative mx-auto w-full max-w-3xl">
             <Image
-              src="/home/TeamBackground.svg"
+              src="/home/TeamBg.jpg"
               alt="Team Background"
-              width={1200}
-              height={600}
+              width={1400}
+              height={200}
             />
           </div>
         </section>
@@ -221,7 +236,7 @@ function Feature({
         <p className="mt-3 text-[14px] leading-5 text-[#757575]">
           {description}
         </p>
-        <button
+        {/* <button
           className="mt-[24px] rounded-[12px] bg-black px-4 py-3 text-[14px] text-white"
           onClick={() => {
             if (isAuthenticated) {
@@ -232,7 +247,7 @@ function Feature({
           }}
         >
           Try Now
-        </button>
+        </button> */}
       </div>
     </div>
   );
