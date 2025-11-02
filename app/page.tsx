@@ -1,49 +1,60 @@
 'use client';
 
-import { BackgroundGradientAnimation } from '@/components/ui/background-gradient-animation';
 import { useAuthStore } from '@/stores/authStore';
 import Image from 'next/image';
 import Link from 'next/link';
+import React from 'react';
 
 export default function HomePage() {
   const { isAuthenticated, openLoginModal, logout } = useAuthStore();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#FAFAFA]">
+    <div className="flex min-h-screen flex-col bg-[#05020D] text-white">
       {/* 顶部导航栏 */}
-      <div className="flex w-full items-center justify-between bg-[#FAFAFA] py-3">
+      <div className="flex w-full items-center justify-between bg-[#05020D] my-[30px] px-[64px]">
         <img
           className="ml-3 h-[24px] w-auto"
-          src={'/images/logo.png'}
+          src={'/images/logo_white.png'}
           width={159}
           height={30}
         />
-        <button
-          className="mr-3 h-[40px] w-[80px] rounded-[12px] bg-black text-white"
-          onClick={() => {
-            if (isAuthenticated) {
-              logout();
-            } else {
-              openLoginModal();
-            }
-          }}
-        >
-          {isAuthenticated ? 'Log Out' : 'Login'}
-        </button>
+
+        <div className="flex text-white justify-center">
+          <button
+            className="mr-3 h-[55px] w-[116px] rounded-[5px] bg-[#252525] text-white "
+            onClick={() => {
+              if (isAuthenticated) {
+                logout();
+              } else {
+                openLoginModal();
+              }
+            }}
+          >
+            {isAuthenticated ? 'Log Out' : 'Login'}
+          </button>
+
+          <div className="flex h-[55px] gap-[50px] leading-[55px]">
+            <div className="cursor-pointer">About Us</div>
+
+            <div className="cursor-pointer">Register</div>
+
+            <div className="cursor-pointer">Contact</div>
+          </div>
+        </div>
       </div>
 
       {/* 主体内容 */}
-      <main className="mx-3 min-h-screen flex-1 rounded-[12px] bg-white">
+      <main className="mx-3 min-h-screen flex-1 rounded-[12px] bg-[#05020D] text-[white]">
         <section className="relative px-[15%] py-[18%] text-center z-10">
-          <BackgroundGradientAnimation
+          {/* <BackgroundGradientAnimation
             containerClassName="absolute inset-0 -z-10 h-full w-full"
             interactive={true}
-          />
-          <p className="text-[65px] text-black h-[100px] leading-[80px]">
+          /> */}
+          <p className="text-[65px] h-[100px] leading-[80px]">
             Turn opinions into assets
             {/* <br className="hidden md:block" /> In Your Own Voice */}
           </p>
-          <p className="mx-auto mt-6 w-[590px] text-[20px] text-[#575757] leading-[25px]">
+          <p className="mx-auto mt-6 w-[590px] text-[20px] leading-[25px]">
             A platform where creators turn opinions into prediction markets and
             earn from fan participation.
           </p>
@@ -67,16 +78,26 @@ export default function HomePage() {
               // >
               //   Get Started
               // </button>
-              <div className="flex flex-col items-center">
-                <div className="rounded-[16px] mr-[12px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90">
-                  Coming Soon
+              <div className="flex items-center">
+                <div className="rounded-[16px] mr-[12px] p-[2px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] shadow-sm hover:opacity-90">
+                  <div className="rounded-[14px] bg-[#161A42] px-8 py-3">
+                    <span className="bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] bg-clip-text text-[16px] font-medium text-transparent">
+                      Coming Soon
+                    </span>
+                  </div>
                 </div>
-                <button
+                <div
+                  className="rounded-[16px] mr-[12px] bg-[#161A42] px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90 cursor-pointer"
+                  onClick={() => openLoginModal()}
+                >
+                  Go to Influxy
+                </div>
+                {/* <button
                   className="rounded-[16px] h-[24px] mt-[20px] px-4 py-1 text-[12px] font-medium text-[#0000EE] hover:opacity-90"
                   onClick={() => openLoginModal()}
                 >
                   Go to Influxy
-                </button>
+                </button> */}
               </div>
             )}
           </div>
@@ -84,15 +105,15 @@ export default function HomePage() {
         </section>
 
         <section className="mx-auto px-[15%] pt-[30px]">
-          <p className="mb-[12px] text-center text-[56px] font-medium italic text-black ">
+          <p className="mb-[12px] text-center text-[56px] font-medium italic ">
             Why Nextmate.fun
           </p>
-          <p className="mx-auto mb-[80px] w-[640px] text-center text-[20px] text-[#757575]">
+          <p className="mx-auto mb-[80px] w-[640px] text-center text-[20px]">
             Empowering creators to turn opinions into value.
           </p>
 
           <Feature
-            image="/home/ForKol.jpg"
+            image="/home/ForKol.png"
             title="For KOL Creators"
             description="Use Influxy AI Agent to quickly craft high-quality posts and instantly create prediction events from your opinions. Fans can bet on your predictions, and you earn a share of the trading fees from the market."
             reversed={false}
@@ -101,7 +122,7 @@ export default function HomePage() {
           />
 
           <Feature
-            image="/home/ForFan.jpg"
+            image="/home/ForFan.png"
             title="For Fans"
             description="Join prediction markets created by your favorite KOLs, bet on opinions you believe in, and earn rewards when your predictions are right.  Transform your opinions into real value while engaging with creators you love. "
             reversed={true}
@@ -184,12 +205,46 @@ export default function HomePage() {
             Team Background
           </p>
           <div className="relative mx-auto w-full max-w-3xl">
-            <Image
+            <div className="w-full h-[150px] flex items-center justify-center">
+              <Image
+                src="/home/bing.png"
+                alt="Team Background"
+                width={150}
+                height={150}
+                className="h-[100px] w-auto"
+              />
+            </div>
+
+            <div className="w-full h-[150px] flex items-center justify-center">
+              <Image
+                src="/home/romeo.png"
+                alt="Team Background"
+                width={150}
+                height={150}
+                className="h-[100px] w-auto"
+              />
+
+              <Image
+                src="/home/jeff.png"
+                alt="Team Background"
+                width={150}
+                height={150}
+                className="h-[100px] w-auto"
+              />
+              <Image
+                src="/home/sing.png"
+                alt="Team Background"
+                width={150}
+                height={150}
+                className="h-[100px] w-auto"
+              />
+            </div>
+            {/* <Image
               src="/home/TeamBg.jpg"
               alt="Team Background"
               width={1400}
               height={200}
-            />
+            /> */}
           </div>
         </section>
       </main>
@@ -233,9 +288,7 @@ function Feature({
 
       <div className={`${textColClasses} w-[350px]`}>
         <p className="text-[24px] font-semibold">{title}</p>
-        <p className="mt-3 text-[14px] leading-5 text-[#757575]">
-          {description}
-        </p>
+        <p className="mt-3 text-[14px] leading-5 ">{description}</p>
         {/* <button
           className="mt-[24px] rounded-[12px] bg-black px-4 py-3 text-[14px] text-white"
           onClick={() => {
@@ -259,54 +312,61 @@ type FAQProps = {
 };
 
 function FAQ({ q, children }: FAQProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
   return (
-    <details
-      className="
-    group relative rounded-[20px] border border-gray-200
-    bg-[#EBE9E9] hover:bg-[#F2F7FF] hover:shadow-sm hover:open:bg-[#F2F7FF]
-    transition-all duration-300 overflow-hidden
-  "
-      onMouseEnter={(e) => {
-        const details = e.currentTarget;
-        details.open = true;
-      }}
-      onMouseLeave={(e) => {
-        const details = e.currentTarget;
-        details.open = false;
-      }}
+    <div
+      className={`rounded-[20px] transition-all duration-300 ${
+        isOpen
+          ? 'border-0 p-[2px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB]'
+          : 'border border-[#252525]'
+      }`}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
     >
-      <summary
+      <details
         className="
-      flex items-center cursor-default list-none justify-between
-      pt-10 pb-10 group-open:pb-6 transition-[padding] duration-300
-      pr-[56px]
-    "
-        onClick={(e) => {
-          // 阻止默认的点击切换行为
-          e.preventDefault();
-        }}
+        group relative rounded-[18px]
+        bg-[#161A42] hover:shadow-sm
+        transition-all duration-300 overflow-hidden
+      "
+        open={isOpen}
       >
-        <span className="text-[20px] font-medium pl-[80px] italic">Q:</span>
-        <span className="text-[20px] font-medium mr-auto pl-10">{q}</span>
-      </summary>
+        <summary
+          className="
+        flex items-center cursor-default list-none justify-between
+        pt-10 pb-10 group-open:pb-6 transition-[padding] duration-300
+        pr-[56px]
+      "
+          onClick={(e) => {
+            // 阻止默认的点击切换行为
+            e.preventDefault();
+          }}
+        >
+          <span className="text-[20px] font-medium pl-[80px] italic">Q:</span>
+          <span className="text-[20px] font-medium mr-auto pl-10">{q}</span>
+        </summary>
 
-      {/* 关键：箭头相对 details 垂直居中 */}
-      <img
-        src="/icons/lsicon_down-outline.svg"
-        width={16}
-        height={16}
-        className="
-      absolute right-[40px] top-1/2 -translate-y-1/2
-      rotate-[-90deg] group-open:rotate-0
-      transition-transform
-      pointer-events-none 
-    "
-      />
+        {/* 关键：箭头相对 details 垂直居中 */}
+        <img
+          src="/icons/lsicon_down-outline.svg"
+          width={16}
+          height={16}
+          className="
+        absolute right-[40px] top-1/2 -translate-y-1/2
+        rotate-[-90deg] group-open:rotate-0
+        transition-transform
+        pointer-events-none 
+      "
+        />
 
-      <div className="text-sm leading-7 md:text-base flex items-baseline mb-10 w-[820px]">
-        <span className="text-[20px] font-medium pl-[80px] italic">A:</span>
-        <div className="text-[20px] font-medium mr-auto pl-10">{children}</div>
-      </div>
-    </details>
+        <div className="text-sm leading-7 md:text-base flex items-baseline mb-10 w-[820px]">
+          <span className="text-[20px] font-medium pl-[80px] italic">A:</span>
+          <div className="text-[20px] font-medium mr-auto pl-10">
+            {children}
+          </div>
+        </div>
+      </details>
+    </div>
   );
 }
