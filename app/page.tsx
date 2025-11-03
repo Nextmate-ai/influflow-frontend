@@ -1,5 +1,6 @@
 'use client';
 
+import { PageBackground } from '@/components/ui/page-background';
 import { useAuthStore } from '@/stores/authStore';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,9 +10,12 @@ export default function HomePage() {
   const { isAuthenticated, openLoginModal, logout } = useAuthStore();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#05020D] text-white">
+    <div className="relative flex min-h-screen flex-col bg-transparent text-white">
+      {/* 背景组件 */}
+      <PageBackground containerClassName="z-0" />
+
       {/* 顶部导航栏 */}
-      <div className="flex w-full items-center justify-between bg-[#05020D] my-[30px] px-[64px]">
+      <div className="relative z-10 flex w-full items-center justify-between bg-transparent my-[30px] px-[64px]">
         <img
           className="ml-3 h-[24px] w-auto"
           src={'/images/logo_white.png'}
@@ -44,7 +48,7 @@ export default function HomePage() {
       </div>
 
       {/* 主体内容 */}
-      <main className="mx-3 min-h-screen flex-1 rounded-[12px] bg-[#05020D] text-[white]">
+      <main className="relative z-10 mx-3 min-h-screen flex-1 rounded-[12px] bg-transparent text-[white]">
         <section className="relative px-[15%] py-[18%] text-center z-10">
           {/* <BackgroundGradientAnimation
             containerClassName="absolute inset-0 -z-10 h-full w-full"
