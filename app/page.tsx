@@ -37,13 +37,13 @@ export default function HomePage() {
             {isAuthenticated ? 'Log Out' : 'Login'}
           </button>
 
-          <div className="flex h-[55px] gap-[50px] leading-[55px]">
+          {/* <div className="flex h-[55px] gap-[50px] leading-[55px]">
             <div className="cursor-pointer">About Us</div>
 
             <div className="cursor-pointer">Register</div>
 
             <div className="cursor-pointer">Contact</div>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -214,8 +214,8 @@ export default function HomePage() {
                 src="/home/bing.png"
                 alt="Team Background"
                 width={150}
-                height={150}
-                className="h-[100px] w-auto"
+                height={120}
+                className="h-[72px] w-auto"
               />
             </div>
 
@@ -292,7 +292,7 @@ function Feature({
 
       <div className={`${textColClasses} w-[350px]`}>
         <p className="text-[24px] font-semibold">{title}</p>
-        <p className="mt-3 text-[14px] leading-5 ">{description}</p>
+        <p className="mt-3 text-[15px] leading-6 ">{description}</p>
         {/* <button
           className="mt-[24px] rounded-[12px] bg-black px-4 py-3 text-[14px] text-white"
           onClick={() => {
@@ -366,7 +366,7 @@ function FAQ({ q, children }: FAQProps) {
 
         <div className="text-sm leading-7 md:text-base flex items-baseline mb-10 w-[820px]">
           <span className="text-[20px] font-medium pl-[80px] italic">A:</span>
-          <div className="text-[20px] font-medium mr-auto pl-10">
+          <div className="text-[20px] font-medium mr-auto pl-10 leading-8">
             {children}
           </div>
         </div>

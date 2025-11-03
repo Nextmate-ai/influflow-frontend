@@ -13,12 +13,12 @@ export const PageBackground = ({
   return (
     <div
       className={cn(
-        'absolute inset-0 w-full h-full pointer-events-none overflow-hidden',
+        'absolute inset-0 w-full pointer-events-none overflow-hidden',
         containerClassName,
       )}
     >
       {/* 背景层：所有图片垂直依次展开 */}
-      <div className="relative w-full flex flex-col">
+      <div className="relative w-full h-full flex flex-col">
         {/* 图片1 */}
         <div className="relative w-screen h-auto shrink-0">
           <Image
@@ -78,6 +78,19 @@ export const PageBackground = ({
             className="w-full h-auto"
             sizes="100vw"
           />
+        </div>
+
+        {/* 延伸层：使用 flex-1 填充，通过 overflow-hidden 截断多余部分 */}
+        <div className="relative w-screen flex-1 shrink-0 overflow-hidden" style={{ minHeight: 0 }}>
+          <div className="absolute inset-0">
+            <Image
+              src="/home/5.png"
+              alt="Background Extension"
+              fill
+              className="object-cover"
+              sizes="100vw"
+            />
+          </div>
         </div>
       </div>
     </div>
