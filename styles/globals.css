@@ -1,6 +1,5 @@
-@import './fonts.css';
-@import './editor.css';
-@import './driverjs.css';
+/* CSS 文件已改为在 layout.tsx 中直接导入，避免 Turbopack 热更新问题 */
+/* @import 语句在 Turbopack 中可能导致热更新崩溃 */
 
 @tailwind base;
 @tailwind components;

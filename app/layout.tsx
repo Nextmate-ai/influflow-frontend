@@ -1,3 +1,8 @@
+// 优化 CSS 导入顺序，避免 Turbopack 热更新问题
+// 将 @import 改为直接导入，减少热更新时的依赖链
+import '../styles/fonts.css';
+import '../styles/editor.css';
+import '../styles/driverjs.css';
 import '../styles/globals.css';
 
 import { Analytics } from '@vercel/analytics/next';

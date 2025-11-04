@@ -161,8 +161,8 @@ export const BackgroundGradientAnimation = ({
       <div className={cn('', className)}>{children}</div>
       <div
         className={cn(
-          'gradients-container h-full w-full blur-lg',
-          isSafari ? 'blur-2xl' : '[filter:url(#blurMe)_blur(40px)]',
+          'gradients-container h-full w-full bg-[#05020D]',
+          // isSafari ? 'blur-2xl' : '[filter:url(#blurMe)_blur(40px)]',
         )}
       >
         <div
@@ -180,7 +180,7 @@ export const BackgroundGradientAnimation = ({
         ></div>
         <div
           className={cn(
-            `absolute [background:radial-gradient(circle_at_center,_rgba(var(--third-color),_0.8)_0,_rgba(var(--third-color),_0)_50%)_no-repeat]`,
+            `absolute [background:rabg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB]dial-gradient(circle_at_center,_rgba(var(--third-color),_0.8)_0,_rgba(var(--third-color),_0)_50%)_no-repeat]`,
             `[mix-blend-mode:var(--blending-value)] 
              w-[calc(var(--size)/1.3)] 
              h-[calc(var(--size)/1.3)]  

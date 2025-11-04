@@ -148,7 +148,7 @@ export const AppSidebar = forwardRef<AppSidebarRef, AppSidebarProps>(
           <div className="flex h-[40px] items-center justify-between">
             {/* <ProfileDropdown collapsed={collapsed} /> */}
             <Link href="/">
-              <Image src={'/images/logo.png'} width={82} height={24} />
+              <Image src={'/images/logo_old.png'} width={82} height={24} />
             </Link>
             {/* 收起按钮 */}
             {onToggleCollapse && (

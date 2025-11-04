@@ -639,7 +639,7 @@ export const WelcomeScreen = ({
         {/* 首页 Section */}
         <motion.div
           ref={homepageRef}
-          className="relative m-3 flex min-h-[94vh] items-center justify-center overflow-hidden rounded-[20px]"
+          className="relative bg-white m-3 flex min-h-[94vh] items-center justify-center overflow-hidden rounded-[20px]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
