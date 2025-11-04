@@ -25,7 +25,7 @@ export default function HomePage() {
 
         <div className="flex text-white justify-center">
           <button
-            className="mr-3 h-[55px] w-[116px] rounded-[5px] bg-[#252525] text-white "
+            className="mr-3 h-[40px] w-[96px] rounded-[5px] bg-[#252525] text-white "
             onClick={() => {
               if (isAuthenticated) {
                 logout();
@@ -49,7 +49,7 @@ export default function HomePage() {
 
       {/* 主体内容 */}
       <main className="relative z-10 mx-3 min-h-screen flex-1 rounded-[12px] bg-transparent text-[white]">
-        <section className="relative px-[15%] py-[18%] text-center z-10">
+        <section className="relative px-[15%] py-[15%] text-center z-10">
           {/* <BackgroundGradientAnimation
             containerClassName="absolute inset-0 -z-10 h-full w-full"
             interactive={true}
