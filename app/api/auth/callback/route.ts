@@ -25,9 +25,9 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
 
-  let next = searchParams.get('next') ?? '/';
+  let next = searchParams.get('next') ?? '/home';
   if (!next.startsWith('/')) {
-    next = '/';
+    next = '/home';
   }
 
   const redirect = (path: string) => NextResponse.redirect(`${origin}${path}`);
@@ -42,6 +42,8 @@ export async function GET(request: Request) {
     console.log('URL params:', {
       code: code ? 'present' : 'missing',
       origin,
+      next,
+      fullUrl: request.url,
     });
 
     if (!code) {
@@ -147,6 +149,7 @@ export async function GET(request: Request) {
 
     // 直接使用请求的 origin，确保跳转到正确的域名
     const redirectUrl = `${origin}${next}`;
+    console.log('Redirecting to:', redirectUrl);
     return NextResponse.redirect(redirectUrl);
   } catch (error) {
     console.error('Unhandled error in auth callback:', error);

@@ -29,9 +29,9 @@ export async function GET(
   const referralCode = decodeURIComponent(resolvedParams.referral_code || '');
   const code = searchParams.get('code');
 
-  let next = searchParams.get('next') ?? '/';
+  let next = searchParams.get('next') ?? '/home';
   if (!next.startsWith('/')) {
-    next = '/';
+    next = '/home';
   }
 
   const redirect = (path: string) => NextResponse.redirect(`${origin}${path}`);
@@ -53,6 +53,14 @@ export async function GET(
   }
 
   try {
+    console.log('Referral callback URL params:', {
+      code: code ? 'present' : 'missing',
+      origin,
+      next,
+      referralCode,
+      fullUrl: request.url,
+    });
+
     const supabase = await createClient();
 
     const { data: sessionData, error: exchangeError } =
@@ -152,7 +160,9 @@ export async function GET(
     }
 
     // 直接使用请求的 origin，确保跳转到正确的域名
-    return NextResponse.redirect(`${origin}${next}`);
+    const redirectUrl = `${origin}${next}`;
+    console.log('Referral callback redirecting to:', redirectUrl);
+    return NextResponse.redirect(redirectUrl);
   } catch (error) {
     console.error('Unexpected error in referral callback:', error);
     return redirect(
