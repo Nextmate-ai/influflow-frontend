@@ -76,12 +76,6 @@ export default function HomePage() {
                 </Link>
               </div>
             ) : (
-              // <button
-              //   className="rounded-[16px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90"
-              //   onClick={() => openLoginModal()}
-              // >
-              //   Get Started
-              // </button>
               <div className="flex items-center">
                 <div className="rounded-[16px] mr-[12px] p-[2px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] shadow-sm hover:opacity-90">
                   <div className="rounded-[14px] bg-[#161A42] px-8 py-3">
@@ -96,12 +90,6 @@ export default function HomePage() {
                 >
                   Go to Influxy
                 </div>
-                {/* <button
-                  className="rounded-[16px] h-[24px] mt-[20px] px-4 py-1 text-[12px] font-medium text-[#0000EE] hover:opacity-90"
-                  onClick={() => openLoginModal()}
-                >
-                  Go to Influxy
-                </button> */}
               </div>
             )}
           </div>

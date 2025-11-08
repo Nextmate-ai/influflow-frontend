@@ -57,7 +57,7 @@ export default function ReferralLandingPage() {
       return;
     }
 
-    const next = '/';
+    const next = '/home';
     const origin =
       typeof window !== 'undefined'
         ? window.location.origin

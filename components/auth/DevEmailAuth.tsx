@@ -23,7 +23,7 @@ export function DevEmailAuth({ mode, referralCode }: DevEmailAuthProps) {
   }, []);
 
   const callbackUrl = useMemo(() => {
-    const next = encodeURIComponent('/');
+    const next = encodeURIComponent('/home');
     if (referralCode) {
       const code = encodeURIComponent(referralCode);
       return `${origin}/api/auth/referral/callback/${code}?next=${next}`;
