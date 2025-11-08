@@ -41,7 +41,7 @@ export function LoginModal({ isOpen, onClose, authError }: LoginModalProps) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'twitter',
       options: {
-        redirectTo: `${origin}/api/auth/callback`,
+        redirectTo: `${origin}/api/auth/callback?next=/home`,
       },
     });
 
@@ -66,7 +66,7 @@ export function LoginModal({ isOpen, onClose, authError }: LoginModalProps) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'twitter',
       options: {
-        redirectTo: `${origin}/api/auth/callback`,
+        redirectTo: `${origin}/api/auth/callback?next=/home`,
       },
     });
 
