@@ -158,19 +158,29 @@ export const useAuthStore = create<IAuthState>()(
         }
       },
 
-      openLoginModal: (error?: string, redirectToHome?: boolean) =>
-        set({
+      openLoginModal: (error?: string, redirectToHome?: boolean) => {
+        // 同时保存到 sessionStorage，确保 OAuth 回调后仍能访问
+        if (typeof window !== 'undefined' && redirectToHome) {
+          sessionStorage.setItem('redirectToHomeAfterLogin', 'true');
+        }
+        return set({
           isLoginModalOpen: true,
           authError: error || null,
           redirectToHomeAfterLogin: redirectToHome ?? false,
-        }),
+        });
+      },
 
-      closeLoginModal: () =>
-        set({
+      closeLoginModal: () => {
+        // 清除 sessionStorage
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('redirectToHomeAfterLogin');
+        }
+        return set({
           isLoginModalOpen: false,
           authError: null,
           redirectToHomeAfterLogin: false,
-        }),
+        });
+      },
 
       setAuthError: (error: string | null) =>
         set({

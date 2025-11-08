@@ -24,9 +24,16 @@ interface LoginModalProps {
 export function LoginModal({ isOpen, onClose, authError }: LoginModalProps) {
   const [showExistingUserLogin, setShowExistingUserLogin] = useState(true); // 默认显示登录
   const [error, setError] = useState('');
-  const redirectToHomeAfterLogin = useAuthStore(
+  const storeRedirectToHome = useAuthStore(
     (state) => state.redirectToHomeAfterLogin,
   );
+  
+  // 优先从 sessionStorage 读取，确保 OAuth 回调后仍能访问
+  const redirectToHomeAfterLogin =
+    typeof window !== 'undefined'
+      ? sessionStorage.getItem('redirectToHomeAfterLogin') === 'true' ||
+        storeRedirectToHome
+      : storeRedirectToHome;
 
   // 处理外部传入的认证错误
   useEffect(() => {

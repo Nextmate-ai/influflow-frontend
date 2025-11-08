@@ -17,9 +17,16 @@ export function DevEmailAuth({ mode, referralCode }: DevEmailAuthProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>('');
   const [info, setInfo] = useState<string>('');
-  const redirectToHomeAfterLogin = useAuthStore(
+  const storeRedirectToHome = useAuthStore(
     (state) => state.redirectToHomeAfterLogin,
   );
+  
+  // 优先从 sessionStorage 读取，确保 OAuth 回调后仍能访问
+  const redirectToHomeAfterLogin =
+    typeof window !== 'undefined'
+      ? sessionStorage.getItem('redirectToHomeAfterLogin') === 'true' ||
+        storeRedirectToHome
+      : storeRedirectToHome;
 
   const origin = useMemo(() => {
     if (typeof window !== 'undefined') return window.location.origin;
