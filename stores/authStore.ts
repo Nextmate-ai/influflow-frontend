@@ -23,6 +23,7 @@ interface IAuthState {
   isAuthenticated: boolean;
   isLoginModalOpen: boolean;
   authError: string | null;
+  redirectToHomeAfterLogin: boolean; // 登录后是否跳转到 /home
 
   // Actions
   setSession: (
@@ -33,7 +34,7 @@ interface IAuthState {
   updateUser: (userData: Partial<IUser>) => void;
   syncProfileFromSupabase: () => Promise<void>;
   logout: () => Promise<void>;
-  openLoginModal: (error?: string) => void;
+  openLoginModal: (error?: string, redirectToHome?: boolean) => void;
   closeLoginModal: () => void;
   checkAuthStatus: () => Promise<void>;
   getAccessToken: () => Promise<string | null>;
@@ -60,6 +61,7 @@ export const useAuthStore = create<IAuthState>()(
       isAuthenticated: false,
       isLoginModalOpen: false,
       authError: null,
+      redirectToHomeAfterLogin: false,
 
       setSession: (user, accessToken, expiresAt) => {
         // 更新内存中的token缓存
@@ -156,16 +158,18 @@ export const useAuthStore = create<IAuthState>()(
         }
       },
 
-      openLoginModal: (error?: string) =>
+      openLoginModal: (error?: string, redirectToHome?: boolean) =>
         set({
           isLoginModalOpen: true,
           authError: error || null,
+          redirectToHomeAfterLogin: redirectToHome ?? false,
         }),
 
       closeLoginModal: () =>
         set({
           isLoginModalOpen: false,
           authError: null,
+          redirectToHomeAfterLogin: false,
         }),
 
       setAuthError: (error: string | null) =>

@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { DevEmailAuth } from '@/components/auth/DevEmailAuth';
 import { showEmailAuth } from '@/constants/env';
 import { createClient } from '@/lib/supabase/client';
+import { useAuthStore } from '@/stores/authStore';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -23,6 +24,9 @@ interface LoginModalProps {
 export function LoginModal({ isOpen, onClose, authError }: LoginModalProps) {
   const [showExistingUserLogin, setShowExistingUserLogin] = useState(true); // 默认显示登录
   const [error, setError] = useState('');
+  const redirectToHomeAfterLogin = useAuthStore(
+    (state) => state.redirectToHomeAfterLogin,
+  );
 
   // 处理外部传入的认证错误
   useEffect(() => {
@@ -38,10 +42,11 @@ export function LoginModal({ isOpen, onClose, authError }: LoginModalProps) {
       typeof window !== 'undefined'
         ? window.location.origin
         : process.env.NEXT_PUBLIC_SITE_URL!;
+    const next = redirectToHomeAfterLogin ? '/home' : '/';
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'twitter',
       options: {
-        redirectTo: `${origin}/api/auth/callback?next=/home`,
+        redirectTo: `${origin}/api/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
 
@@ -58,15 +63,11 @@ export function LoginModal({ isOpen, onClose, authError }: LoginModalProps) {
       typeof window !== 'undefined'
         ? window.location.origin
         : process.env.NEXT_PUBLIC_SITE_URL!;
-    console.log(
-      '%c [ origin ]-58',
-      'font-size:13px; background:pink; color:#bf2c9f;',
-      origin,
-    );
+    const next = redirectToHomeAfterLogin ? '/home' : '/';
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'twitter',
       options: {
-        redirectTo: `${origin}/api/auth/callback?next=/home`,
+        redirectTo: `${origin}/api/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
 

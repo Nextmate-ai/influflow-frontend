@@ -29,9 +29,9 @@ export async function GET(
   const referralCode = decodeURIComponent(resolvedParams.referral_code || '');
   const code = searchParams.get('code');
 
-  let next = searchParams.get('next') ?? '/home';
+  let next = searchParams.get('next') ?? '/';
   if (!next.startsWith('/')) {
-    next = '/home';
+    next = '/';
   }
 
   const redirect = (path: string) => NextResponse.redirect(`${origin}${path}`);

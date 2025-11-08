@@ -86,7 +86,7 @@ export default function HomePage() {
                 </div>
                 <div
                   className="rounded-[16px] mr-[12px] bg-[#161A42] px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90 cursor-pointer"
-                  onClick={() => openLoginModal()}
+                  onClick={() => openLoginModal(undefined, true)}
                 >
                   Go to Influxy
                 </div>
