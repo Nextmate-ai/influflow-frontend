@@ -151,8 +151,8 @@ export async function GET(
       }
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin;
-    return NextResponse.redirect(`${siteUrl}${next}`);
+    // 直接使用请求的 origin，确保跳转到正确的域名
+    return NextResponse.redirect(`${origin}${next}`);
   } catch (error) {
     console.error('Unexpected error in referral callback:', error);
     return redirect(
