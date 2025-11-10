@@ -10,10 +10,12 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
   // 不在首页显示 Topbar
   const isHomePage = pathname === '/';
+  // launchpad 页面作为独立模块，不使用 Topbar
+  const isLaunchPadPage = pathname?.startsWith('/launchpad');
 
   return (
     <>
-      {!isAuthenticated && !isHomePage && <Topbar />}
+      {!isAuthenticated && !isHomePage && !isLaunchPadPage && <Topbar />}
       {children}
     </>
   );

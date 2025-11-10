@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import { PredictionCard, PredictionCardData } from './PredictionCard';
 
 interface AuctionGridProps {
@@ -19,9 +20,17 @@ interface AuctionGridProps {
 /**
  * 拍卖网格组件 - 展示多个预言卡片
  */
-export const AuctionGrid: React.FC<AuctionGridProps> = ({ predictions, onPredictionClick }) => {
+export const AuctionGrid: React.FC<AuctionGridProps> = ({
+  predictions,
+  onPredictionClick,
+}) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6 py-8">
+    <div
+      className="grid gap-x-[52px] gap-y-[42px]"
+      style={{
+        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+      }}
+    >
       {predictions.map((prediction) => (
         <PredictionCard
           key={prediction.id}

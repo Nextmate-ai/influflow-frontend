@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
-import { LaunchPadHeader } from '@/components/launchpad/LaunchPadHeader';
 import { DashboardContent } from '@/components/launchpad/dashboard/DashboardContent';
+import { SharedHeader } from '@/components/layout/SharedHeader';
 
 /**
  * 发射台仪表盘主页
@@ -10,8 +9,8 @@ import { DashboardContent } from '@/components/launchpad/dashboard/DashboardCont
  */
 export default function LaunchPadDashboard() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <LaunchPadHeader showCreate={true} />
+    <div className="min-h-screen bg-[#0B041E] text-white pb-[32px]">
+      <SharedHeader className="my-[0] py-[30px]" />
       <DashboardContent />
     </div>
   );

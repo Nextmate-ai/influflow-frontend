@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { SharedHeader } from '@/components/layout/SharedHeader';
 import { LaunchPadHeader } from '@/components/launchpad/LaunchPadHeader';
 import { ParticipationsTable } from '@/components/launchpad/participations/ParticipationsTable';
 
@@ -11,6 +12,7 @@ import { ParticipationsTable } from '@/components/launchpad/participations/Parti
 export default function ParticipationsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <SharedHeader />
       <LaunchPadHeader showCreate={false} />
       <div className="max-w-7xl mx-auto px-6 py-8">
         <ParticipationsTable />

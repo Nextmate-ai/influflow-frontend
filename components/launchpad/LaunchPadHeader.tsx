@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import React from 'react';
 
 interface LaunchPadHeaderProps {
   showCreate?: boolean;
@@ -12,7 +12,9 @@ interface LaunchPadHeaderProps {
  * 发射台 Header 组件 - 在 Dashboard 和 Participations 页面间共享
  * 提供导航和创建按钮
  */
-export const LaunchPadHeader: React.FC<LaunchPadHeaderProps> = ({ showCreate = true }) => {
+export const LaunchPadHeader: React.FC<LaunchPadHeaderProps> = ({
+  showCreate = true,
+}) => {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
@@ -28,7 +30,9 @@ export const LaunchPadHeader: React.FC<LaunchPadHeaderProps> = ({ showCreate = t
             <h1 className="text-4xl font-bold text-white mb-2">
               Turn your opinions into earnings.
             </h1>
-            <p className="text-slate-400">Create and participate in prediction markets</p>
+            <p className="text-slate-400">
+              Create and participate in prediction markets
+            </p>
           </div>
 
           {showCreate && (

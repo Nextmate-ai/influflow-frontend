@@ -1,5 +1,6 @@
 'use client';
 
+import { SharedHeader } from '@/components/layout/SharedHeader';
 import { PageBackground } from '@/components/ui/page-background';
 import { useAuthStore } from '@/stores/authStore';
 import Image from 'next/image';
@@ -7,7 +8,7 @@ import Link from 'next/link';
 import React from 'react';
 
 export default function HomePage() {
-  const { isAuthenticated, openLoginModal, logout } = useAuthStore();
+  const { isAuthenticated, openLoginModal } = useAuthStore();
 
   return (
     <div className="relative flex min-h-screen flex-col bg-transparent text-white">
@@ -15,37 +16,7 @@ export default function HomePage() {
       <PageBackground containerClassName="z-0" />
 
       {/* 顶部导航栏 */}
-      <div className="relative z-10 flex w-full items-center justify-between bg-transparent my-[30px] px-[64px]">
-        <img
-          className="ml-3 h-[24px] w-auto"
-          src={'/images/logo_white.png'}
-          width={159}
-          height={30}
-        />
-
-        <div className="flex text-white justify-center">
-          <button
-            className="mr-3 h-[40px] w-[96px] rounded-[5px] bg-[#252525] text-white "
-            onClick={() => {
-              if (isAuthenticated) {
-                logout();
-              } else {
-                openLoginModal();
-              }
-            }}
-          >
-            {isAuthenticated ? 'Log Out' : 'Login'}
-          </button>
-
-          {/* <div className="flex h-[55px] gap-[50px] leading-[55px]">
-            <div className="cursor-pointer">About Us</div>
-
-            <div className="cursor-pointer">Register</div>
-
-            <div className="cursor-pointer">Contact</div>
-          </div> */}
-        </div>
-      </div>
+      <SharedHeader />
 
       {/* 主体内容 */}
       <main className="relative z-10 mx-3 min-h-screen flex-1 rounded-[12px] bg-transparent text-[white]">
