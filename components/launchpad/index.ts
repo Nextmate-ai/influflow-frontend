@@ -20,6 +20,7 @@ export { ParticipationStats } from './participations/ParticipationStats';
 
 // Modal Components
 export { UserDetailModal } from './modals/UserDetailModal';
+export { CreatePredictionModal } from './modals/CreatePredictionModal';
 
 // Shared UI Components
 export { GradientSlider } from './shared/GradientSlider';

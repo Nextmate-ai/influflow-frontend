@@ -21,6 +21,8 @@ export interface PredictionCardData {
   title: string;
   image: string;
   percentage: number;
+  yesPercentage: number;
+  noPercentage: number;
   totalVolume: string;
   timeRemaining: string;
   option: string;
@@ -49,6 +51,8 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
         title,
         image,
         percentage: yesPercentage,
+        yesPercentage,
+        noPercentage,
         totalVolume,
         timeRemaining,
         option: 'Yes',
@@ -61,7 +65,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`relative h-[300px] flex flex-col border border-[#60A5FA] rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/20 group`}
+      className={`relative flex flex-col border border-[#60A5FA] rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/20 group`}
     >
       {/* 用户信息和头像 */}
       <div className="flex items-start gap-4 mb-[20px]">
@@ -80,39 +84,66 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
         </div>
       </div>
 
-      {/* 投票比例 */}
-      <div className="mb-6">
-        <GradientSlider
-          leftPercentage={yesPercentage}
-          rightPercentage={noPercentage}
-        />
-      </div>
-
-      {/* 投票比例数字 */}
-      <div className="flex justify-around items-center mb-[24px] text-sm text-white">
-        <div className="w-[160px] h-[44px] flex items-center justify-center border-2 border-[#07B6D4] rounded-[16px]">
-          Yes
+      <div className="flex items-start justify-start gap-[20px]">
+        <div className="max-w-[100px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-transparent">
+          name
         </div>
-        <div className="w-[160px] h-[44px] flex items-center justify-center border-2 border-[#CB30E0] rounded-[16px]">
-          No
+
+        <div className="flex-1 flex-col">
+          {/* 投票比例 */}
+          <div className="mb-[16px] mt-[-20px]">
+            <GradientSlider
+              leftPercentage={yesPercentage}
+              rightPercentage={noPercentage}
+            />
+          </div>
+
+          {/* 投票比例数字 */}
+          <div className="flex justify-around items-center mb-[24px] text-sm text-white">
+            <div className="w-[140px] h-[40px] flex items-center justify-center border-2 border-[#07B6D4] rounded-[16px]">
+              Yes
+            </div>
+            <div className="w-[140px] h-[40px] flex items-center justify-center border-2 border-[#CB30E0] rounded-[16px]">
+              No
+            </div>
+          </div>
         </div>
       </div>
 
       {/* 统计信息 */}
       <div className="flex justify-between items-center text-xs space-x-2 mt-auto">
         <div className="text-white text-base leading-[32px] line-clamp-2">
-          @name
+          <Image
+            src="/images/twitter_card.png"
+            alt="avatar"
+            width={24}
+            height={24}
+          />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-[24px]">
           <StatCard
-            icon={<span>💰</span>}
-            label="3k Vol."
+            icon={
+              <Image
+                src="/images/volume.png"
+                alt="avatar"
+                width={12}
+                height={12}
+              />
+            }
+            label=""
             value={totalVolume}
             tooltip="Total volume traded"
           />
           <StatCard
-            icon={<span>⏰</span>}
+            icon={
+              <Image
+                src="/images/timer.png"
+                alt="avatar"
+                width={12}
+                height={12}
+              />
+            }
             label=""
             value={timeRemaining}
             tooltip="Time until market closes"

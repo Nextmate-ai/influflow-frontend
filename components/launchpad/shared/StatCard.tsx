@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Tooltip } from '@heroui/react';
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -13,22 +12,30 @@ interface StatCardProps {
 /**
  * 统计卡片组件 - 显示投注金额和时间信息
  */
-export const StatCard: React.FC<StatCardProps> = ({ icon, label, value, tooltip }) => {
+export const StatCard: React.FC<StatCardProps> = ({
+  icon,
+  label,
+  value,
+  tooltip,
+}) => {
   const content = (
-    <div className="flex items-center gap-2 text-sm">
+    <div className="flex items-center gap-[12px] text-sm text-white">
       {icon}
-      <span className="text-slate-400">{label}</span>
-      <span className="text-cyan-400 font-semibold">{value}</span>
+      <span className="text-base font-white">{value}</span>
     </div>
   );
 
-  if (tooltip) {
-    return (
-      <Tooltip content={tooltip} color="default" className="bg-slate-800 text-slate-200">
-        {content}
-      </Tooltip>
-    );
-  }
+  // if (tooltip) {
+  //   return (
+  //     <Tooltip
+  //       content={tooltip}
+  //       color="default"
+  //       className="bg-slate-800 text-slate-200"
+  //     >
+  //       {content}
+  //     </Tooltip>
+  //   );
+  // }
 
   return content;
 };

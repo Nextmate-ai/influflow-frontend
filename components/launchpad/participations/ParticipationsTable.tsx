@@ -5,6 +5,8 @@ import { Tabs, Tab } from '@heroui/react';
 import { ParticipationRow } from './ParticipationRow';
 import { ParticipationStats } from './ParticipationStats';
 
+type ViewType = 'participations' | 'creations';
+
 // 示例数据
 const MOCK_PARTICIPATIONS = [
   {
@@ -41,71 +43,130 @@ const MOCK_PARTICIPATIONS = [
   },
 ];
 
+interface ParticipationsTableProps {
+  viewType?: ViewType;
+}
+
 /**
  * 参与表格组件 - 显示用户的所有参与历史
  */
-export const ParticipationsTable: React.FC = () => {
+export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
+  viewType = 'participations',
+}) => {
+  // Creations 数据（示例）
+  const MOCK_CREATIONS = [
+    {
+      prediction: "Will Michelle Yeoh win Best Actress at tomorrow's Oscars?",
+      totalVolume: '$2.4m',
+      rewards: 4.8,
+      time: 'June 13, 2025',
+      status: 'Ongoing' as const,
+      outcome: 'Yes' as const,
+    },
+    {
+      prediction: "Will Michelle Yeoh win Best Actress at tomorrow's Oscars?",
+      totalVolume: '$2.4m',
+      rewards: 4.8,
+      time: 'June 13, 2025',
+      status: 'Ongoing' as const,
+      outcome: 'Yes' as const,
+    },
+    {
+      prediction: "Will Michelle Yeoh win Best Actress at tomorrow's Oscars?",
+      totalVolume: '$1.6m',
+      rewards: 4.8,
+      time: 'June 13, 2025',
+      status: 'Finished' as const,
+      outcome: 'No' as const,
+    },
+    {
+      prediction: "Will Michelle Yeoh win Best Actress at tomorrow's Oscars?",
+      totalVolume: '$1.6m',
+      rewards: 4.8,
+      time: 'June 13, 2025',
+      status: 'Finished' as const,
+      outcome: 'No' as const,
+    },
+    {
+      prediction: "Will Michelle Yeoh win Best Actress at tomorrow's Oscars?",
+      totalVolume: '$1.6m',
+      rewards: 4.8,
+      time: 'June 13, 2025',
+      status: 'Finished' as const,
+      outcome: 'No' as const,
+    },
+  ];
+
+  const displayData =
+    viewType === 'participations' ? MOCK_PARTICIPATIONS : MOCK_CREATIONS;
+
   return (
-    <div className="bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 border-2 border-slate-700 rounded-2xl overflow-hidden">
+    <div className="bg-[#0B041E] border border-[#2DC3D9] rounded-2xl overflow-hidden flex flex-col h-[600px]">
       {/* 统计信息 */}
       <ParticipationStats totalEarnings="$2,236" />
 
-      {/* 标签页 */}
-      <div className="px-6 mb-6 border-b border-slate-700">
-        <Tabs
-          aria-label="Participations"
-          color="primary"
-          className="w-full"
-          classNames={{
-            tabList: 'gap-6 w-full border-0 p-0 bg-transparent',
-            cursor: 'w-full bg-gradient-to-r from-cyan-500 to-blue-500',
-            tab: 'max-w-fit px-0 h-12 text-slate-400 hover:text-white data-[selected=true]:text-white font-semibold',
-            tabContent: 'group-data-[selected=true]:text-white',
-          }}
-        >
-          <Tab key="participations" title="Participations">
-            <div className="pb-6">
-              {/* 表格 */}
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b-2 border-slate-600">
-                    <th className="text-left px-6 py-4 text-slate-400 font-semibold">
-                      Prediction
-                    </th>
-                    <th className="text-left px-6 py-4 text-slate-400 font-semibold">
-                      Total Volume
-                    </th>
-                    <th className="text-left px-6 py-4 text-slate-400 font-semibold">
-                      Rewards
-                    </th>
-                    <th className="text-left px-6 py-4 text-slate-400 font-semibold">
-                      Time
-                    </th>
-                    <th className="text-left px-6 py-4 text-slate-400 font-semibold">
-                      Status
-                    </th>
-                    <th className="text-left px-6 py-4 text-slate-400 font-semibold">
-                      Outcome
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {MOCK_PARTICIPATIONS.map((participation, index) => (
-                    <ParticipationRow key={index} {...participation} />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Tab>
-
-          <Tab key="creations" title="Creations">
-            <div className="pb-6">
-              <div className="text-center py-8">
-                <p className="text-slate-400">No creations yet. Start by creating a prediction market!</p>
-              </div>
-            </div>
-          </Tab>
-        </Tabs>
+      {/* 表格 */}
+      <div className="px-6 pb-6 flex-1 overflow-y-auto table-scrollbar">
+        <table className="w-full">
+          <thead className="sticky top-0 bg-[#0B041E] z-10">
+            <tr className="border-b border-[#2DC3D9]">
+              <th className="text-left px-6 py-4 text-white font-semibold">
+                Prediction
+              </th>
+              <th className="text-left px-6 py-4 text-white font-semibold">
+                Total Volume
+              </th>
+              <th className="text-left px-6 py-4 text-white font-semibold">
+                Rewards
+              </th>
+              <th className="text-left px-6 py-4 text-white font-semibold">
+                Time
+              </th>
+              <th className="text-left px-6 py-4 text-white font-semibold">
+                Status
+              </th>
+              <th className="text-left px-6 py-4 text-white font-semibold">
+                Outcome
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {displayData.length > 0 ? (
+              displayData.map((item, index) => (
+                <ParticipationRow key={index} {...item} />
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="px-6 py-8 text-center">
+                  <p className="text-gray-400">
+                    {viewType === 'participations'
+                      ? 'No participations yet.'
+                      : 'No creations yet. Start by creating a prediction market!'}
+                  </p>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        <style jsx global>{`
+          .table-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #2DC3D9 transparent;
+          }
+          .table-scrollbar::-webkit-scrollbar {
+            width: 6px;
+          }
+          .table-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .table-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #2DC3D9;
+            border-radius: 3px;
+          }
+          .table-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #2DC3D9;
+          }
+        `}</style>
       </div>
     </div>
   );
