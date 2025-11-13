@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Modal, ModalContent, Input } from '@heroui/react';
+import { Input, Modal, ModalContent } from '@heroui/react';
 import Image from 'next/image';
+import React, { useState } from 'react';
 import { GradientSlider } from '../shared/GradientSlider';
 import { StatCard } from '../shared/StatCard';
 
@@ -42,14 +42,14 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
   // 规则文本（示例）
   const rulesText = [
-    "The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City.",
-    "The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...",
-    "The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...",
-    "The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City.",
-    "The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...",
-    "The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...",
-    "The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City.",
-    "The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...",
+    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City.',
+    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...',
+    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...',
+    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City.',
+    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...',
+    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...',
+    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City.',
+    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...',
   ].join('\n\n');
 
   return (
@@ -133,7 +133,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         className="text-white text-sm font-medium whitespace-nowrap"
                         style={{
                           paddingLeft: '12px',
-                          paddingRight: prediction.yesPercentage < 20 ? '8px' : '12px',
+                          paddingRight:
+                            prediction.yesPercentage < 20 ? '8px' : '12px',
                         }}
                       >
                         {Math.round(prediction.yesPercentage)}% Yes
@@ -150,7 +151,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       <span
                         className="text-white text-sm font-medium whitespace-nowrap"
                         style={{
-                          paddingLeft: prediction.noPercentage < 20 ? '8px' : '12px',
+                          paddingLeft:
+                            prediction.noPercentage < 20 ? '8px' : '12px',
                           paddingRight: '12px',
                         }}
                       >
@@ -200,21 +202,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   >
                     {rulesText}
                   </div>
-                  <style jsx global>{`
-                    .rules-scrollbar::-webkit-scrollbar {
-                      width: 6px;
-                    }
-                    .rules-scrollbar::-webkit-scrollbar-track {
-                      background: transparent;
-                    }
-                    .rules-scrollbar::-webkit-scrollbar-thumb {
-                      background-color: #2DC3D9;
-                      border-radius: 3px;
-                    }
-                    .rules-scrollbar::-webkit-scrollbar-thumb:hover {
-                      background-color: #2DC3D9;
-                    }
-                  `}</style>
                 </div>
               </div>
 
@@ -247,7 +234,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       style={
                         selectedOption === 'yes'
                           ? {
-                              background: 'linear-gradient(to right, #040E1E, #268DA4)',
+                              background:
+                                'linear-gradient(to right, #040E1E, #268DA4)',
                             }
                           : {}
                       }
@@ -264,7 +252,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       style={
                         selectedOption === 'no'
                           ? {
-                              background: 'linear-gradient(to right, #040E1E, #bb3ed9)',
+                              background:
+                                'linear-gradient(to right, #040E1E, #bb3ed9)',
                             }
                           : {}
                       }
@@ -311,7 +300,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       type="number"
                       className="w-full"
                       classNames={{
-                        input: 'bg-transparent text-white text-right text-3xl font-semibold pr-4',
+                        input:
+                          'bg-transparent text-white text-right text-3xl font-semibold pr-4',
                         inputWrapper:
                           'bg-transparent border-2 border-[#07B6D4] rounded-2xl h-16',
                       }}
@@ -327,7 +317,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 {/* Payout if you win */}
                 <div className="mb-8">
                   <div className="flex justify-between items-center">
-                    <span className="text-white text-base">Payout if you win</span>
+                    <span className="text-white text-base">
+                      Payout if you win
+                    </span>
                     <span className="text-white text-lg font-semibold">
                       ${payoutIfWin}
                     </span>
@@ -343,9 +335,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         'linear-gradient(to right, #1FA2FF, #12D8FA, #870CD8)',
                     }}
                   >
-                    <button
-                      className="w-full h-full rounded-2xl bg-[#0B041E] text-white font-semibold text-lg hover:opacity-80 transition-all duration-200"
-                    >
+                    <button className="w-full h-full rounded-2xl bg-[#0B041E] text-white font-semibold text-lg hover:opacity-80 transition-all duration-200">
                       Join
                     </button>
                   </div>

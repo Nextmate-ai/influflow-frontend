@@ -110,7 +110,7 @@ export const SharedHeader = ({
           ) : (
             <button
               className="mr-3 h-[40px] w-[96px] rounded-[5px] bg-[#252525] text-white"
-              onClick={openLoginModal}
+              onClick={() => openLoginModal()}
             >
               Login
             </button>

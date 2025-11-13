@@ -148,25 +148,6 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
             )}
           </tbody>
         </table>
-        <style jsx global>{`
-          .table-scrollbar {
-            scrollbar-width: thin;
-            scrollbar-color: #2DC3D9 transparent;
-          }
-          .table-scrollbar::-webkit-scrollbar {
-            width: 6px;
-          }
-          .table-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-          }
-          .table-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #2DC3D9;
-            border-radius: 3px;
-          }
-          .table-scrollbar::-webkit-scrollbar-thumb:hover {
-            background-color: #2DC3D9;
-          }
-        `}</style>
       </div>
     </div>
   );
