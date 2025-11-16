@@ -13,7 +13,7 @@ interface PredictionCardProps {
   noPercentage: number;
   totalVolume: string;
   timeRemaining: string;
-  onCardClick?: (prediction: PredictionCardData) => void;
+  onCardClick?: (prediction: PredictionCardData, option?: 'yes' | 'no') => void;
 }
 
 export interface PredictionCardData {
@@ -55,8 +55,48 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
         noPercentage,
         totalVolume,
         timeRemaining,
-        option: 'Yes',
+        option: '',
       });
+    }
+  };
+
+  const handleYesClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onCardClick) {
+      onCardClick(
+        {
+          id,
+          title,
+          image,
+          percentage: yesPercentage,
+          yesPercentage,
+          noPercentage,
+          totalVolume,
+          timeRemaining,
+          option: 'yes',
+        },
+        'yes',
+      );
+    }
+  };
+
+  const handleNoClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onCardClick) {
+      onCardClick(
+        {
+          id,
+          title,
+          image,
+          percentage: yesPercentage,
+          yesPercentage,
+          noPercentage,
+          totalVolume,
+          timeRemaining,
+          option: 'no',
+        },
+        'no',
+      );
     }
   };
 
@@ -65,7 +105,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`relative flex flex-col border border-[#60A5FA] rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/20 group`}
+      className={`relative flex flex-col border border-[#60A5FA] rounded-2xl p-6 pt-[32px] pb-[20px] cursor-pointer transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/20 group`}
     >
       {/* 用户信息和头像 */}
       <div className="flex items-start gap-4 mb-[20px]">
@@ -100,10 +140,16 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
 
           {/* 投票比例数字 */}
           <div className="flex justify-around items-center mb-[24px] text-sm text-white">
-            <div className="w-[140px] h-[40px] flex items-center justify-center border-2 border-[#07B6D4] rounded-[16px]">
+            <div
+              onClick={handleYesClick}
+              className="w-[140px] h-[40px] flex items-center justify-center border-2 border-[#07B6D4] rounded-[16px] cursor-pointer hover:bg-[#07B6D4]/10 transition-colors"
+            >
               Yes
             </div>
-            <div className="w-[140px] h-[40px] flex items-center justify-center border-2 border-[#CB30E0] rounded-[16px]">
+            <div
+              onClick={handleNoClick}
+              className="w-[140px] h-[40px] flex items-center justify-center border-2 border-[#CB30E0] rounded-[16px] cursor-pointer hover:bg-[#CB30E0]/10 transition-colors"
+            >
               No
             </div>
           </div>

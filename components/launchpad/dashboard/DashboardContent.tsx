@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 
-import { UserDetailModal } from '../modals/UserDetailModal';
 import { CreatePredictionModal } from '../modals/CreatePredictionModal';
+import { UserDetailModal } from '../modals/UserDetailModal';
 import { AuctionGrid } from './AuctionGrid';
 import { PredictionCardData } from './PredictionCard';
 
@@ -75,8 +75,14 @@ export const DashboardContent: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const handlePredictionClick = (prediction: PredictionCardData) => {
-    setSelectedPrediction(prediction);
+  const handlePredictionClick = (
+    prediction: PredictionCardData,
+    option?: 'yes' | 'no',
+  ) => {
+    setSelectedPrediction({
+      ...prediction,
+      option: option || '',
+    });
     setIsModalOpen(true);
   };
 

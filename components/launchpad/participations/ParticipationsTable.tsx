@@ -16,6 +16,7 @@ const MOCK_PARTICIPATIONS = [
     time: 'June 13, 2025',
     status: 'Ongoing' as const,
     outcome: null,
+    opinion: 'Yes' as const,
   },
   {
     prediction: 'Will Michelle Yeoh win Best Actress at tomorrow\'s Oscars?',
@@ -24,6 +25,7 @@ const MOCK_PARTICIPATIONS = [
     time: 'June 13, 2025',
     status: 'Ongoing' as const,
     outcome: null,
+    opinion: 'No' as const,
   },
   {
     prediction: 'Will Michelle Yeoh win Best Actress at tomorrow\'s Oscars?',
@@ -32,6 +34,7 @@ const MOCK_PARTICIPATIONS = [
     time: 'June 13, 2025',
     status: 'Finished' as const,
     outcome: 'Yes' as const,
+    opinion: 'Yes' as const,
   },
   {
     prediction: 'Will Michelle Yeoh win Best Actress at tomorrow\'s Oscars?',
@@ -40,6 +43,7 @@ const MOCK_PARTICIPATIONS = [
     time: 'June 13, 2025',
     status: 'Finished' as const,
     outcome: 'No' as const,
+    opinion: 'No' as const,
   },
 ];
 
@@ -62,6 +66,7 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
       time: 'June 13, 2025',
       status: 'Ongoing' as const,
       outcome: 'Yes' as const,
+      opinion: 'Yes' as const,
     },
     {
       prediction: "Will Michelle Yeoh win Best Actress at tomorrow's Oscars?",
@@ -70,6 +75,7 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
       time: 'June 13, 2025',
       status: 'Ongoing' as const,
       outcome: 'Yes' as const,
+      opinion: 'Yes' as const,
     },
     {
       prediction: "Will Michelle Yeoh win Best Actress at tomorrow's Oscars?",
@@ -78,6 +84,7 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
       time: 'June 13, 2025',
       status: 'Finished' as const,
       outcome: 'No' as const,
+      opinion: 'No' as const,
     },
     {
       prediction: "Will Michelle Yeoh win Best Actress at tomorrow's Oscars?",
@@ -86,6 +93,7 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
       time: 'June 13, 2025',
       status: 'Finished' as const,
       outcome: 'No' as const,
+      opinion: 'No' as const,
     },
     {
       prediction: "Will Michelle Yeoh win Best Actress at tomorrow's Oscars?",
@@ -94,6 +102,7 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
       time: 'June 13, 2025',
       status: 'Finished' as const,
       outcome: 'No' as const,
+      opinion: 'No' as const,
     },
   ];
 
@@ -110,34 +119,59 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
         <table className="w-full">
           <thead className="sticky top-0 bg-[#0B041E] z-10">
             <tr className="border-b border-[#2DC3D9]">
-              <th className="text-left px-6 py-4 text-white font-semibold">
-                Prediction
-              </th>
-              <th className="text-left px-6 py-4 text-white font-semibold">
-                Total Volume
-              </th>
-              <th className="text-left px-6 py-4 text-white font-semibold">
-                Rewards
-              </th>
-              <th className="text-left px-6 py-4 text-white font-semibold">
-                Time
-              </th>
-              <th className="text-left px-6 py-4 text-white font-semibold">
-                Status
-              </th>
-              <th className="text-left px-6 py-4 text-white font-semibold">
-                Outcome
-              </th>
+              {viewType === 'participations' ? (
+                <>
+                  <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    Prediction
+                  </th>
+                  <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    Opinion
+                  </th>
+                  <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    Outcome
+                  </th>
+                  <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    Profit/Lose
+                  </th>
+                  <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    Time
+                  </th>
+                  <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    Status
+                  </th>
+                </>
+              ) : (
+                <>
+                  <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    Prediction
+                  </th>
+                  <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    Total Volume
+                  </th>
+                  <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    Rewards
+                  </th>
+                  <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    Time
+                  </th>
+                  <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    Status
+                  </th>
+                  <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    Outcome
+                  </th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
             {displayData.length > 0 ? (
               displayData.map((item, index) => (
-                <ParticipationRow key={index} {...item} />
+                <ParticipationRow key={index} {...item} viewType={viewType} />
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center">
+                <td colSpan={viewType === 'participations' ? 6 : 6} className="px-6 py-8 text-center">
                   <p className="text-gray-400">
                     {viewType === 'participations'
                       ? 'No participations yet.'

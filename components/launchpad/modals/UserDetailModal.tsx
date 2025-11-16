@@ -2,7 +2,7 @@
 
 import { Input, Modal, ModalContent } from '@heroui/react';
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GradientSlider } from '../shared/GradientSlider';
 import { StatCard } from '../shared/StatCard';
 
@@ -32,7 +32,23 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   prediction,
 }) => {
   const [amount, setAmount] = useState('231');
-  const [selectedOption, setSelectedOption] = useState<'yes' | 'no'>('yes');
+  // 根据 prediction.option 设置初始选择，如果没有 option 则不选择
+  const [selectedOption, setSelectedOption] = useState<'yes' | 'no' | null>(
+    null,
+  );
+
+  // 当弹窗打开或 prediction 变化时，根据 option 设置初始选择
+  useEffect(() => {
+    if (isOpen) {
+      if (prediction.option?.toLowerCase() === 'yes') {
+        setSelectedOption('yes');
+      } else if (prediction.option?.toLowerCase() === 'no') {
+        setSelectedOption('no');
+      } else {
+        setSelectedOption(null);
+      }
+    }
+  }, [isOpen, prediction.option]);
 
   // 预测的投票状态（右侧面板使用，可以基于用户选择动态计算）
   const [predictionYesPercentage, setPredictionYesPercentage] = useState(45);
@@ -63,10 +79,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     >
       <ModalContent className="bg-[#0B041E] border border-[#60A5FA] rounded-2xl p-0">
         {(onClose) => (
-          <div className="flex flex-col h-full max-h-[90vh] relative">
+          <div className="flex flex-col h-full max-h-[75vh] relative">
             <div className="flex flex-row h-full overflow-hidden">
               {/* 左侧面板 - 预测详情 */}
-              <div className="flex-1 p-8 border-r border-[#60A5FA] overflow-y-auto">
+              <div className="flex-1 p-8 border-r border-[#60A5FA] overflow-y-auto modal-left-scrollbar">
                 {/* 用户头像和Name */}
                 <div className="flex items-center gap-4 mb-6">
                   <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
@@ -159,15 +175,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         {Math.round(prediction.noPercentage)}% No
                       </span>
                     </div>
-                    {/* 分割线 */}
-                    <div
-                      className="absolute top-0 h-full w-0.5 bg-white"
-                      style={{
-                        left: `${prediction.yesPercentage}%`,
-                        transform: 'translateX(-50%)',
-                        zIndex: 2,
-                      }}
-                    />
                     {/* 闪电图标 - 在分割线中间 */}
                     <div
                       className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
@@ -180,9 +187,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       <Image
                         src="/images/lightning.png"
                         alt="divider"
-                        width={16}
-                        height={24}
-                        className="h-6 w-auto"
+                        width={32}
+                        height={32}
+                        className="h-10 w-auto"
                       />
                     </div>
                   </div>
@@ -193,20 +200,14 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   <div className="text-white text-base font-medium mb-4">
                     Rules:
                   </div>
-                  <div
-                    className="text-gray-400 text-sm leading-relaxed max-h-48 overflow-y-auto pr-2 rules-scrollbar"
-                    style={{
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: '#2DC3D9 transparent',
-                    }}
-                  >
+                  <div className="text-gray-400 text-sm leading-relaxed pr-2">
                     {rulesText}
                   </div>
                 </div>
               </div>
 
               {/* 右侧面板 - My Bid */}
-              <div className="flex-1 p-8 flex flex-col overflow-y-auto">
+              <div className="flex-1 p-8 flex flex-col overflow-hidden">
                 {/* My Bid 标题和关闭按钮 */}
                 <div className="flex items-center justify-between mb-8">
                   <h3 className="text-white text-2xl font-semibold">My Bid</h3>
@@ -226,37 +227,39 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   <div className="flex gap-4">
                     <button
                       onClick={() => setSelectedOption('yes')}
-                      className={`flex-1 h-12 rounded-2xl font-semibold transition-all duration-200 ${
+                      className={`h-12 rounded-2xl font-semibold transition-all duration-200 ${
                         selectedOption === 'yes'
                           ? 'text-white border-2 border-[#07B6D4]'
                           : 'bg-transparent text-gray-400 border-2 border-gray-600 hover:border-gray-500'
                       }`}
-                      style={
-                        selectedOption === 'yes'
+                      style={{
+                        width: '102px',
+                        ...(selectedOption === 'yes'
                           ? {
                               background:
                                 'linear-gradient(to right, #040E1E, #268DA4)',
                             }
-                          : {}
-                      }
+                          : {}),
+                      }}
                     >
                       Yes
                     </button>
                     <button
                       onClick={() => setSelectedOption('no')}
-                      className={`flex-1 h-12 rounded-2xl font-semibold transition-all duration-200 ${
+                      className={`h-12 rounded-2xl font-semibold transition-all duration-200 ${
                         selectedOption === 'no'
                           ? 'text-white border-2 border-[#CB30E0]'
                           : 'bg-transparent text-gray-400 border-2 border-gray-600 hover:border-gray-500'
                       }`}
-                      style={
-                        selectedOption === 'no'
+                      style={{
+                        width: '102px',
+                        ...(selectedOption === 'no'
                           ? {
                               background:
-                                'linear-gradient(to right, #040E1E, #bb3ed9)',
+                                'linear-gradient(to right, #D245C3 0%, #5731AC 100%)',
                             }
-                          : {}
-                      }
+                          : {}),
+                      }}
                     >
                       No
                     </button>

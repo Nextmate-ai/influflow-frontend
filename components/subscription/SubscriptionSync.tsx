@@ -12,8 +12,9 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
  */
 export const SubscriptionSync = () => {
   const { isAuthenticated } = useAuthStore();
+  // 暂时禁用真实请求，避免重复请求导致闪动
   const { data: subscriptionInfo, refetch } =
-    useSubscriptionInfo(isAuthenticated);
+    useSubscriptionInfo(false); // 暂时禁用
   const { setSubscriptionInfo } = useSubscriptionStore();
 
   // 同步订阅信息到 store

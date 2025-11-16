@@ -59,17 +59,32 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       isDismissable={false}
       classNames={{
         wrapper: 'justify-end items-center !overflow-hidden',
-        base: 'm-0 !w-[400px] rounded-none !static',
+        base: 'm-0 !w-[400px] rounded-[12px] !static !transition-none',
         body: 'p-0',
         backdrop: 'hidden',
       }}
       style={{
         height: 'calc(100vh - 92px)',
       }}
-      motionProps={{}}
+      motionProps={{
+        variants: {
+          enter: {
+            opacity: 1,
+            transition: {
+              duration: 0,
+            },
+          },
+          exit: {
+            opacity: 0,
+            transition: {
+              duration: 0,
+            },
+          },
+        },
+      }}
     >
       <ModalContent 
-        className="bg-[#0B041E] border border-[#2DC3D9] rounded-none p-0 overflow-hidden"
+        className="bg-transparent backdrop-blur-md border border-[#2DC3D9] rounded-[12px] p-0 overflow-hidden !transition-none"
         style={{ height: 'calc(100vh - 92px)' }}
       >
         {(onClose) => (

@@ -59,3 +59,25 @@ body {
 .table-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #2DC3D9;
 }
+
+/* 左侧面板滚动条样式 - 无背景，优化样式 */
+.modal-left-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #60A5FA transparent;
+}
+.modal-left-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.modal-left-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border: none;
+  margin: 0;
+}
+.modal-left-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #60A5FA;
+  border-radius: 2px;
+  border: none;
+}
+.modal-left-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #3B82F6;
+}
