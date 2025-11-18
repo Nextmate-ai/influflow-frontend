@@ -1,7 +1,10 @@
 'use client';
 
+import { useMarketCreation } from '@/hooks/useMarketCreation';
+import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
 import { Input, Modal, ModalContent } from '@heroui/react';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useActiveWallet } from 'thirdweb/react';
 
 interface CreatePredictionModalProps {
   isOpen: boolean;
@@ -26,17 +29,162 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
   const [option2, setOption2] = useState('No');
   const [closingDate, setClosingDate] = useState('25/04/2026');
   const [bidAmount, setBidAmount] = useState('0');
+  const [selectedSide, setSelectedSide] = useState<1 | 2>(1); // 1 = Yes, 2 = No
 
-  const handleCreate = () => {
-    // TODO: 处理创建逻辑
-    console.log({
-      title,
-      rules,
-      options: [option1, option2],
-      closingDate,
-      bidAmount,
-    });
-    onClose();
+  const wallet = useActiveWallet();
+  const { approve, createMarket, isPending, currentStep, error } =
+    useMarketCreation();
+
+  // 将日期字符串转换为 Unix 时间戳（秒）
+  const endTime = useMemo(() => {
+    try {
+      // 假设日期格式为 DD/MM/YYYY
+      const [day, month, year] = closingDate.split('/');
+      const date = new Date(`${year}-${month}-${day}`);
+      return BigInt(Math.floor(date.getTime() / 1000));
+    } catch {
+      return BigInt(0);
+    }
+  }, [closingDate]);
+
+  // 将 bidAmount 转换为 wei（18 位小数，精确转换避免浮点数精度问题）
+  // 例如：输入 "1" → "1000000000000000000" (1后面18个0)
+  const creatorBet = useMemo(() => {
+    try {
+      if (!bidAmount || bidAmount.trim() === '') {
+        return BigInt(0);
+      }
+
+      // 移除所有空格和逗号
+      const cleanAmount = bidAmount.replace(/[\s,]/g, '');
+
+      // 检查是否为有效数字格式（支持纯整数和小数）
+      // 匹配：纯整数（如 "1"）、小数（如 "1.5"、"0.1"）
+      if (!/^\d+(\.\d+)?$/.test(cleanAmount)) {
+        return BigInt(0);
+      }
+
+      // 按小数点分割
+      const parts = cleanAmount.split('.');
+      const integerPart = parts[0] || '0';
+      let decimalPart = parts[1] || '';
+
+      // 将小数部分补齐到18位，或截断到18位
+      if (decimalPart.length > 18) {
+        decimalPart = decimalPart.substring(0, 18);
+      } else {
+        decimalPart = decimalPart.padEnd(18, '0');
+      }
+
+      // 组合成完整的18位数字字符串
+      // 例如：输入 "1" → integerPart="1", decimalPart="000000000000000000" → "1000000000000000000"
+      const weiString = integerPart + decimalPart;
+
+      // 转换为 BigInt（BigInt 会自动处理前导0）
+      const result = BigInt(weiString);
+
+      if (result <= BigInt(0)) {
+        return BigInt(0);
+      }
+
+      return result;
+    } catch (error) {
+      console.error('金额转换错误:', error);
+      return BigInt(0);
+    }
+  }, [bidAmount]);
+
+  const handleCreate = async () => {
+    if (!wallet) {
+      alert('请先连接钱包');
+      return;
+    }
+
+    if (!title.trim()) {
+      alert('请输入标题');
+      return;
+    }
+
+    if (!rules.trim()) {
+      alert('请输入规则');
+      return;
+    }
+
+    if (creatorBet === BigInt(0)) {
+      alert('请输入投注金额');
+      return;
+    }
+
+    if (endTime === BigInt(0)) {
+      alert('请输入有效的结束时间');
+      return;
+    }
+
+    try {
+      // 第一步：Approve
+      // 需要先获取 token 合约地址（这里假设 token 合约地址可以从市场合约获取）
+      // 如果 token 地址是固定的，可以从环境变量或常量中获取
+      const tokenAddress = predictionMarketContract.address; // 临时使用市场合约地址，实际应该是 token 合约地址
+
+      await new Promise<void>((resolve, reject) => {
+        approve(tokenAddress, creatorBet);
+        // 等待 approve 完成（实际应该等待交易确认）
+        setTimeout(() => {
+          resolve();
+        }, 3000);
+      });
+
+      // 第二步：创建市场
+      const marketParams = {
+        questionTitle: title,
+        questionDescription: rules,
+        endTime,
+        creatorSide: selectedSide,
+        creatorBet,
+      };
+
+      // 打印完整的创建市场参数
+      console.log('=== 创建市场参数 ===');
+      console.log('questionTitle:', marketParams.questionTitle);
+      console.log('questionDescription:', marketParams.questionDescription);
+      console.log('endTime:', marketParams.endTime.toString());
+      console.log(
+        'endTime (日期):',
+        new Date(Number(marketParams.endTime) * 1000).toLocaleString(),
+      );
+      console.log('creatorSide:', marketParams.creatorSide);
+      console.log('creatorBet (wei):', marketParams.creatorBet.toString());
+      console.log(
+        'creatorBet (hex):',
+        '0x' + marketParams.creatorBet.toString(16),
+      );
+      console.log('creatorBet (ETH):', Number(marketParams.creatorBet) / 1e18);
+      console.log('原始 bidAmount:', bidAmount);
+      console.log(
+        '完整参数对象:',
+        JSON.stringify(
+          {
+            ...marketParams,
+            creatorBet: marketParams.creatorBet.toString(),
+            endTime: marketParams.endTime.toString(),
+          },
+          null,
+          2,
+        ),
+      );
+
+      createMarket(marketParams);
+
+      // 成功后关闭模态框
+      setTimeout(() => {
+        if (currentStep === 'success') {
+          onClose();
+        }
+      }, 2000);
+    } catch (err) {
+      console.error('创建市场失败:', err);
+      alert(`创建失败: ${err instanceof Error ? err.message : '未知错误'}`);
+    }
   };
 
   return (
@@ -101,18 +249,28 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                 {/* Options */}
                 <div>
                   <label className="block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-transparent text-base font-medium mb-2">
-                    Options
+                    Options (选择你的立场)
                   </label>
                   <div className="flex gap-4">
                     <button
                       type="button"
-                      className="w-[100px] h-[52px] bg-transparent border border-[#2DC3D9] rounded-2xl text-white text-base font-medium hover:bg-[#2DC3D9]/10 transition-all duration-200 flex items-center justify-center"
+                      onClick={() => setSelectedSide(1)}
+                      className={`w-[100px] h-[52px] rounded-2xl text-white text-base font-medium transition-all duration-200 flex items-center justify-center ${
+                        selectedSide === 1
+                          ? 'bg-[#2DC3D9] border-2 border-[#2DC3D9]'
+                          : 'bg-transparent border border-[#2DC3D9] hover:bg-[#2DC3D9]/10'
+                      }`}
                     >
                       {option1}
                     </button>
                     <button
                       type="button"
-                      className="w-[100px] h-[52px] bg-transparent border border-[#D602FF] rounded-2xl text-white text-base font-medium hover:bg-[#D602FF]/10 transition-all duration-200 flex items-center justify-center"
+                      onClick={() => setSelectedSide(2)}
+                      className={`w-[100px] h-[52px] rounded-2xl text-white text-base font-medium transition-all duration-200 flex items-center justify-center ${
+                        selectedSide === 2
+                          ? 'bg-[#D602FF] border-2 border-[#D602FF]'
+                          : 'bg-transparent border border-[#D602FF] hover:bg-[#D602FF]/10'
+                      }`}
                     >
                       {option2}
                     </button>
@@ -179,6 +337,26 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                   />
                 </div>
 
+                {/* 错误提示 */}
+                {error && (
+                  <div className="text-red-400 text-sm mb-2">
+                    错误: {error.message || '未知错误'}
+                  </div>
+                )}
+
+                {/* 状态提示 */}
+                {currentStep === 'approving' && (
+                  <div className="text-[#86FDE8] text-sm mb-2">正在授权...</div>
+                )}
+                {currentStep === 'creating' && (
+                  <div className="text-[#86FDE8] text-sm mb-2">
+                    正在创建市场...
+                  </div>
+                )}
+                {currentStep === 'success' && (
+                  <div className="text-green-400 text-sm mb-2">创建成功！</div>
+                )}
+
                 {/* Create 按钮 */}
                 <div className="pt-1 flex justify-end">
                   <div
@@ -190,9 +368,16 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                   >
                     <button
                       onClick={handleCreate}
-                      className="w-full h-full rounded-2xl bg-[#0B041E] text-white font-semibold text-lg hover:opacity-80 transition-all duration-200"
+                      disabled={isPending || !wallet}
+                      className="w-full h-full rounded-2xl bg-[#0B041E] text-white font-semibold text-lg hover:opacity-80 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Create
+                      {isPending
+                        ? currentStep === 'approving'
+                          ? '授权中...'
+                          : currentStep === 'creating'
+                            ? '创建中...'
+                            : '处理中...'
+                        : 'Create'}
                     </button>
                   </div>
                 </div>

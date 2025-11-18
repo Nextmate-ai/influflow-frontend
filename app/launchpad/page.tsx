@@ -1,9 +1,41 @@
 'use client';
 
 import { useState } from 'react';
+import { ThirdwebProvider } from 'thirdweb/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createThirdwebClient } from 'thirdweb';
+import { baseSepolia } from 'thirdweb/chains';
+import { inAppWallet } from 'thirdweb/wallets';
+
 import { DashboardContent } from '@/components/launchpad/dashboard/DashboardContent';
 import { SharedHeader } from '@/components/layout/SharedHeader';
 import { ParticipationsTable } from '@/components/launchpad/participations/ParticipationsTable';
+import { THIRDWEB_CLIENT_ID } from '@/constants/env';
+
+// 创建 Thirdweb 客户端
+const client = createThirdwebClient({
+  clientId: THIRDWEB_CLIENT_ID,
+});
+
+// 配置只使用 In-App Wallet，只支持 X 登录
+const wallets = [
+  inAppWallet({
+    auth: {
+      options: ['x'],
+    },
+  }),
+];
+
+// 创建 QueryClient
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 分钟
+    },
+  },
+});
 
 type ViewType = 'dashboard' | 'participations' | 'creations';
 
@@ -28,14 +60,16 @@ export default function LaunchPadDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B041E] text-white pb-[32px]">
-      <SharedHeader
-        className="my-[0] py-[30px]"
-        onProfileModalOpenChange={setIsProfileModalOpen}
-        onParticipationsClick={handleParticipationsClick}
-        onCreationsClick={handleCreationsClick}
-      />
-      <div className="px-[64px]">
+    <QueryClientProvider client={queryClient}>
+      <ThirdwebProvider>
+        <div className="min-h-screen bg-[#0B041E] text-white pb-[32px]">
+          <SharedHeader
+            className="my-[0] py-[30px]"
+            onProfileModalOpenChange={setIsProfileModalOpen}
+            onParticipationsClick={handleParticipationsClick}
+            onCreationsClick={handleCreationsClick}
+          />
+          <div className="px-[64px]">
         <div className="text-center text-2xl text-white my-[12px]">
           Turn your opinions into earnings.
         </div>
@@ -93,7 +127,9 @@ export default function LaunchPadDashboard() {
             <ParticipationsTable viewType={currentView} />
           </div>
         )}
-      </div>
-    </div>
+          </div>
+        </div>
+      </ThirdwebProvider>
+    </QueryClientProvider>
   );
 }

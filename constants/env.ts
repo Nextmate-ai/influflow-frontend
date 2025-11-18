@@ -13,3 +13,16 @@ export const showEmailAuth =
 
 export const enableArticleStreaming =
   process.env.NEXT_PUBLIC_ENABLE_ARTICLE_STREAMING === 'true';
+
+// Thirdweb Configuration
+export const THIRDWEB_CLIENT_ID =
+  process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID ||
+  'b5223df1a6e6f4c10c516b14d860dac2';
+export const THIRDWEB_SECRET_KEY =
+  process.env.THIRDWEB_SECRET_KEY ||
+  'UTqTC0QPjc22oNnCARPJEgAiT3DIAkAoc_9SuXWawy2_KDv6SqEa4IPvpB49fbcI5ieQ9m2I_otxQr5Tiuemlg';
+
+// Contract Configuration
+export const PREDICTION_MARKET_CONTRACT_ADDRESS =
+  '0x9e3696bb0b437ec91ed7c3b810788781214769f5';
+export const BASE_SEPOLIA_CHAIN_ID = 84532;

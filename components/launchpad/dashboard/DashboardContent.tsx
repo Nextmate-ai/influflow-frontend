@@ -6,6 +6,7 @@ import { CreatePredictionModal } from '../modals/CreatePredictionModal';
 import { UserDetailModal } from '../modals/UserDetailModal';
 import { AuctionGrid } from './AuctionGrid';
 import { PredictionCardData } from './PredictionCard';
+import { usePredictionMarkets } from '@/hooks/usePredictionMarkets';
 
 // 示例数据
 const MOCK_PREDICTIONS = [
@@ -68,12 +69,17 @@ const MOCK_PREDICTIONS = [
 
 /**
  * 仪表盘内容组件 - 管理预言列表和模态框状态
+ * 
+ * 从 Supabase 的 markets_readable 表读取数据
  */
 export const DashboardContent: React.FC = () => {
   const [selectedPrediction, setSelectedPrediction] =
     useState<PredictionCardData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // 从 Supabase 读取市场数据
+  const { predictions, isLoading, error } = usePredictionMarkets();
 
   const handlePredictionClick = (
     prediction: PredictionCardData,
@@ -106,8 +112,26 @@ export const DashboardContent: React.FC = () => {
         </button>
       </div>
 
+      {/* 显示加载状态或错误信息 */}
+      {isLoading && (
+        <div className="mb-4 text-center text-gray-400">
+          正在从数据库加载市场数据...
+        </div>
+      )}
+      {error && (
+        <div className="mb-4 text-center text-red-400">
+          加载失败: {error.message || '未知错误'}
+        </div>
+      )}
+
+      {!isLoading && predictions.length === 0 && !error && (
+        <div className="mb-4 text-center text-gray-400">
+          暂无市场数据
+        </div>
+      )}
+
       <AuctionGrid
-        predictions={MOCK_PREDICTIONS}
+        predictions={predictions}
         onPredictionClick={handlePredictionClick}
       />
 

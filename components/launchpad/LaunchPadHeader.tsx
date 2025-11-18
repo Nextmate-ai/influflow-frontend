@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
+import { WalletConnect } from './WalletConnect';
 
 interface LaunchPadHeaderProps {
   showCreate?: boolean;
@@ -35,14 +36,19 @@ export const LaunchPadHeader: React.FC<LaunchPadHeaderProps> = ({
             </p>
           </div>
 
-          {showCreate && (
-            <Link
-              href="/launchpad/create"
-              className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              Create
-            </Link>
-          )}
+          <div className="flex items-center gap-4">
+            {/* 钱包连接按钮 - 右上角 */}
+            <WalletConnect />
+
+            {showCreate && (
+              <Link
+                href="/launchpad/create"
+                className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                Create
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Navigation Tabs */}
