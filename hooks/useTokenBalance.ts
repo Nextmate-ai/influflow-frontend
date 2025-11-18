@@ -36,7 +36,7 @@ export function useTokenBalance() {
   const { data: balance, isLoading, error } = useReadContract({
     contract: tokenContract,
     method: 'function balanceOf(address owner) view returns (uint256)',
-    params: wallet ? [wallet.getAccount()?.address || ''] : undefined,
+    params: wallet ? [wallet.getAccount()?.address || ''] : ['0x0000000000000000000000000000000000000000'],
     queryOptions: {
       enabled: !!wallet,
     },

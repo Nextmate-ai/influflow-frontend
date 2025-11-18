@@ -27,10 +27,10 @@ export function usePredictionMarket(
     return BigInt(marketId);
   }, [marketId]);
 
-  const { data, isLoading, error } = useReadContract<MarketResponse>({
+  const { data, isLoading, error } = useReadContract({
     contract: predictionMarketContract,
     method: GET_MARKET_METHOD,
-    params: marketIdBigInt !== null ? [marketIdBigInt] : undefined,
+    params: marketIdBigInt !== null ? [marketIdBigInt] : [BigInt(0)],
     queryOptions: {
       enabled: marketIdBigInt !== null,
     },
@@ -40,7 +40,12 @@ export function usePredictionMarket(
     if (!data || !marketId) {
       return null;
     }
-    return mapMarketDataToPredictionCard(String(marketId), data);
+    // data 是一个元组 [config, data]，需要转换为 MarketResponse 格式
+    const marketResponse: MarketResponse = {
+      config: data[0],
+      data: data[1],
+    };
+    return mapMarketDataToPredictionCard(String(marketId), marketResponse);
   }, [data, marketId]);
 
   return {
