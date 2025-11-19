@@ -1,7 +1,6 @@
 'use client';
 
 import { useMarketCreation } from '@/hooks/useMarketCreation';
-import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
 import { Input, Modal, ModalContent } from '@heroui/react';
 import React, { useMemo, useState } from 'react';
 import { useActiveWallet } from 'thirdweb/react';
@@ -121,20 +120,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
     }
 
     try {
-      // 第一步：Approve
-      // 需要先获取 token 合约地址（这里假设 token 合约地址可以从市场合约获取）
-      // 如果 token 地址是固定的，可以从环境变量或常量中获取
-      const tokenAddress = predictionMarketContract.address; // 临时使用市场合约地址，实际应该是 token 合约地址
-
-      await new Promise<void>((resolve, reject) => {
-        approve(tokenAddress, creatorBet);
-        // 等待 approve 完成（实际应该等待交易确认）
-        setTimeout(() => {
-          resolve();
-        }, 3000);
-      });
-
-      // 第二步：创建市场
+      // 准备创建市场参数
       const marketParams = {
         questionTitle: title,
         questionDescription: rules,
@@ -173,14 +159,22 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
         ),
       );
 
-      createMarket(marketParams);
+      // 第一步：Approve - 等待交易确认
+      console.log('=== 开始 Approve ===');
+      await approve(creatorBet);
+      console.log('=== Approve 完成 ===');
+
+      // 第二步：创建市场 - 等待交易确认
+      console.log('=== 开始创建市场 ===');
+      await createMarket(marketParams);
+      console.log('=== 创建市场完成 ===');
 
       // 成功后关闭模态框
-      setTimeout(() => {
-        if (currentStep === 'success') {
+      if (currentStep === 'success') {
+        setTimeout(() => {
           onClose();
-        }
-      }, 2000);
+        }, 2000);
+      }
     } catch (err) {
       console.error('创建市场失败:', err);
       alert(`创建失败: ${err instanceof Error ? err.message : '未知错误'}`);
