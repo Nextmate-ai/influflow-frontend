@@ -13,6 +13,7 @@ interface AuctionGridProps {
     noPercentage: number;
     totalVolume: string;
     timeRemaining: string;
+    rawData?: Record<string, any>;
   }>;
   onPredictionClick?: (prediction: PredictionCardData) => void;
 }
