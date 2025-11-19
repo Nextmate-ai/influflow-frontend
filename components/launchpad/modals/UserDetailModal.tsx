@@ -116,7 +116,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   // 计算合约调用参数（使用防抖后的金额）
   const debouncedAmountValue = parseFloat(debouncedAmount) || 0;
   const marketId = prediction.id ? BigInt(prediction.id) : BigInt(0);
-  const side = selectedOption === 'yes' ? 0 : selectedOption === 'no' ? 1 : 0;
+  // 合约期望：yes = 1, no = 2
+  const side = selectedOption === 'yes' ? 1 : selectedOption === 'no' ? 2 : 1;
   const amountInWei =
     debouncedAmountValue > 0
       ? BigInt(Math.floor(debouncedAmountValue * 1e18))
@@ -261,7 +262,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
     // 转换参数
     const marketId = BigInt(prediction.id);
-    const side = selectedOption === 'yes' ? 0 : 1; // 0 = Yes, 1 = No
+    // 合约期望：yes = 1, no = 2
+    const side = selectedOption === 'yes' ? 1 : 2;
     const amountInWei = BigInt(Math.floor(amountValue * 1e18));
 
     // 准备 buyShares 交易
