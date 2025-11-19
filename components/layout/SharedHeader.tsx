@@ -83,7 +83,10 @@ export const SharedHeader = ({
         <div className="flex items-center gap-4">
           {/* Launchpad 页面显示钱包连接按钮 */}
           {isLaunchPadPage ? (
-            <WalletConnect />
+            <WalletConnect
+              onParticipationsClick={onParticipationsClick}
+              onCreationsClick={onCreationsClick}
+            />
           ) : (
             <>
               {isAuthenticated && user ? (

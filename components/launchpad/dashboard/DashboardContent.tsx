@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react';
 
+import { usePredictionMarkets } from '@/hooks/usePredictionMarkets';
 import { CreatePredictionModal } from '../modals/CreatePredictionModal';
 import { UserDetailModal } from '../modals/UserDetailModal';
 import { AuctionGrid } from './AuctionGrid';
 import { PredictionCardData } from './PredictionCard';
-import { usePredictionMarkets } from '@/hooks/usePredictionMarkets';
 
 // 示例数据
 const MOCK_PREDICTIONS = [
@@ -69,7 +69,7 @@ const MOCK_PREDICTIONS = [
 
 /**
  * 仪表盘内容组件 - 管理预言列表和模态框状态
- * 
+ *
  * 从 Supabase 的 markets_readable 表读取数据
  */
 export const DashboardContent: React.FC = () => {
@@ -85,8 +85,23 @@ export const DashboardContent: React.FC = () => {
     prediction: PredictionCardData,
     option?: 'yes' | 'no',
   ) => {
+    // 从 predictions 列表中找到对应的完整数据（包含 rawData）
+    const fullPrediction = predictions.find((p) => p.id === prediction.id);
+
+    // 调试：检查数据传递
+    console.log('点击预测卡片:', {
+      predictionId: prediction.id,
+      foundFullPrediction: !!fullPrediction,
+      hasRawData: !!(fullPrediction?.rawData || prediction.rawData),
+      rawDataKeys: fullPrediction?.rawData
+        ? Object.keys(fullPrediction.rawData)
+        : [],
+    });
+
     setSelectedPrediction({
       ...prediction,
+      // 如果找到了完整数据，使用它的 rawData，否则使用传入的 rawData
+      rawData: fullPrediction?.rawData || prediction.rawData,
       option: option || '',
     });
     setIsModalOpen(true);
@@ -111,24 +126,6 @@ export const DashboardContent: React.FC = () => {
           </div>
         </button>
       </div>
-
-      {/* 显示加载状态或错误信息 */}
-      {isLoading && (
-        <div className="mb-4 text-center text-gray-400">
-          正在从数据库加载市场数据...
-        </div>
-      )}
-      {error && (
-        <div className="mb-4 text-center text-red-400">
-          加载失败: {error.message || '未知错误'}
-        </div>
-      )}
-
-      {!isLoading && predictions.length === 0 && !error && (
-        <div className="mb-4 text-center text-gray-400">
-          暂无市场数据
-        </div>
-      )}
 
       <AuctionGrid
         predictions={predictions}

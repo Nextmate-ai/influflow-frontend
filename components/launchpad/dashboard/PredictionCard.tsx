@@ -13,6 +13,7 @@ interface PredictionCardProps {
   noPercentage: number;
   totalVolume: string;
   timeRemaining: string;
+  rawData?: Record<string, any>;
   onCardClick?: (prediction: PredictionCardData, option?: 'yes' | 'no') => void;
 }
 
@@ -26,6 +27,8 @@ export interface PredictionCardData {
   totalVolume: string;
   timeRemaining: string;
   option: string;
+  // 完整的原始数据，用于详情弹窗
+  rawData?: Record<string, any>;
 }
 
 /**
@@ -40,6 +43,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
   noPercentage,
   totalVolume,
   timeRemaining,
+  rawData,
   onCardClick,
 }) => {
   const [isHovering, setIsHovering] = useState(false);
@@ -56,6 +60,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
         totalVolume,
         timeRemaining,
         option: '',
+        rawData, // 传递完整的原始数据
       });
     }
   };
@@ -74,6 +79,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
           totalVolume,
           timeRemaining,
           option: 'yes',
+          rawData, // 传递完整的原始数据
         },
         'yes',
       );
@@ -94,6 +100,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
           totalVolume,
           timeRemaining,
           option: 'no',
+          rawData, // 传递完整的原始数据
         },
         'no',
       );

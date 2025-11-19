@@ -1,14 +1,22 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { createThirdwebClient } from 'thirdweb';
 import { baseSepolia } from 'thirdweb/chains';
 import { ConnectButton, useActiveWallet } from 'thirdweb/react';
 import { inAppWallet } from 'thirdweb/wallets';
 
+import { UserProfileModal } from '@/components/modals/UserProfileModal';
 import { THIRDWEB_CLIENT_ID } from '@/constants/env';
 import { useTokenApprove } from '@/hooks/useTokenApprove';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { useTokenClaim } from '@/hooks/useTokenClaim';
+import { WalletUserInfo } from './WalletUserInfo';
+
+interface WalletConnectInnerProps {
+  onParticipationsClick?: () => void;
+  onCreationsClick?: () => void;
+}
 
 // 创建 Thirdweb 客户端
 const client = createThirdwebClient({
@@ -32,27 +40,109 @@ const wallets = [
  * ConnectButton 包装组件
  * 注意：ThirdwebProvider 和 QueryClientProvider 现在在页面级别提供
  */
-export function WalletConnectInner() {
+export function WalletConnectInner({
+  onParticipationsClick,
+  onCreationsClick,
+}: WalletConnectInnerProps) {
+  const wallet = useActiveWallet();
+  const connectButtonRef = useRef<HTMLDivElement>(null);
+  const customButtonRef = useRef<HTMLButtonElement>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  // 当组件挂载后，查找 ConnectButton 渲染的按钮并设置点击处理器
+  useEffect(() => {
+    if (!wallet && connectButtonRef.current && customButtonRef.current) {
+      const findConnectButton = () => {
+        const buttons = connectButtonRef.current?.querySelectorAll('button');
+        if (buttons && buttons.length > 0) {
+          // 找到 ConnectButton 渲染的按钮（通常是第一个）
+          const connectButton = Array.from(buttons).find(
+            (btn) => btn !== customButtonRef.current,
+          );
+          if (connectButton && customButtonRef.current) {
+            // 设置自定义按钮的点击处理器
+            const handleClick = () => {
+              connectButton.click();
+            };
+            customButtonRef.current.onclick = handleClick;
+            return () => {
+              if (customButtonRef.current) {
+                customButtonRef.current.onclick = null;
+              }
+            };
+          }
+        }
+        return undefined;
+      };
+
+      // 延迟查找，确保 ConnectButton 已经渲染
+      const timer = setTimeout(findConnectButton, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [wallet]);
+
+  const handleUserClick = () => {
+    if (wallet) {
+      setIsProfileModalOpen(true);
+    }
+  };
+
   return (
-    <div className="flex items-center gap-3">
-      <ConnectButton
-        accountAbstraction={{
-          chain: baseSepolia, // 使用 Base Sepolia 测试网
-          sponsorGas: false, // 启用 gas 赞助（免 gas 交易）
-        }}
-        client={client}
-        connectModal={{ size: 'compact' }}
-        theme="dark"
-        wallets={wallets}
-        connectButton={{
-          label: '使用 X 登录',
-        }}
-      />
-      {/* 领取测试 Token 按钮 - 仅在钱包连接后显示 */}
-      <ClaimTokenButton />
-      {/* Approve 按钮 - 仅在钱包连接后显示 */}
-      <ApproveButton />
-    </div>
+    <>
+      <div className="flex items-center gap-3">
+        {wallet ? (
+          // 已登录：显示钱包用户信息
+          <>
+            <WalletUserInfo onClick={handleUserClick} />
+            {/* 领取测试 Token 按钮 - 仅在钱包连接后显示 */}
+            {/* <ClaimTokenButton /> */}
+            {/* Approve 按钮 - 仅在钱包连接后显示 */}
+            {/* <ApproveButton /> */}
+          </>
+        ) : (
+          // 未登录：显示与 SharedHeader Login 按钮样式一致的连接按钮
+          <div className="relative inline-block mr-3">
+            {/* ConnectButton - 隐藏但保持功能 */}
+            <div
+              ref={connectButtonRef}
+              className="[&_button]:!opacity-0 [&_button]:!absolute [&_button]:!inset-0 [&_button]:!z-10 [&_button]:!w-full [&_button]:!h-full"
+            >
+              <ConnectButton
+                accountAbstraction={{
+                  chain: baseSepolia, // 使用 Base Sepolia 测试网
+                  sponsorGas: false, // 启用 gas 赞助（免 gas 交易）
+                }}
+                client={client}
+                connectModal={{ size: 'compact' }}
+                theme="dark"
+                wallets={wallets}
+                connectButton={{
+                  label: '使用 X 登录',
+                }}
+              />
+            </div>
+            {/* 自定义按钮覆盖层 - 与 SharedHeader Login 按钮样式完全一致 */}
+            <button
+              ref={customButtonRef}
+              type="button"
+              className="h-[40px] w-[96px] rounded-[5px] bg-[#252525] text-white flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              使用 X 登录
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 用户详情弹窗 */}
+      {wallet && (
+        <UserProfileModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          onParticipationsClick={onParticipationsClick}
+          onCreationsClick={onCreationsClick}
+        />
+      )}
+    </>
   );
 }
 

@@ -3,7 +3,24 @@
 import { Input, Modal, ModalContent } from '@heroui/react';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
-import { GradientSlider } from '../shared/GradientSlider';
+import {
+  createThirdwebClient,
+  getContract,
+  prepareContractCall,
+} from 'thirdweb';
+import { baseSepolia } from 'thirdweb/chains';
+import {
+  useActiveWallet,
+  useReadContract,
+  useSendTransaction,
+} from 'thirdweb/react';
+
+import {
+  PREDICTION_MARKET_CONTRACT_ADDRESS,
+  THIRDWEB_CLIENT_ID,
+} from '@/constants/env';
+import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
+
 import { StatCard } from '../shared/StatCard';
 
 interface UserDetailModalProps {
@@ -19,6 +36,7 @@ interface UserDetailModalProps {
     totalVolume: string;
     timeRemaining: string;
     option: string;
+    rawData?: Record<string, any>; // 完整的原始数据
   };
 }
 
@@ -31,11 +49,35 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   onClose,
   prediction,
 }) => {
-  const [amount, setAmount] = useState('231');
+  const [amount, setAmount] = useState('0');
+  // 防抖后的金额值，用于合约调用
+  const [debouncedAmount, setDebouncedAmount] = useState('0');
   // 根据 prediction.option 设置初始选择，如果没有 option 则不选择
   const [selectedOption, setSelectedOption] = useState<'yes' | 'no' | null>(
     null,
   );
+
+  // 下注相关状态
+  const [isApproving, setIsApproving] = useState(false);
+  const [isBuying, setIsBuying] = useState(false);
+  const [approveError, setApproveError] = useState<Error | null>(null);
+  const [buyError, setBuyError] = useState<Error | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // 钱包和合约相关 hooks
+  const wallet = useActiveWallet();
+  const { mutate: sendTransaction } = useSendTransaction();
+
+  // Token 合约地址和实例
+  const TOKEN_CONTRACT_ADDRESS = '0xC5387F42883F6AfBa3AA935764Ac79a112aE1897';
+  const client = createThirdwebClient({
+    clientId: THIRDWEB_CLIENT_ID,
+  });
+  const tokenContract = getContract({
+    client,
+    chain: baseSepolia,
+    address: TOKEN_CONTRACT_ADDRESS,
+  });
 
   // 当弹窗打开或 prediction 变化时，根据 option 设置初始选择
   useEffect(() => {
@@ -50,23 +92,255 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     }
   }, [isOpen, prediction.option]);
 
+  // 防抖逻辑：输入完成后 500ms 再更新 debouncedAmount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedAmount(amount);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [amount]);
+
+  // 当弹窗打开时，重置防抖状态
+  useEffect(() => {
+    if (isOpen) {
+      setDebouncedAmount(amount);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   // 预测的投票状态（右侧面板使用，可以基于用户选择动态计算）
   const [predictionYesPercentage, setPredictionYesPercentage] = useState(45);
   const [predictionNoPercentage, setPredictionNoPercentage] = useState(55);
 
-  const payoutIfWin = (parseFloat(amount) * 1.076).toFixed(2);
+  // 计算合约调用参数（使用防抖后的金额）
+  const debouncedAmountValue = parseFloat(debouncedAmount) || 0;
+  const marketId = prediction.id ? BigInt(prediction.id) : BigInt(0);
+  const side = selectedOption === 'yes' ? 0 : selectedOption === 'no' ? 1 : 0;
+  const amountInWei =
+    debouncedAmountValue > 0
+      ? BigInt(Math.floor(debouncedAmountValue * 1e18))
+      : BigInt(0);
 
-  // 规则文本（示例）
-  const rulesText = [
-    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City.',
-    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...',
-    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...',
-    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City.',
-    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...',
-    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...',
-    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City.',
-    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City...',
-  ].join('\n\n');
+  // 调用合约方法获取真实的 payout 值
+  // estimatePayout 返回 (uint256 shares, uint256 payout)
+  const { data: payoutData, isPending: isPayoutPending } = useReadContract({
+    contract: predictionMarketContract,
+    method:
+      'function estimatePayout(uint256 marketId, uint8 side, uint256 amount) view returns (uint256 shares, uint256 payout)',
+    params: [marketId, side, amountInWei],
+    queryOptions: {
+      enabled:
+        isOpen &&
+        debouncedAmountValue > 0 &&
+        selectedOption !== null &&
+        marketId > BigInt(0),
+    },
+  });
+
+  // 计算 payout 显示值（从 wei 转换为美元）
+  // payoutData 是一个元组 [shares, payout]
+  const [shares, payout] = payoutData || [BigInt(0), BigInt(0)];
+
+  // 判断是否正在加载或输入中
+  const amountValue = parseFloat(amount) || 0;
+  const isInputting = amount !== debouncedAmount && amountValue > 0;
+  const isCalculating = isPayoutPending && debouncedAmountValue > 0;
+
+  // 显示逻辑：加载中显示 "..."，否则显示真实值或 "0.00"
+  const payoutIfWin =
+    isInputting || isCalculating
+      ? '...'
+      : payoutData && payout > BigInt(0)
+        ? (Number(payout) / 1e18).toFixed(2)
+        : '0.00';
+
+  // 从 rawData 中获取真实数据，如果没有则使用默认值
+  const rawData = prediction.rawData || {};
+
+  // 调试：打印接收到的数据
+  useEffect(() => {
+    if (isOpen) {
+      console.log('详情弹窗打开，接收到的 prediction:', prediction);
+      console.log('rawData:', rawData);
+      console.log('rawData 的所有字段:', rawData ? Object.keys(rawData) : []);
+    }
+  }, [isOpen, prediction, rawData]);
+
+  // 获取问题描述（规则文本）- 支持多种字段名格式
+  const rulesText =
+    rawData.question_description ||
+    rawData.questionDescription ||
+    'No description available.';
+
+  // 获取创建者地址
+  const creator = rawData.creator || 'Unknown';
+
+  // 计算真实的投票百分比（基于 rawData）
+  // 优先使用 yes_price/no_price，如果没有则使用 yes_invested_ratio/no_invested_ratio
+  // 或者使用 yes_pool_usd 和 no_pool_usd 来计算
+  const yesPrice = rawData.yes_price || rawData.yesPrice;
+  const noPrice = rawData.no_price || rawData.noPrice;
+  const yesRatio = rawData.yes_invested_ratio || rawData.yesInvestedRatio;
+  const noRatio = rawData.no_invested_ratio || rawData.noInvestedRatio;
+
+  // 如果都没有，尝试从 pool 数据计算
+  const yesPoolUsd = parseFloat(
+    String(
+      rawData.yes_pool_usd ||
+        rawData.yesPoolUsd ||
+        rawData.yes_pool_total ||
+        rawData.yesPoolTotal ||
+        0,
+    ),
+  );
+  const noPoolUsd = parseFloat(
+    String(
+      rawData.no_pool_usd ||
+        rawData.noPoolUsd ||
+        rawData.no_pool_total ||
+        rawData.noPoolTotal ||
+        0,
+    ),
+  );
+  const poolTotal = yesPoolUsd + noPoolUsd;
+
+  const realYesPercentage = yesPrice
+    ? Math.round(parseFloat(String(yesPrice)) * 100)
+    : yesRatio
+      ? Math.round(parseFloat(String(yesRatio)) * 100)
+      : poolTotal > 0
+        ? Math.round((yesPoolUsd / poolTotal) * 100)
+        : prediction.yesPercentage;
+
+  const realNoPercentage = noPrice
+    ? Math.round(parseFloat(String(noPrice)) * 100)
+    : noRatio
+      ? Math.round(parseFloat(String(noRatio)) * 100)
+      : poolTotal > 0
+        ? Math.round((noPoolUsd / poolTotal) * 100)
+        : prediction.noPercentage;
+
+  // 更新预测的投票状态为真实数据
+  useEffect(() => {
+    if (isOpen && rawData) {
+      setPredictionYesPercentage(realYesPercentage);
+      setPredictionNoPercentage(realNoPercentage);
+    }
+  }, [isOpen, rawData, realYesPercentage, realNoPercentage]);
+
+  // 当弹窗打开时，清除错误和成功消息
+  useEffect(() => {
+    if (isOpen) {
+      setApproveError(null);
+      setBuyError(null);
+      setSuccessMessage(null);
+    }
+  }, [isOpen]);
+
+  // 实现 buyShares 函数
+  const handleBuyShares = () => {
+    if (!wallet) {
+      setBuyError(new Error('Wallet not connected'));
+      return;
+    }
+
+    if (!selectedOption) {
+      setBuyError(new Error('Please select Yes or No'));
+      return;
+    }
+
+    const amountValue = parseFloat(amount);
+    if (isNaN(amountValue) || amountValue <= 0) {
+      setBuyError(new Error('Please enter a valid amount'));
+      return;
+    }
+
+    setIsBuying(true);
+    setBuyError(null);
+
+    // 转换参数
+    const marketId = BigInt(prediction.id);
+    const side = selectedOption === 'yes' ? 0 : 1; // 0 = Yes, 1 = No
+    const amountInWei = BigInt(Math.floor(amountValue * 1e18));
+
+    // 准备 buyShares 交易
+    const transaction = prepareContractCall({
+      contract: predictionMarketContract,
+      method:
+        'function buyShares(uint256 marketId, uint8 side, uint256 amount) returns (uint256 shares)',
+      params: [marketId, side, amountInWei],
+    });
+
+    // 发送交易
+    sendTransaction(transaction, {
+      onSuccess: (result) => {
+        console.log('BuyShares success:', result);
+        setIsBuying(false);
+        setSuccessMessage('Successfully purchased shares!');
+        // 可以在这里添加其他成功后的操作，比如刷新数据
+      },
+      onError: (err) => {
+        console.error('BuyShares error:', err);
+        setIsBuying(false);
+        setBuyError(
+          err instanceof Error ? err : new Error('Failed to buy shares'),
+        );
+      },
+    });
+  };
+
+  // 实现 approve 和 buyShares 的完整流程
+  const handleApprove = () => {
+    if (!wallet) {
+      setApproveError(new Error('Wallet not connected'));
+      return;
+    }
+
+    if (!selectedOption) {
+      setApproveError(new Error('Please select Yes or No'));
+      return;
+    }
+
+    const amountValue = parseFloat(amount);
+    if (isNaN(amountValue) || amountValue <= 0) {
+      setApproveError(new Error('Please enter a valid amount'));
+      return;
+    }
+
+    setIsApproving(true);
+    setApproveError(null);
+    setBuyError(null);
+    setSuccessMessage(null);
+
+    // 转换 amount 为 wei
+    const amountInWei = BigInt(Math.floor(amountValue * 1e18));
+
+    // 准备 approve 交易
+    const approveTransaction = prepareContractCall({
+      contract: tokenContract,
+      method:
+        'function approve(address spender, uint256 amount) returns (bool)',
+      params: [PREDICTION_MARKET_CONTRACT_ADDRESS, amountInWei],
+    });
+
+    // 发送 approve 交易
+    sendTransaction(approveTransaction, {
+      onSuccess: () => {
+        console.log('Approve success, calling buyShares...');
+        setIsApproving(false);
+        // Approve 成功后自动调用 buyShares
+        handleBuyShares();
+      },
+      onError: (err) => {
+        console.error('Approve error:', err);
+        setIsApproving(false);
+        setApproveError(
+          err instanceof Error ? err : new Error('Failed to approve'),
+        );
+      },
+    });
+  };
 
   return (
     <Modal
@@ -93,8 +367,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       className="object-cover"
                     />
                   </div>
-                  <div className="max-w-[100px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-transparent text-base font-medium">
-                    Name
+                  <div className="max-w-[200px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-transparent text-base font-medium">
+                    {creator.slice(0, 6)}...{creator.slice(-4)}
                   </div>
                 </div>
 
@@ -141,7 +415,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     <div
                       className="absolute left-0 top-0 h-full rounded-l-full bg-gradient-to-r from-[#00B2FF] to-[#00FFD0] flex items-center"
                       style={{
-                        width: `${prediction.yesPercentage}%`,
+                        width: `${realYesPercentage}%`,
                         zIndex: 1,
                       }}
                     >
@@ -149,37 +423,34 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         className="text-white text-sm font-medium whitespace-nowrap"
                         style={{
                           paddingLeft: '12px',
-                          paddingRight:
-                            prediction.yesPercentage < 20 ? '8px' : '12px',
+                          paddingRight: realYesPercentage < 20 ? '8px' : '12px',
                         }}
                       >
-                        {Math.round(prediction.yesPercentage)}% Yes
+                        {Math.round(realYesPercentage)}% Yes
                       </span>
                     </div>
-                    {/* 右侧渐变条 */}
                     <div
                       className="absolute right-0 top-0 h-full rounded-r-full bg-gradient-to-l from-[#870CD8] to-[#FF2DDF] flex items-center justify-end"
                       style={{
-                        width: `${prediction.noPercentage}%`,
+                        width: `${realNoPercentage}%`,
                         zIndex: 1,
                       }}
                     >
                       <span
                         className="text-white text-sm font-medium whitespace-nowrap"
                         style={{
-                          paddingLeft:
-                            prediction.noPercentage < 20 ? '8px' : '12px',
+                          paddingLeft: realNoPercentage < 20 ? '8px' : '12px',
                           paddingRight: '12px',
                         }}
                       >
-                        {Math.round(prediction.noPercentage)}% No
+                        {Math.round(realNoPercentage)}% No
                       </span>
                     </div>
                     {/* 闪电图标 - 在分割线中间 */}
                     <div
                       className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                       style={{
-                        left: `${prediction.yesPercentage}%`,
+                        left: `${realYesPercentage}%`,
                         top: '50%',
                         zIndex: 3,
                       }}
@@ -267,7 +538,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 </div>
 
                 {/* Voting Status Prediction */}
-                <div className="mb-8">
+                {/* <div className="mb-8">
                   <div className="text-[#58C0CE] text-base font-medium mb-4">
                     Voting Status Prediction
                   </div>
@@ -289,7 +560,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       <div className="text-white text-sm">No</div>
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Amount 输入 */}
                 <div className="mb-6">
@@ -329,8 +600,20 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   </div>
                 </div>
 
+                {/* 错误和成功提示 */}
+                {(approveError || buyError) && (
+                  <div className="mb-4 text-red-400 text-sm">
+                    {approveError?.message || buyError?.message}
+                  </div>
+                )}
+                {successMessage && (
+                  <div className="mb-4 text-green-400 text-sm">
+                    {successMessage}
+                  </div>
+                )}
+
                 {/* Join 按钮 */}
-                <div className="mt-auto flex justify-end">
+                <div className="mt-auto flex flex-col items-end gap-2">
                   <div
                     className="w-[168px] h-[56px] rounded-2xl p-[2px]"
                     style={{
@@ -338,10 +621,25 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         'linear-gradient(to right, #1FA2FF, #12D8FA, #870CD8)',
                     }}
                   >
-                    <button className="w-full h-full rounded-2xl bg-[#0B041E] text-white font-semibold text-lg hover:opacity-80 transition-all duration-200">
-                      Join
+                    <button
+                      onClick={handleApprove}
+                      disabled={
+                        !wallet ||
+                        isApproving ||
+                        isBuying ||
+                        !selectedOption ||
+                        parseFloat(amount) <= 0
+                      }
+                      className="w-full h-full rounded-2xl bg-[#0B041E] text-white font-semibold text-lg hover:opacity-80 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isApproving || isBuying ? 'Loading...' : 'Join'}
                     </button>
                   </div>
+                  {!wallet && (
+                    <span className="text-xs text-gray-400">
+                      Please connect wallet
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

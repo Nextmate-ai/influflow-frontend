@@ -34,7 +34,14 @@ export const AuctionGrid: React.FC<AuctionGridProps> = ({
       {predictions.map((prediction) => (
         <PredictionCard
           key={prediction.id}
-          {...prediction}
+          id={prediction.id}
+          image={prediction.image}
+          title={prediction.title}
+          yesPercentage={prediction.yesPercentage}
+          noPercentage={prediction.noPercentage}
+          totalVolume={prediction.totalVolume}
+          timeRemaining={prediction.timeRemaining}
+          rawData={prediction.rawData}
           onCardClick={onPredictionClick}
         />
       ))}

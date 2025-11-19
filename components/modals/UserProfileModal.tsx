@@ -3,7 +3,10 @@
 import React, { useEffect } from 'react';
 import { Modal, ModalContent } from '@heroui/react';
 import Image from 'next/image';
+import { useActiveWallet } from 'thirdweb/react';
+
 import { useAuthStore } from '@/stores/authStore';
+import { useTokenBalance } from '@/hooks/useTokenBalance';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -23,9 +26,32 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onCreationsClick,
 }) => {
   const { user } = useAuthStore();
+  const wallet = useActiveWallet();
+  const { balance, isLoading: isLoadingBalance } = useTokenBalance();
 
-  // 测试环境：默认钱包余额
-  const walletBalance = '4,668';
+  // 获取钱包地址
+  const walletAddress = wallet?.getAccount()?.address || '';
+  const formattedAddress = walletAddress
+    ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+    : 'Not Connected';
+
+  // 格式化 Token 余额
+  const formattedBalance = isLoadingBalance
+    ? '...'
+    : (Number(balance) / 1e18).toFixed(4);
+
+  // 复制地址到剪贴板
+  const handleCopyAddress = async () => {
+    if (walletAddress) {
+      try {
+        await navigator.clipboard.writeText(walletAddress);
+        // 可以添加一个 toast 提示，这里暂时用 alert
+        // alert('Address copied to clipboard!');
+      } catch (err) {
+        console.error('Failed to copy address:', err);
+      }
+    }
+  };
 
   const handleParticipations = () => {
     onParticipationsClick?.();
@@ -103,10 +129,18 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 My Profile
               </h2>
 
-              {/* 用户头像和姓名 */}
+              {/* 用户头像和钱包地址 */}
               <div className="flex flex-col items-center mb-8">
                 <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-[#60A5FA] mb-4">
-                  {user?.avatar ? (
+                  {wallet ? (
+                    // 如果有钱包，显示钱包头像（基于地址生成）
+                    <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                      <span className="text-white text-2xl font-semibold">
+                        {walletAddress ? walletAddress.slice(2, 4).toUpperCase() : 'W'}
+                      </span>
+                    </div>
+                  ) : user?.avatar ? (
+                    // 如果没有钱包但有用户头像，显示用户头像
                     <Image
                       src={user.avatar}
                       alt={user.name || 'User'}
@@ -114,6 +148,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       className="object-cover"
                     />
                   ) : (
+                    // 默认头像
                     <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
                       <span className="text-white text-2xl font-semibold">
                         {user?.name?.charAt(0).toUpperCase() || 'U'}
@@ -121,68 +156,107 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     </div>
                   )}
                 </div>
-                <h3 className="text-white text-lg font-semibold">
-                  {user?.name || 'User'}
-                </h3>
+                {/* 钱包地址和复制按钮 */}
+                {wallet && walletAddress ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-white text-sm font-medium">
+                      {formattedAddress}
+                    </span>
+                    <button
+                      onClick={handleCopyAddress}
+                      className="text-[#86FDE8] hover:text-[#60A5FA] transition-colors cursor-pointer"
+                      title="Copy address"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <h3 className="text-white text-lg font-semibold">
+                    {user?.name || 'User'}
+                  </h3>
+                )}
               </div>
 
-              {/* My Wallet 部分 */}
+              {/* My Wallet 部分 - 仅显示 Token 数量 */}
               <div className="mb-8">
                 <h3 className="text-white text-base font-medium mb-4">
                   My Wallet
                 </h3>
-                <div className="flex items-center justify-between bg-transparent border border-[#2DC3D9] rounded-2xl p-4">
-                  <div className="flex items-center gap-3">
-                    {/* Ethereum 图标 */}
-                    <div className="w-8 h-8 flex items-center justify-center">
-                      <svg
-                        className="w-6 h-6"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24Z"
-                          fill="#627EEA"
-                        />
-                        <path
-                          d="M12.498 3V9.6525L17.9955 12.165L12.498 3Z"
-                          fill="white"
-                          fillOpacity="0.602"
-                        />
-                        <path
-                          d="M12.498 3L7 12.165L12.498 9.6525V3Z"
-                          fill="white"
-                        />
-                        <path
-                          d="M12.498 16.476V20.9963L18 12.8085L12.498 16.476Z"
-                          fill="white"
-                          fillOpacity="0.602"
-                        />
-                        <path
-                          d="M12.498 20.9963V16.4753L7 12.8085L12.498 20.9963Z"
-                          fill="white"
-                        />
-                        <path
-                          d="M12.498 15.4298L17.9955 12.8085L12.498 9.65399V15.4298Z"
-                          fill="white"
-                          fillOpacity="0.2"
-                        />
-                        <path
-                          d="M7 12.8085L12.498 15.4298V9.65399L7 12.8085Z"
-                          fill="white"
-                          fillOpacity="0.602"
-                        />
-                      </svg>
+                {wallet ? (
+                  <div className="flex items-center justify-between bg-transparent border border-[#2DC3D9] rounded-2xl p-4">
+                    <div className="flex items-center gap-3">
+                      {/* Token 图标 */}
+                      <div className="w-8 h-8 flex items-center justify-center">
+                        <svg
+                          className="w-6 h-6"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24Z"
+                            fill="#627EEA"
+                          />
+                          <path
+                            d="M12.498 3V9.6525L17.9955 12.165L12.498 3Z"
+                            fill="white"
+                            fillOpacity="0.602"
+                          />
+                          <path
+                            d="M12.498 3L7 12.165L12.498 9.6525V3Z"
+                            fill="white"
+                          />
+                          <path
+                            d="M12.498 16.476V20.9963L18 12.8085L12.498 16.476Z"
+                            fill="white"
+                            fillOpacity="0.602"
+                          />
+                          <path
+                            d="M12.498 20.9963V16.4753L7 12.8085L12.498 20.9963Z"
+                            fill="white"
+                          />
+                          <path
+                            d="M12.498 15.4298L17.9955 12.8085L12.498 9.65399V15.4298Z"
+                            fill="white"
+                            fillOpacity="0.2"
+                          />
+                          <path
+                            d="M7 12.8085L12.498 15.4298V9.65399L7 12.8085Z"
+                            fill="white"
+                            fillOpacity="0.602"
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <span className="text-white text-lg font-semibold">
+                          {formattedBalance} Tokens
+                        </span>
+                        <span className="text-[#86FDE8] text-xs">
+                          Token Balance
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-white text-lg font-semibold">
-                      {walletBalance} ETH
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center bg-transparent border border-[#2DC3D9] rounded-2xl p-4">
+                    <span className="text-gray-400 text-sm">
+                      Wallet not connected
                     </span>
                   </div>
-                  <button className="text-[#86FDE8] text-sm font-medium hover:text-[#60A5FA] transition-colors">
-                    Add &gt;
-                  </button>
-                </div>
+                )}
               </div>
 
               {/* My History 部分 */}

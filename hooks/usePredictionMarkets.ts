@@ -63,11 +63,16 @@ export function usePredictionMarkets() {
           return;
         }
 
+        // 调试：打印实际获取的数据
+        console.log('从数据库获取的原始数据:', data);
+        console.log('第一条数据的字段:', data[0] ? Object.keys(data[0]) : []);
+
         // 转换数据格式
         const mappedPredictions = data.map((row: MarketReadableRow) =>
           mapMarketRowToPredictionCard(row),
         );
 
+        console.log('转换后的预测数据:', mappedPredictions);
         setPredictions(mappedPredictions);
       } catch (err) {
         console.error('Failed to fetch prediction markets:', err);
@@ -93,6 +98,61 @@ export function usePredictionMarkets() {
 }
 
 /**
+ * 计算投票百分比 - 使用与详情页面相同的优先级逻辑
+ * 优先级：yes_price/no_price > yes_invested_ratio/no_invested_ratio > pool 数据计算
+ */
+function calculatePercentages(
+  rawData: Record<string, any>,
+): { yesPercentage: number; noPercentage: number } {
+  // 优先使用 yes_price/no_price
+  const yesPrice = rawData.yes_price || rawData.yesPrice;
+  const noPrice = rawData.no_price || rawData.noPrice;
+  
+  // 其次使用 yes_invested_ratio/no_invested_ratio
+  const yesRatio = rawData.yes_invested_ratio || rawData.yesInvestedRatio;
+  const noRatio = rawData.no_invested_ratio || rawData.noInvestedRatio;
+
+  // 如果都没有，尝试从 pool 数据计算
+  const yesPoolUsd = parseFloat(
+    String(
+      rawData.yes_pool_usd ||
+        rawData.yesPoolUsd ||
+        rawData.yes_pool_total ||
+        rawData.yesPoolTotal ||
+        0,
+    ),
+  );
+  const noPoolUsd = parseFloat(
+    String(
+      rawData.no_pool_usd ||
+        rawData.noPoolUsd ||
+        rawData.no_pool_total ||
+        rawData.noPoolTotal ||
+        0,
+    ),
+  );
+  const poolTotal = yesPoolUsd + noPoolUsd;
+
+  const yesPercentage = yesPrice
+    ? Math.round(parseFloat(String(yesPrice)) * 100)
+    : yesRatio
+      ? Math.round(parseFloat(String(yesRatio)) * 100)
+      : poolTotal > 0
+        ? Math.round((yesPoolUsd / poolTotal) * 100)
+        : 50;
+
+  const noPercentage = noPrice
+    ? Math.round(parseFloat(String(noPrice)) * 100)
+    : noRatio
+      ? Math.round(parseFloat(String(noRatio)) * 100)
+      : poolTotal > 0
+        ? Math.round((noPoolUsd / poolTotal) * 100)
+        : 50;
+
+  return { yesPercentage, noPercentage };
+}
+
+/**
  * 将 Supabase 行数据映射为 PredictionCardData
  */
 function mapMarketRowToPredictionCard(
@@ -100,22 +160,30 @@ function mapMarketRowToPredictionCard(
 ): PredictionCardData {
   const marketId = String(row.market_id || row.id || '');
   
-  // 计算百分比
-  const yesTotal = parseFloat(String(row.yes_pool_total || 0));
-  const noTotal = parseFloat(String(row.no_pool_total || 0));
-  const total = yesTotal + noTotal;
+  // 使用统一的百分比计算函数
+  const { yesPercentage, noPercentage } = calculatePercentages(
+    row as Record<string, any>,
+  );
 
-  const yesPercentage = total > 0 ? Math.round((yesTotal / total) * 100) : 50;
-  const noPercentage = total > 0 ? Math.round((noTotal / total) * 100) : 50;
-
-  // 格式化交易量
-  const totalVolume = formatVolume(row.total_volume);
+  // 格式化交易量 - 支持多种字段名
+  const volumeValue = row.total_volume_usd || row.total_volume || row.totalVolumeUsd || row.totalVolume;
+  const totalVolume = formatVolume(volumeValue);
 
   // 计算剩余时间
   const timeRemaining = calculateTimeRemaining(row.end_time);
 
   // 生成头像 URL（基于 creator 地址）
   const image = generateAvatarUrl(row.creator || marketId);
+
+  // 调试：打印单条数据的转换
+  console.log('转换单条数据:', {
+    marketId,
+    title: row.question_title,
+    yesPercentage,
+    noPercentage,
+    totalVolume,
+    rawDataKeys: Object.keys(row),
+  });
 
   return {
     id: marketId,
@@ -127,6 +195,8 @@ function mapMarketRowToPredictionCard(
     totalVolume,
     timeRemaining,
     option: '',
+    // 保存完整的原始数据
+    rawData: row as Record<string, any>,
   };
 }
 

@@ -17,13 +17,21 @@ const WalletConnectInner = dynamic(
   },
 );
 
+interface WalletConnectProps {
+  onParticipationsClick?: () => void;
+  onCreationsClick?: () => void;
+}
+
 /**
  * 钱包连接按钮组件
  * 用于 Launchpad 页面右上角
  * 使用动态导入禁用 SSR，避免服务器端 QueryClient 错误
  * 配置账户抽象，支持免 gas 交易
  */
-export function WalletConnect() {
+export function WalletConnect({
+  onParticipationsClick,
+  onCreationsClick,
+}: WalletConnectProps) {
   const [mounted, setMounted] = useState(false);
 
   // 确保只在客户端渲染
@@ -40,5 +48,10 @@ export function WalletConnect() {
     );
   }
 
-  return <WalletConnectInner />;
+  return (
+    <WalletConnectInner
+      onParticipationsClick={onParticipationsClick}
+      onCreationsClick={onCreationsClick}
+    />
+  );
 }
