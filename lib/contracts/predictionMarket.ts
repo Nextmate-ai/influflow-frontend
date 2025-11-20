@@ -4,10 +4,13 @@
  * 网络: Base Sepolia Testnet (Chain ID: 84532)
  */
 
-import { getContract } from 'thirdweb';
+import { createThirdwebClient, getContract } from 'thirdweb';
 import { baseSepolia } from 'thirdweb/chains';
-import { createThirdwebClient } from 'thirdweb';
-import { THIRDWEB_CLIENT_ID, PREDICTION_MARKET_CONTRACT_ADDRESS } from '@/constants/env';
+
+import {
+  PREDICTION_MARKET_CONTRACT_ADDRESS,
+  THIRDWEB_CLIENT_ID,
+} from '@/constants/env';
 
 // 创建 Thirdweb 客户端
 const client = createThirdwebClient({
@@ -58,4 +61,3 @@ export interface MarketResponse {
  */
 export const GET_MARKET_METHOD =
   'function getMarket(uint256 marketId) view returns ((string questionTitle, string questionDescription, address creator, uint256 endTime) config, (uint8 state, uint8 outcome, uint256 yesPoolTotal, uint256 noPoolTotal, uint256 yesSharesTotal, uint256 noSharesTotal, uint256 yesReserve, uint256 noReserve, uint256 k, uint256 baseVirtualLiquidity, uint256 virtualLiquidity, uint256 totalVolume, uint256 creatorFees, bool creatorFeesClaimed) data)';
-

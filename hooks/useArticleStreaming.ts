@@ -96,7 +96,7 @@ export function useArticleStreaming({
           // 使用后端的 message: "Finished analyzing user input"
           // 保存分析结果
           if (evt.data) {
-            setEventData(prev => ({
+            setEventData((prev) => ({
               ...prev,
               analyzeInput: {
                 topic: evt.data.topic,
@@ -110,7 +110,7 @@ export function useArticleStreaming({
           // 使用后端的 message: "Starting fetching urls"
           // 保存 URLs
           if (evt.data?.urls) {
-            setEventData(prev => ({
+            setEventData((prev) => ({
               ...prev,
               fetchUrls: evt.data.urls,
             }));
@@ -121,7 +121,7 @@ export function useArticleStreaming({
           // 使用后端的 message: "Finished fetching urls"
           // 更新 URLs 和失败列表
           if (evt.data?.urls) {
-            setEventData(prev => ({
+            setEventData((prev) => ({
               ...prev,
               fetchUrls: evt.data.urls,
             }));
@@ -132,7 +132,7 @@ export function useArticleStreaming({
           // 使用后端的 message: "Starting web search"
           // 保存搜索查询
           if (evt.data?.search_queries) {
-            setEventData(prev => ({
+            setEventData((prev) => ({
               ...prev,
               searchQueries: evt.data.search_queries,
             }));
@@ -143,7 +143,7 @@ export function useArticleStreaming({
           // 使用后端的 message: "Web search completed"
           // 保存搜索结果
           if (evt.data?.query_results) {
-            setEventData(prev => ({
+            setEventData((prev) => ({
               ...prev,
               searchResults: evt.data.query_results,
             }));
@@ -247,16 +247,11 @@ export function useArticleStreaming({
 
     // 如果有会话ID，直接重连；否则重新创建会话
     if (sessionIdRef.current) {
-      connectGenerateStream(
-        sessionIdRef.current,
-        handleEvent,
-        handleError,
-        {
-          maxRetry: 3,
-          retryInterval: 2000,
-          openWhenHidden: true,
-        },
-      ).then((controller) => {
+      connectGenerateStream(sessionIdRef.current, handleEvent, handleError, {
+        maxRetry: 3,
+        retryInterval: 2000,
+        openWhenHidden: true,
+      }).then((controller) => {
         sseControllerRef.current = controller;
         setIsConnected(true);
         setError(null);

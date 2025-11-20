@@ -12,10 +12,7 @@ import {
 import { baseSepolia } from 'thirdweb/chains';
 import { useActiveWallet, useSendTransaction } from 'thirdweb/react';
 
-import { THIRDWEB_CLIENT_ID } from '@/constants/env';
-
-// Token 合约地址
-const TOKEN_CONTRACT_ADDRESS = '0xC5387F42883F6AfBa3AA935764Ac79a112aE1897';
+import { THIRDWEB_CLIENT_ID, TOKEN_CONTRACT_ADDRESS } from '@/constants/env';
 
 // 创建 Thirdweb 客户端
 const client = createThirdwebClient({

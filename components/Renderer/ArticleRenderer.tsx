@@ -18,10 +18,10 @@ import { IContentFormat, IMode } from '@/types/api';
 import { MindmapEdgeData, MindmapNodeData } from '@/types/content';
 import { IOutline } from '@/types/outline';
 import { isLongformType } from '@/utils/contentFormat';
+import { devLog } from '@/utils/devLog';
 
 import { ModeOptions } from '../home/WelcomeScreen';
 
-import { devLog } from '@/utils/devLog';
 import { AIEditDialog } from './ArticleRenderer/AIEditDialog';
 import { ArticleToolbar } from './ArticleRenderer/ArticleToolbar';
 import { DeleteConfirmModal } from './ArticleRenderer/DeleteConfirmModal';

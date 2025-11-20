@@ -84,12 +84,12 @@ interface MarketData {
 // utils/contractDataMapper.ts
 function mapMarketDataToPredictionCard(
   marketId: string,
-  marketData: MarketData
+  marketData: MarketData,
 ): PredictionCardData {
   const yesTotal = Number(marketData.data.yesPoolTotal);
   const noTotal = Number(marketData.data.noPoolTotal);
   const total = yesTotal + noTotal;
-  
+
   return {
     id: marketId,
     title: marketData.config.questionTitle,
@@ -110,7 +110,7 @@ function mapMarketDataToPredictionCard(
 export function usePredictionMarket(marketId: string) {
   const { data, isLoading, error } = useReadContract({
     contract: PREDICTION_MARKET_CONTRACT,
-    method: "function getMarket(uint256 marketId) view returns (...)",
+    method: 'function getMarket(uint256 marketId) view returns (...)',
     params: [BigInt(marketId)],
   });
 
@@ -140,4 +140,3 @@ export function usePredictionMarket(marketId: string) {
 1. **单元测试**: 测试数据映射函数
 2. **集成测试**: 测试 Hook 和组件集成
 3. **E2E 测试**: 测试完整的用户流程
-

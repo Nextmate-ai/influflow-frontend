@@ -7,10 +7,11 @@ import { ConnectButton, useActiveWallet } from 'thirdweb/react';
 import { inAppWallet } from 'thirdweb/wallets';
 
 import { UserProfileModal } from '@/components/modals/UserProfileModal';
-import { THIRDWEB_CLIENT_ID } from '@/constants/env';
+import { THIRDWEB_CLIENT_ID, TOKEN_CONTRACT_ADDRESS } from '@/constants/env';
 import { useTokenApprove } from '@/hooks/useTokenApprove';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { useTokenClaim } from '@/hooks/useTokenClaim';
+
 import { WalletUserInfo } from './WalletUserInfo';
 
 interface WalletConnectInnerProps {
@@ -31,7 +32,7 @@ const wallets = [
     },
     executionMode: {
       mode: 'EIP7702',
-      sponsorGas: false,
+      sponsorGas: true,
     },
   }),
 ];
@@ -101,33 +102,38 @@ export function WalletConnectInner({
           </>
         ) : (
           // 未登录：显示与 SharedHeader Login 按钮样式一致的连接按钮
-          <div className="relative inline-block mr-3">
+          <div className="relative mr-3 inline-block">
             {/* ConnectButton - 隐藏但保持功能 */}
             <div
               ref={connectButtonRef}
-              className="[&_button]:!opacity-0 [&_button]:!absolute [&_button]:!inset-0 [&_button]:!z-10 [&_button]:!w-full [&_button]:!h-full"
+              className="[&_button]:!absolute [&_button]:!inset-0 [&_button]:!z-10 [&_button]:!h-full [&_button]:!w-full [&_button]:!opacity-0"
             >
               <ConnectButton
                 accountAbstraction={{
                   chain: baseSepolia, // 使用 Base Sepolia 测试网
-                  sponsorGas: false, // 启用 gas 赞助（免 gas 交易）
+                  sponsorGas: true, // 启用 gas 赞助（免 gas 交易）
                 }}
                 client={client}
                 connectModal={{ size: 'compact' }}
                 theme="dark"
                 wallets={wallets}
                 connectButton={{
-                  label: '使用 X 登录',
+                  label: 'Connect',
+                }}
+                detailsButton={{
+                  displayBalanceToken: {
+                    [baseSepolia.id]: TOKEN_CONTRACT_ADDRESS,
+                  },
                 }}
               />
             </div>
-            {/* 自定义按钮覆盖层 - 与 SharedHeader Login 按钮样式完全一致 */}
+            {/* 自定义按钮覆盖层 - 青色主题风格 */}
             <button
               ref={customButtonRef}
               type="button"
-              className="h-[40px] w-[96px] rounded-[5px] bg-[#252525] text-white flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+              className="flex h-[40px] cursor-pointer items-center justify-center rounded-[8px] border-2 border-[#2DC3D9] bg-transparent px-6 font-medium text-[#2DC3D9] transition-all duration-200 hover:bg-[#2DC3D9]/10"
             >
-              使用 X 登录
+              Connect
             </button>
           </div>
         )}
@@ -163,7 +169,7 @@ function ClaimTokenButton() {
     <button
       onClick={claim}
       disabled={isPending}
-      className="px-4 py-2 bg-gradient-to-r from-[#D245C3] to-[#5731AC] text-white font-semibold rounded-lg hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+      className="rounded-lg bg-gradient-to-r from-[#D245C3] to-[#5731AC] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {isPending ? '领取中...' : '领取测试 Token'}
     </button>
@@ -202,7 +208,7 @@ function ApproveButton() {
       <button
         onClick={handleApprove}
         disabled={isPending || isLoadingBalance}
-        className="px-4 py-2 bg-gradient-to-r from-[#1FA2FF] to-[#12D8FA] text-white font-semibold rounded-lg hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+        className="rounded-lg bg-gradient-to-r from-[#1FA2FF] to-[#12D8FA] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isPending ? '授权中...' : 'Approve'}
       </button>
@@ -212,7 +218,7 @@ function ApproveButton() {
         </span>
       )}
       {error && (
-        <span className="text-xs text-red-400 max-w-[200px] text-right">
+        <span className="max-w-[200px] text-right text-xs text-red-400">
           错误: {error.message}
         </span>
       )}

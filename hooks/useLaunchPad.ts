@@ -1,7 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Prediction, Participation, CreateMarketFormData } from '@/components/launchpad/types';
+import {
+  CreateMarketFormData,
+  Participation,
+  Prediction,
+} from '@/components/launchpad/types';
+import { useCallback, useState } from 'react';
 
 /**
  * 发射台预言管理 Hook
@@ -21,7 +25,9 @@ export const useLaunchPadPredictions = () => {
       // setPredictions(data);
       console.log('Fetching predictions...');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch predictions');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch predictions',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +60,9 @@ export const useLaunchPadParticipations = () => {
       // setParticipations(data);
       console.log('Fetching participations...');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch participations');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch participations',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -76,31 +84,29 @@ export const useCreateMarket = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createMarket = useCallback(
-    async (formData: CreateMarketFormData) => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        // 这里应该调用实际的 API
-        // const response = await fetch('/api/launchpad/create', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(formData),
-        // });
-        // if (!response.ok) throw new Error('Failed to create market');
-        // return await response.json();
-        console.log('Creating market with data:', formData);
-        return { success: true, id: 'new-market-id' };
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to create market';
-        setError(message);
-        throw err;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
+  const createMarket = useCallback(async (formData: CreateMarketFormData) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // 这里应该调用实际的 API
+      // const response = await fetch('/api/launchpad/create', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(formData),
+      // });
+      // if (!response.ok) throw new Error('Failed to create market');
+      // return await response.json();
+      console.log('Creating market with data:', formData);
+      return { success: true, id: 'new-market-id' };
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to create market';
+      setError(message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   return {
     isLoading,
@@ -132,14 +138,15 @@ export const useParticipateInMarket = () => {
         console.log('Participating in market:', marketId, option, amount);
         return { success: true, transactionId: 'tx-id' };
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to participate';
+        const message =
+          err instanceof Error ? err.message : 'Failed to participate';
         setError(message);
         throw err;
       } finally {
         setIsLoading(false);
       }
     },
-    []
+    [],
   );
 
   return {

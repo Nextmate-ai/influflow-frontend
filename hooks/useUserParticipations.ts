@@ -3,9 +3,9 @@
  * 从 Supabase markets_readable 表读取数据，根据 viewType 过滤
  */
 
-import { useState, useEffect } from 'react';
-import { useActiveWallet } from 'thirdweb/react';
 import { createClient } from '@/lib/supabase/client';
+import { useCallback, useEffect, useState } from 'react';
+import { useActiveWallet } from 'thirdweb/react';
 import { MarketReadableRow } from './usePredictionMarkets';
 
 export interface ParticipationRowData {
@@ -13,10 +13,17 @@ export interface ParticipationRowData {
   totalVolume: string;
   rewards: number;
   time: string;
-  status: 'Ongoing' | 'Finished';
+  status: 'Ongoing' | 'Finished' | 'Voided' | 'Resolved';
   outcome: 'Yes' | 'No' | null;
   opinion?: 'Yes' | 'No' | null;
   marketId?: string;
+  betAmount?: number; // 用户投注金额
+  expectedPayout?: number; // 预期收益
+  claimed?: boolean; // 是否已领取
+  marketOutcome?: 'Yes' | 'No' | null; // 市场结果
+  marketState?: string; // 市场状态 (Active/Resolved 等)
+  totalInvestment?: number; // 总投资金额
+  creatorFeesClaimed?: boolean; // Creator 费用是否已领取
 }
 
 /**
@@ -28,6 +35,14 @@ export interface PositionReadableRow {
   market_id?: number | string;
   yes_shares?: number | string;
   no_shares?: number | string;
+  yes_investment_usd?: number | string;
+  no_investment_usd?: number | string;
+  total_investment_usd?: number | string;
+  expected_payout_usd?: number | string;
+  claimed?: boolean | string;
+  market_state?: string;
+  market_outcome?: string;
+  market_question?: string;
   created_at?: string;
   updated_at?: string;
   [key: string]: any; // 允许其他字段
@@ -56,9 +71,12 @@ function removeAddressPrefix(address: string): string {
  */
 export function useUserParticipations(viewType: ViewType = 'creations') {
   const wallet = useActiveWallet();
-  const [participations, setParticipations] = useState<ParticipationRowData[]>([]);
+  const [participations, setParticipations] = useState<ParticipationRowData[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   useEffect(() => {
     const fetchParticipations = async () => {
@@ -118,7 +136,9 @@ export function useUserParticipations(viewType: ViewType = 'creations') {
             .eq('user_address', normalizedAddress);
 
           if (positionsError) {
-            throw new Error(`Supabase positions query error: ${positionsError.message}`);
+            throw new Error(
+              `Supabase positions query error: ${positionsError.message}`,
+            );
           }
 
           if (!positionsData || positionsData.length === 0) {
@@ -131,7 +151,10 @@ export function useUserParticipations(viewType: ViewType = 'creations') {
             ...new Set(
               positionsData
                 .map((p: PositionReadableRow) => p.market_id)
-                .filter((id): id is string | number => id !== undefined && id !== null),
+                .filter(
+                  (id: string | number | undefined | null): id is string | number =>
+                    id !== undefined && id !== null,
+                ),
             ),
           ];
 
@@ -148,7 +171,9 @@ export function useUserParticipations(viewType: ViewType = 'creations') {
             .in('market_id', marketIds);
 
           if (marketsError) {
-            throw new Error(`Supabase markets query error: ${marketsError.message}`);
+            throw new Error(
+              `Supabase markets query error: ${marketsError.message}`,
+            );
           }
 
           if (!marketsData || marketsData.length === 0) {
@@ -184,7 +209,11 @@ export function useUserParticipations(viewType: ViewType = 'creations') {
             const noShares = parseFloat(String(position.no_shares || 0));
 
             // 获取原始时间戳用于排序
-            const timestamp = position.created_at || position.updated_at || market.created_at || '';
+            const timestamp =
+              position.created_at ||
+              position.updated_at ||
+              market.created_at ||
+              '';
 
             // 如果有 yes_shares，生成一条 Yes 记录
             if (yesShares > 0) {
@@ -220,11 +249,15 @@ export function useUserParticipations(viewType: ViewType = 'creations') {
             if (!a.timestamp || !b.timestamp) {
               return 0;
             }
-            return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+            return (
+              new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            );
           });
 
           // 提取排序后的记录
-          const participationRecords = participationRecordsWithTime.map((item) => item.record);
+          const participationRecords = participationRecordsWithTime.map(
+            (item) => item.record,
+          );
 
           setParticipations(participationRecords);
         }
@@ -242,12 +275,18 @@ export function useUserParticipations(viewType: ViewType = 'creations') {
     };
 
     fetchParticipations();
-  }, [wallet, viewType]);
+  }, [wallet, viewType, refetchTrigger]);
+
+  // Refetch 函数，用于手动刷新数据
+  const refetch = useCallback(() => {
+    setRefetchTrigger((prev) => prev + 1);
+  }, []);
 
   return {
     participations,
     isLoading,
     error,
+    refetch,
   };
 }
 
@@ -269,19 +308,46 @@ function mapPositionToParticipation(
   const totalVolume = formatVolume(volumeValue);
 
   // 格式化时间 - 使用 position 的创建时间或更新时间
-  const time = formatTime(position.created_at || position.updated_at || market.created_at);
+  const time = formatTime(
+    position.created_at || position.updated_at || market.created_at,
+  );
 
   // 判断状态
   const status = determineStatus(market.state, market.end_time);
 
-  // 转换 outcome
-  const outcome = convertOutcome(market.outcome);
+  // 转换 outcome (市场结果)
+  const marketOutcome = convertOutcome(market.outcome);
+
+  // 计算投注金额
+  const yesInvestment = parseFloat(String(position.yes_investment_usd || 0));
+  const noInvestment = parseFloat(String(position.no_investment_usd || 0));
+  const betAmount = opinion === 'Yes' ? yesInvestment : noInvestment;
+
+  // 获取预期收益
+  const expectedPayout = parseFloat(String(position.expected_payout_usd || 0));
+
+  // 获取是否已领取
+  const claimed = position.claimed === true || position.claimed === 'true';
 
   // 计算收益（暂时使用占位符，实际需要根据用户的选择和 outcome 计算）
-  const rewards = calculatePositionRewards(market, opinion, shares, outcome);
+  const rewards = calculatePositionRewards(
+    market,
+    opinion,
+    shares,
+    marketOutcome,
+  );
+
+  // outcome 字段保留原来的逻辑（用于兼容）
+  const outcome = marketOutcome;
+
+  // 获取总投资金额
+  const totalInvestment = parseFloat(
+    String(position.total_investment_usd || 0),
+  );
 
   return {
-    prediction: market.question_title || 'Untitled Market',
+    prediction:
+      market.question_title || market.market_question || 'Untitled Market',
     totalVolume,
     rewards,
     time,
@@ -289,6 +355,16 @@ function mapPositionToParticipation(
     outcome,
     opinion,
     marketId: String(position.market_id || market.market_id || market.id || ''),
+    betAmount,
+    expectedPayout,
+    claimed,
+    marketOutcome,
+    marketState:
+      position.market_state ||
+      market.market_state ||
+      market.state?.toString() ||
+      '',
+    totalInvestment,
   };
 }
 
@@ -301,14 +377,35 @@ function mapMarketRowToParticipation(
 ): ParticipationRowData {
   // 格式化交易量
   const volumeValue =
-    row.total_volume_usd || row.total_volume || row.totalVolumeUsd || row.totalVolume;
+    row.total_volume_usd ||
+    row.total_volume ||
+    row.totalVolumeUsd ||
+    row.totalVolume;
   const totalVolume = formatVolume(volumeValue);
 
   // 格式化时间
   const time = formatTime(row.created_at || row.updated_at);
 
   // 判断状态
-  const status = determineStatus(row.state, row.end_time);
+  // 对于 creations 视图，根据 market state 直接返回状态
+  let status: 'Ongoing' | 'Finished' | 'Voided' | 'Resolved';
+  if (viewType === 'creations') {
+    const state = row.state?.toString() || '';
+    const stateLower = state.toLowerCase();
+    if (stateLower === 'active') {
+      status = 'Ongoing';
+    } else if (stateLower === 'voided') {
+      status = 'Voided';
+    } else if (stateLower === 'resolved') {
+      status = 'Resolved';
+    } else {
+      // 其他状态默认使用原来的逻辑
+      status = determineStatus(row.state, row.end_time);
+    }
+  } else {
+    // 对于 participations 视图，使用原来的逻辑
+    status = determineStatus(row.state, row.end_time);
+  }
 
   // 转换 outcome
   const outcome = convertOutcome(row.outcome);
@@ -320,6 +417,16 @@ function mapMarketRowToParticipation(
   // 暂时设为 null，后续需要从合约或数据库查询
   const opinion: 'Yes' | 'No' | null = null;
 
+  // 获取 market state
+  const marketState = row.state?.toString() || '';
+
+  // 获取 creator_fees_claimed 字段
+  const creatorFeesClaimed =
+    row.creator_fees_claimed === true ||
+    row.creator_fees_claimed === 'true' ||
+    row.creatorFeesClaimed === true ||
+    row.creatorFeesClaimed === 'true';
+
   return {
     prediction: row.question_title || 'Untitled Market',
     totalVolume,
@@ -329,6 +436,8 @@ function mapMarketRowToParticipation(
     outcome,
     opinion,
     marketId: String(row.market_id || row.id || ''),
+    marketState,
+    creatorFeesClaimed,
   };
 }
 
@@ -373,16 +482,28 @@ function formatTime(time: string | undefined): string {
 
 /**
  * 判断市场状态
+ * 支持 state 为数字或字符串类型
  */
 function determineStatus(
-  state: number | undefined,
+  state: number | string | undefined,
   endTime: string | number | undefined,
 ): 'Ongoing' | 'Finished' {
   // 如果 state 存在，根据 state 判断
-  // state 可能表示：0=Active, 1=Closed, 2=Resolved 等
-  if (state !== undefined) {
+  if (state !== undefined && state !== null) {
+    // 如果 state 是字符串类型
+    if (typeof state === 'string') {
+      const stateLower = state.toLowerCase();
+      // "Active" 状态显示为 "Ongoing"
+      if (stateLower === 'active') {
+        return 'Ongoing';
+      }
+      // 其他状态(如 "Resolved", "Finished" 等)显示为 "Finished"
+      return 'Finished';
+    }
+
+    // 如果 state 是数字类型
+    // state 可能表示：0=Active, 1=Closed, 2=Resolved 等
     // 假设 0 或 1 表示 Ongoing，其他表示 Finished
-    // 根据实际业务逻辑调整
     if (state === 0 || state === 1) {
       return 'Ongoing';
     }
@@ -410,12 +531,27 @@ function determineStatus(
 /**
  * 转换 outcome 值
  */
-function convertOutcome(outcome: number | undefined): 'Yes' | 'No' | null {
+function convertOutcome(
+  outcome: number | string | undefined,
+): 'Yes' | 'No' | null {
   if (outcome === undefined || outcome === null) {
     return null;
   }
 
-  // 假设：0 = No, 1 = Yes，根据实际业务逻辑调整
+  // 如果是字符串类型
+  if (typeof outcome === 'string') {
+    const lowerOutcome = outcome.toLowerCase();
+    if (lowerOutcome === 'yes') {
+      return 'Yes';
+    } else if (lowerOutcome === 'no') {
+      return 'No';
+    } else if (lowerOutcome === 'none') {
+      return null;
+    }
+    return null;
+  }
+
+  // 如果是数字类型: 0 = No, 1 = Yes
   if (outcome === 0) {
     return 'No';
   } else if (outcome === 1) {
@@ -447,16 +583,22 @@ function calculatePositionRewards(
 
 /**
  * 计算收益
- * 暂时使用占位符，实际需要根据用户的选择和 outcome 计算
+ * 对于 creations: 使用 creator_fees_usd
+ * 对于 participations: 需要根据用户的选择（Yes/No）和 outcome 计算盈亏
  */
-function calculateRewards(
-  row: MarketReadableRow,
-  viewType: ViewType,
-): number {
+function calculateRewards(row: MarketReadableRow, viewType: ViewType): number {
+  if (viewType === 'creations') {
+    // 对于 creations，使用 creator_fees_usd
+    const creatorFees = row.creator_fees_usd;
+    if (creatorFees !== undefined && creatorFees !== null) {
+      return typeof creatorFees === 'string'
+        ? parseFloat(creatorFees)
+        : creatorFees;
+    }
+    return 0;
+  }
+
+  // 对于 participations: 暂时返回占位符值
   // TODO: 实现真实的收益计算逻辑
-  // 对于 creations: 可能是创建者获得的费用
-  // 对于 participations: 需要根据用户的选择（Yes/No）和 outcome 计算盈亏
-  // 暂时返回占位符值
   return 0;
 }
-

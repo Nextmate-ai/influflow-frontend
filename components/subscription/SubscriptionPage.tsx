@@ -576,7 +576,7 @@ export const SubscriptionPage = ({ onBack }: SubscriptionPageProps) => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 1.0 }}
-          className="absolute bottom-0 left-0 right-0 flex items-center justify-between border-t border-black/10 bg-white px-[60px] py-6 rounded-b-[12px]"
+          className="absolute inset-x-0 bottom-0 flex items-center justify-between rounded-b-[12px] border-t border-black/10 bg-white px-[60px] py-6"
         >
           <Image src={'/icons/influxy.svg'} width={84} height={24} />
           <button

@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Tabs, Tab } from '@heroui/react';
-import { ParticipationRow } from './ParticipationRow';
-import { ParticipationStats } from './ParticipationStats';
+
 import { useUserParticipations } from '@/hooks/useUserParticipations';
+
+import { ParticipationRow } from './ParticipationRow';
 
 type ViewType = 'participations' | 'creations';
 
@@ -19,73 +19,70 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
   viewType = 'participations',
 }) => {
   // 使用 hook 加载真实数据
-  const { participations, isLoading, error } = useUserParticipations(viewType);
+  const { participations, isLoading, error, refetch } =
+    useUserParticipations(viewType);
 
   const displayData = participations;
 
-  // 计算总收益（暂时使用占位符）
-  const totalEarnings = participations.reduce((sum, p) => sum + p.rewards, 0);
-  const formattedEarnings = `$${totalEarnings.toFixed(2)}`;
-
   return (
-    <div className="bg-[#0B041E] border border-[#2DC3D9] rounded-2xl overflow-hidden flex flex-col h-[600px]">
-      {/* 统计信息 */}
-      <ParticipationStats totalEarnings={formattedEarnings} />
-
+    <div className="flex h-[600px] flex-col overflow-hidden rounded-2xl border border-[#2DC3D9] bg-[#0B041E]">
       {/* 表格 */}
-      <div className="px-6 pb-6 flex-1 overflow-y-auto table-scrollbar">
+      <div className="table-scrollbar flex-1 overflow-y-auto px-6 py-6">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex h-full items-center justify-center">
             <p className="text-gray-400">Loading...</p>
           </div>
         ) : error ? (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex h-full items-center justify-center">
             <p className="text-red-400">Error: {error.message}</p>
           </div>
         ) : (
           <table className="w-full">
-            <thead className="sticky top-0 bg-[#0B041E] z-10">
+            <thead className="sticky top-0 z-10 bg-[#0B041E]">
               <tr className="border-b border-[#2DC3D9]">
                 {viewType === 'participations' ? (
                   <>
-                    <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
                       Prediction
                     </th>
-                    <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
                       Opinion
                     </th>
-                    <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
+                      Bet
+                    </th>
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
                       Outcome
                     </th>
-                    <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
-                      Profit/Lose
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
+                      To Win
                     </th>
-                    <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
-                      Time
-                    </th>
-                    <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
                       Status
                     </th>
                   </>
                 ) : (
                   <>
-                    <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
                       Prediction
                     </th>
-                    <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
                       Total Volume
                     </th>
-                    <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
                       Rewards
                     </th>
-                    <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
                       Time
                     </th>
-                    <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
                       Status
                     </th>
-                    <th className="text-center px-6 py-4 text-[#8ae5f6] font-normal">
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
                       Outcome
+                    </th>
+                    <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
+                      Claim
                     </th>
                   </>
                 )}
@@ -98,12 +95,13 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
                     key={item.marketId || index}
                     {...item}
                     viewType={viewType}
+                    onClaimSuccess={refetch}
                   />
                 ))
               ) : (
                 <tr>
                   <td
-                    colSpan={viewType === 'participations' ? 6 : 6}
+                    colSpan={viewType === 'participations' ? 6 : 7}
                     className="px-6 py-8 text-center"
                   >
                     <p className="text-gray-400">

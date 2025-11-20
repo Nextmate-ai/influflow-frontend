@@ -2,14 +2,14 @@
 
 import { Button, Image } from '@heroui/react';
 import * as Icon from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 
 import { useArticleStreaming } from '@/hooks/useArticleStreaming';
 import type { ChatMessage } from '@/types/agent-chat';
 import { IContentFormat, IMode } from '@/types/api';
 import { IOutline } from '@/types/outline';
 
-import { motion } from 'framer-motion';
-import { useEffect, useRef } from 'react';
 import { StreamMessage } from './StreamMessage';
 
 interface ArticleGenerateStreamingProps {
@@ -101,7 +101,7 @@ export function ArticleGenerateStreaming({
 
           {/* 错误信息 - 固定在底部 */}
           {error && (
-            <div className="flex-shrink-0 border-t border-gray-100 p-6">
+            <div className="shrink-0 border-t border-gray-100 p-6">
               <div className="flex items-center gap-4">
                 <Button
                   size="sm"

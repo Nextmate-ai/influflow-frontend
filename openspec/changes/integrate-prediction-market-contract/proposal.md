@@ -23,6 +23,7 @@
 ### 1. 合约交互层
 
 使用 thirdweb v5 的 `useReadContract` hook：
+
 - 创建合约实例
 - 调用 `getMarket(uint256 marketId)` 方法
 - 处理加载状态和错误
@@ -30,6 +31,7 @@
 ### 2. 数据转换层
 
 将合约返回的数据结构转换为前端所需格式：
+
 - `config.questionTitle` → `title`
 - `config.questionDescription` → `description`
 - `data.yesPoolTotal` / `data.noPoolTotal` → `yesPercentage` / `noPercentage`
@@ -39,6 +41,7 @@
 ### 3. 组件集成
 
 在 `DashboardContent` 组件中：
+
 - 使用 `useReadContract` 读取市场列表
 - 处理多个市场的批量读取
 - 显示加载状态
@@ -72,4 +75,3 @@
 - 接入更多合约方法（创建市场、参与预测等）
 - 实现实时数据更新
 - 添加缓存机制优化性能
-

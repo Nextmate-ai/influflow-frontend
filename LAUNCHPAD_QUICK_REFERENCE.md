@@ -42,21 +42,23 @@ components/layout/sidebar/ProfileDropdown.tsx (已修改 +3 行)
 
 ## 🚀 3个核心页面
 
-| 路由 | 文件 | 说明 |
-|------|------|------|
-| `/launchpad` | `app/launchpad/page.tsx` | 热门预言市场仪表盘 |
-| `/launchpad/create` | `app/launchpad/create/page.tsx` | 创建新市场 |
-| `/launchpad/participations` | `app/launchpad/participations/page.tsx` | 参与 & 创建历史 |
+| 路由                        | 文件                                    | 说明               |
+| --------------------------- | --------------------------------------- | ------------------ |
+| `/launchpad`                | `app/launchpad/page.tsx`                | 热门预言市场仪表盘 |
+| `/launchpad/create`         | `app/launchpad/create/page.tsx`         | 创建新市场         |
+| `/launchpad/participations` | `app/launchpad/participations/page.tsx` | 参与 & 创建历史    |
 
 ## 🎨 核心组件能力
 
 ### 高度复用的组件
+
 - **PredictionCard** - 预言卡片（可配置所有数据）
 - **ParticipationRow** - 表格行（可复用于不同表格）
 - **GradientSlider** - 渐变滑块（独立使用）
 - **StatCard** - 统计卡片（灵活显示任何统计）
 
 ### 容器组件
+
 - **DashboardContent** - 管理预言列表和模态框状态
 - **ParticipationsTable** - 管理表格和标签页
 - **CreateForm** - 管理表单状态和验证
@@ -64,22 +66,32 @@ components/layout/sidebar/ProfileDropdown.tsx (已修改 +3 行)
 ## 💡 使用示例
 
 ### 导入组件
+
 ```typescript
 // 方式1：直接导入
 import { PredictionCard } from '@/components/launchpad/dashboard/PredictionCard';
 
 // 方式2：从主导出文件导入（推荐）
-import { PredictionCard, CreateForm, UserDetailModal } from '@/components/launchpad';
+import {
+  PredictionCard,
+  CreateForm,
+  UserDetailModal,
+} from '@/components/launchpad';
 ```
 
 ### 导入 Hooks
+
 ```typescript
-import { useLaunchPadPredictions, useParticipateInMarket } from '@/hooks/useLaunchPad';
+import {
+  useLaunchPadPredictions,
+  useParticipateInMarket,
+} from '@/hooks/useLaunchPad';
 
 const { predictions, fetchPredictions } = useLaunchPadPredictions();
 ```
 
 ### 导入类型
+
 ```typescript
 import type { Prediction, Participation } from '@/components/launchpad/types';
 ```
@@ -145,25 +157,31 @@ Text: white/slate-300/slate-400
 ## 🔧 修改已有文件
 
 **ProfileDropdown.tsx** (2个改动)
+
 1. 添加 `handleLaunchPad()` 函数
 2. 在下拉菜单中添加 "Launch Pad" 选项
 
 ## 📋 快速集成步骤
 
 ### 1️⃣ 连接 API
+
 编辑 `hooks/useLaunchPad.ts`，替换 mock 数据为真实 API：
+
 ```typescript
 // 搜索: "const response = await fetch"
 // 替换注释的代码为实际的 fetch 调用
 ```
 
 ### 2️⃣ 替换示例数据
+
 在各组件中，将 `MOCK_PREDICTIONS` 和 `MOCK_PARTICIPATIONS` 替换为从 hook 获取的数据
 
 ### 3️⃣ 添加表单验证
+
 在 `CreateForm.tsx` 中完善验证逻辑
 
 ### 4️⃣ 测试
+
 访问 `/launchpad` 查看仪表盘
 访问 `/launchpad/create` 查看创建页面
 访问 `/launchpad/participations` 查看历史页面

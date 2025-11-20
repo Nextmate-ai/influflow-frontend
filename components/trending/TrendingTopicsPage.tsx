@@ -11,10 +11,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/base';
 import { useTopicTypes, useTrendingTopics } from '@/lib/api/services';
-import {
-  type ITrendingTopic,
-  type ITrendsRecommendTweet,
-} from '@/types/api';
+import { type ITrendingTopic, type ITrendsRecommendTweet } from '@/types/api';
 
 import { SearchModal } from './SearchModal';
 import {
@@ -654,7 +651,6 @@ export function NewTrendingTopicsPage({
     [],
   );
 
-
   // 取消写了不用的玻璃效果
   return (
     <div className="size-full overflow-y-auto bg-white">
@@ -719,7 +715,7 @@ export function NewTrendingTopicsPage({
                 ) : (
                   trendingTopics.map((topic: ITrendingTopic, index: number) => (
                     <NewTrendingTopicItem
-                      onTopicSelect={onTopicSelect}  
+                      onTopicSelect={onTopicSelect}
                       key={`${topic.title}-${index}`}
                       topic={topic}
                       index={index}

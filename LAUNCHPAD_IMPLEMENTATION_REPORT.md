@@ -2,19 +2,19 @@
 
 ## 📊 实现统计
 
-| 分类 | 数量 | 说明 |
-|------|------|------|
-| **页面组件** | 3 | `/launchpad`, `/launchpad/create`, `/launchpad/participations` |
-| **仪表盘组件** | 3 | DashboardContent, PredictionCard, AuctionGrid |
-| **创建表单组件** | 5 | CreateForm, TitleInput, OptionsInput, DatePicker, ActionButtons |
-| **参与表格组件** | 3 | ParticipationsTable, ParticipationRow, ParticipationStats |
-| **模态框** | 1 | UserDetailModal |
-| **共享组件** | 3 | LaunchPadHeader, GradientSlider, StatCard |
-| **业务逻辑** | 4 Hooks | useLaunchPadPredictions, useLaunchPadParticipations, useCreateMarket, useParticipateInMarket |
-| **类型定义** | 6 个接口 | Prediction, Participation, CreateMarketFormData, PredictionCardData, UserWallet, MarketStats |
-| **文档** | 2 份 | 完整指南 + 快速参考 |
-| **配置文件** | 1 | 导出聚合文件 (index.ts) |
-| **总计** | **21个文件** | |
+| 分类             | 数量         | 说明                                                                                         |
+| ---------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| **页面组件**     | 3            | `/launchpad`, `/launchpad/create`, `/launchpad/participations`                               |
+| **仪表盘组件**   | 3            | DashboardContent, PredictionCard, AuctionGrid                                                |
+| **创建表单组件** | 5            | CreateForm, TitleInput, OptionsInput, DatePicker, ActionButtons                              |
+| **参与表格组件** | 3            | ParticipationsTable, ParticipationRow, ParticipationStats                                    |
+| **模态框**       | 1            | UserDetailModal                                                                              |
+| **共享组件**     | 3            | LaunchPadHeader, GradientSlider, StatCard                                                    |
+| **业务逻辑**     | 4 Hooks      | useLaunchPadPredictions, useLaunchPadParticipations, useCreateMarket, useParticipateInMarket |
+| **类型定义**     | 6 个接口     | Prediction, Participation, CreateMarketFormData, PredictionCardData, UserWallet, MarketStats |
+| **文档**         | 2 份         | 完整指南 + 快速参考                                                                          |
+| **配置文件**     | 1            | 导出聚合文件 (index.ts)                                                                      |
+| **总计**         | **21个文件** |                                                                                              |
 
 ## ✨ 核心特性
 
@@ -45,6 +45,7 @@
 ### 🏗️ 高度组件化架构
 
 **21个文件，0代码重复：**
+
 - ✅ **共享 Header** - 两个页面复用同一个 Header 组件
 - ✅ **可复用卡片** - PredictionCard 支持任何预言数据
 - ✅ **灵活表格行** - ParticipationRow 可用于多种表格
@@ -156,31 +157,38 @@ useParticipateInMarket()
 ## 🎯 关键设计决策
 
 ### 1. 共享 Header 设计
+
 ```
 LaunchPadHeader (showCreate prop)
 ├─ /launchpad          → showCreate={true}  [显示 Create 按钮]
 └─ /participations     → showCreate={false} [隐藏 Create 按钮]
 ```
+
 优点：DRY 原则，代码复用，状态管理集中
 
 ### 2. 容器 + 展示组件分离
+
 ```
 DashboardContent (容器)
 └─ AuctionGrid (展示)
     └─ PredictionCard ×6 (纯展示)
 ```
+
 优点：职责清晰，易于测试，复用性高
 
 ### 3. 模态框状态在父组件
+
 ```
 DashboardContent
 ├─ selectedPrediction (state)
 ├─ isModalOpen (state)
 └─ onClose 回调关闭
 ```
+
 优点：避免多个 modal 状态冲突
 
 ### 4. 表单状态集中管理
+
 ```
 CreateForm (单一真实数据源)
 ├─ title
@@ -188,6 +196,7 @@ CreateForm (单一真实数据源)
 ├─ closingTime
 └─ resultTime
 ```
+
 优点：易于验证和提交
 
 ## 🚀 使用流程
@@ -274,6 +283,7 @@ CreateForm (单一真实数据源)
 ## 📖 文档指南
 
 ### 完整指南 (LAUNCHPAD_GUIDE.md)
+
 - 详细的项目结构
 - 三个核心模块说明
 - 集成使用案例
@@ -282,6 +292,7 @@ CreateForm (单一真实数据源)
 - 下一步优化建议
 
 ### 快速参考 (LAUNCHPAD_QUICK_REFERENCE.md)
+
 - 目录结构一览
 - 3 个核心页面表格
 - 复用组件列表

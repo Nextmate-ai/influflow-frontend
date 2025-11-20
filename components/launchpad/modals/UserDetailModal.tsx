@@ -3,22 +3,9 @@
 import { Input, Modal, ModalContent } from '@heroui/react';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
-import {
-  createThirdwebClient,
-  getContract,
-  prepareContractCall,
-} from 'thirdweb';
-import { baseSepolia } from 'thirdweb/chains';
-import {
-  useActiveWallet,
-  useReadContract,
-  useSendTransaction,
-} from 'thirdweb/react';
+import { useActiveWallet, useReadContract } from 'thirdweb/react';
 
-import {
-  PREDICTION_MARKET_CONTRACT_ADDRESS,
-  THIRDWEB_CLIENT_ID,
-} from '@/constants/env';
+import { useBuyShares } from '@/hooks/useBuyShares';
 import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
 
 import { StatCard } from '../shared/StatCard';
@@ -58,26 +45,13 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   );
 
   // 下注相关状态
-  const [isApproving, setIsApproving] = useState(false);
-  const [isBuying, setIsBuying] = useState(false);
-  const [approveError, setApproveError] = useState<Error | null>(null);
-  const [buyError, setBuyError] = useState<Error | null>(null);
+  const [operationError, setOperationError] = useState<Error | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // 钱包和合约相关 hooks
+  // 钱包和购买份额 hook
   const wallet = useActiveWallet();
-  const { mutate: sendTransaction } = useSendTransaction();
-
-  // Token 合约地址和实例
-  const TOKEN_CONTRACT_ADDRESS = '0xC5387F42883F6AfBa3AA935764Ac79a112aE1897';
-  const client = createThirdwebClient({
-    clientId: THIRDWEB_CLIENT_ID,
-  });
-  const tokenContract = getContract({
-    client,
-    chain: baseSepolia,
-    address: TOKEN_CONTRACT_ADDRESS,
-  });
+  const { buySharesWithApproval, isPending, currentStep, error } =
+    useBuyShares();
 
   // 当弹窗打开或 prediction 变化时，根据 option 设置初始选择
   useEffect(() => {
@@ -206,18 +180,23 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   );
   const poolTotal = yesPoolUsd + noPoolUsd;
 
-  const realYesPercentage = yesPrice
-    ? Math.round(parseFloat(String(yesPrice)) * 100)
-    : yesRatio
-      ? Math.round(parseFloat(String(yesRatio)) * 100)
+  // 优先使用 yes_invested_ratio/no_invested_ratio
+  const yesInvestedRatio = yesRatio !== undefined ? parseFloat(String(yesRatio)) : undefined;
+  const noInvestedRatio = noRatio !== undefined ? parseFloat(String(noRatio)) : undefined;
+
+  // 计算显示的百分比和进度条宽度
+  const realYesPercentage = yesInvestedRatio !== undefined
+    ? yesInvestedRatio * 100
+    : yesPrice
+      ? Math.round(parseFloat(String(yesPrice)) * 100)
       : poolTotal > 0
         ? Math.round((yesPoolUsd / poolTotal) * 100)
         : prediction.yesPercentage;
 
-  const realNoPercentage = noPrice
-    ? Math.round(parseFloat(String(noPrice)) * 100)
-    : noRatio
-      ? Math.round(parseFloat(String(noRatio)) * 100)
+  const realNoPercentage = noInvestedRatio !== undefined
+    ? noInvestedRatio * 100
+    : noPrice
+      ? Math.round(parseFloat(String(noPrice)) * 100)
       : poolTotal > 0
         ? Math.round((noPoolUsd / poolTotal) * 100)
         : prediction.noPercentage;
@@ -233,115 +212,63 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   // 当弹窗打开时，清除错误和成功消息
   useEffect(() => {
     if (isOpen) {
-      setApproveError(null);
-      setBuyError(null);
+      setOperationError(null);
       setSuccessMessage(null);
     }
   }, [isOpen]);
 
-  // 实现 buyShares 函数
-  const handleBuyShares = () => {
+  // 监听 error 状态变化
+  useEffect(() => {
+    if (error) {
+      setOperationError(error);
+    }
+  }, [error]);
+
+  // 使用批量交易：一次性完成 approve 和 buyShares
+  const handleBuyShares = async () => {
     if (!wallet) {
-      setBuyError(new Error('Wallet not connected'));
+      setOperationError(new Error('Wallet not connected'));
       return;
     }
 
     if (!selectedOption) {
-      setBuyError(new Error('Please select Yes or No'));
+      setOperationError(new Error('Please select Yes or No'));
       return;
     }
 
     const amountValue = parseFloat(amount);
     if (isNaN(amountValue) || amountValue <= 0) {
-      setBuyError(new Error('Please enter a valid amount'));
+      setOperationError(new Error('Please enter a valid amount'));
       return;
     }
 
-    setIsBuying(true);
-    setBuyError(null);
+    try {
+      setOperationError(null);
+      setSuccessMessage(null);
 
-    // 转换参数
-    const marketId = BigInt(prediction.id);
-    // 合约期望：yes = 1, no = 2
-    const side = selectedOption === 'yes' ? 1 : 2;
-    const amountInWei = BigInt(Math.floor(amountValue * 1e18));
+      // 转换参数
+      const marketId = BigInt(prediction.id);
+      // 合约期望：yes = 1, no = 2
+      const side = selectedOption === 'yes' ? 1 : 2;
+      const amountInWei = BigInt(Math.floor(amountValue * 1e18));
 
-    // 准备 buyShares 交易
-    const transaction = prepareContractCall({
-      contract: predictionMarketContract,
-      method:
-        'function buyShares(uint256 marketId, uint8 side, uint256 amount) returns (uint256 shares)',
-      params: [marketId, side, amountInWei],
-    });
+      console.log('=== 开始批量交易（Approve + BuyShares）===');
 
-    // 发送交易
-    sendTransaction(transaction, {
-      onSuccess: (result) => {
-        console.log('BuyShares success:', result);
-        setIsBuying(false);
-        setSuccessMessage('Successfully purchased shares!');
-        // 可以在这里添加其他成功后的操作，比如刷新数据
-      },
-      onError: (err) => {
-        console.error('BuyShares error:', err);
-        setIsBuying(false);
-        setBuyError(
-          err instanceof Error ? err : new Error('Failed to buy shares'),
-        );
-      },
-    });
-  };
+      // 使用批量交易
+      await buySharesWithApproval({
+        marketId,
+        side,
+        amount: amountInWei,
+      });
 
-  // 实现 approve 和 buyShares 的完整流程
-  const handleApprove = () => {
-    if (!wallet) {
-      setApproveError(new Error('Wallet not connected'));
-      return;
+      console.log('=== 批量交易完成 ===');
+      setSuccessMessage('Successfully purchased shares!');
+    } catch (err) {
+      console.error('购买份额失败:', err);
+      setOperationError(
+        err instanceof Error ? err : new Error('Failed to buy shares'),
+      );
     }
-
-    if (!selectedOption) {
-      setApproveError(new Error('Please select Yes or No'));
-      return;
-    }
-
-    const amountValue = parseFloat(amount);
-    if (isNaN(amountValue) || amountValue <= 0) {
-      setApproveError(new Error('Please enter a valid amount'));
-      return;
-    }
-
-    setIsApproving(true);
-    setApproveError(null);
-    setBuyError(null);
-    setSuccessMessage(null);
-
-    // 转换 amount 为 wei
-    const amountInWei = BigInt(Math.floor(amountValue * 1e18));
-
-    // 准备 approve 交易
-    const approveTransaction = prepareContractCall({
-      contract: tokenContract,
-      method:
-        'function approve(address spender, uint256 amount) returns (bool)',
-      params: [PREDICTION_MARKET_CONTRACT_ADDRESS, amountInWei],
-    });
-
-    // 发送 approve 交易
-    sendTransaction(approveTransaction, {
-      onSuccess: () => {
-        console.log('Approve success, calling buyShares...');
-        setIsApproving(false);
-        // Approve 成功后自动调用 buyShares
-        handleBuyShares();
-      },
-      onError: (err) => {
-        console.error('Approve error:', err);
-        setIsApproving(false);
-        setApproveError(
-          err instanceof Error ? err : new Error('Failed to approve'),
-        );
-      },
-    });
   };
 
   return (
@@ -353,15 +280,15 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       className="dark"
       hideCloseButton
     >
-      <ModalContent className="bg-[#0B041E] border border-[#60A5FA] rounded-2xl p-0">
+      <ModalContent className="rounded-2xl border border-[#60A5FA] bg-[#0B041E] p-0">
         {(onClose) => (
-          <div className="flex flex-col h-full max-h-[75vh] relative">
-            <div className="flex flex-row h-full overflow-hidden">
+          <div className="relative flex h-full max-h-[75vh] flex-col">
+            <div className="flex h-full flex-row overflow-hidden">
               {/* 左侧面板 - 预测详情 */}
-              <div className="flex-1 p-8 border-r border-[#60A5FA] overflow-y-auto modal-left-scrollbar">
+              <div className="modal-left-scrollbar flex-1 overflow-y-auto border-r border-[#60A5FA] p-8">
                 {/* 用户头像和Name */}
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+                <div className="mb-6 flex items-center gap-4">
+                  <div className="relative size-16 shrink-0 overflow-hidden rounded-full">
                     <Image
                       src="/images/avatar_bg.png"
                       alt={prediction.title}
@@ -369,18 +296,18 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       className="object-cover"
                     />
                   </div>
-                  <div className="max-w-[200px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-transparent text-base font-medium">
+                  <div className="max-w-[200px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-base font-medium text-transparent">
                     {creator.slice(0, 6)}...{creator.slice(-4)}
                   </div>
                 </div>
 
                 {/* 预测问题 */}
-                <h2 className="text-white text-2xl font-semibold mb-6 leading-tight">
+                <h2 className="mb-6 text-2xl font-semibold leading-tight text-white">
                   {prediction.title}
                 </h2>
 
                 {/* 交易量和剩余时间 - 使用 StatCard */}
-                <div className="flex items-center gap-4 mb-8">
+                <div className="mb-8 flex items-center gap-4">
                   <StatCard
                     icon={
                       <Image
@@ -409,48 +336,52 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* 投票状态 */}
                 <div className="mb-8">
-                  <div className="text-white text-base font-medium mb-4">
+                  <div className="mb-4 text-base font-medium text-white">
                     Voting Status:
                   </div>
-                  <div className="relative w-full h-10 rounded-full overflow-visible">
+                  <div className="relative h-10 w-full overflow-visible rounded-full">
                     {/* 左侧渐变条 */}
                     <div
-                      className="absolute left-0 top-0 h-full rounded-l-full bg-gradient-to-r from-[#00B2FF] to-[#00FFD0] flex items-center"
+                      className="absolute left-0 top-0 flex h-full items-center rounded-l-full bg-gradient-to-r from-[#00B2FF] to-[#00FFD0]"
                       style={{
                         width: `${realYesPercentage}%`,
                         zIndex: 1,
                       }}
                     >
                       <span
-                        className="text-white text-sm font-medium whitespace-nowrap"
+                        className="whitespace-nowrap text-sm font-medium text-white"
                         style={{
                           paddingLeft: '12px',
                           paddingRight: realYesPercentage < 20 ? '8px' : '12px',
                         }}
                       >
-                        {Math.round(realYesPercentage)}% Yes
+                        {yesInvestedRatio !== undefined
+                          ? `${(yesInvestedRatio * 100).toFixed(1)}%`
+                          : `${Math.round(realYesPercentage)}%`} Yes
                       </span>
                     </div>
                     <div
-                      className="absolute right-0 top-0 h-full rounded-r-full bg-gradient-to-l from-[#870CD8] to-[#FF2DDF] flex items-center justify-end"
+                      className="absolute right-0 top-0 flex h-full items-center justify-end rounded-r-full bg-gradient-to-l from-[#870CD8] to-[#FF2DDF]"
                       style={{
                         width: `${realNoPercentage}%`,
                         zIndex: 1,
                       }}
                     >
                       <span
-                        className="text-white text-sm font-medium whitespace-nowrap"
+                        className="whitespace-nowrap text-sm font-medium text-white"
                         style={{
                           paddingLeft: realNoPercentage < 20 ? '8px' : '12px',
                           paddingRight: '12px',
                         }}
                       >
-                        {Math.round(realNoPercentage)}% No
+                        {noInvestedRatio !== undefined
+                          ? `${(noInvestedRatio * 100).toFixed(1)}%`
+                          : `${Math.round(realNoPercentage)}%`} No
                       </span>
                     </div>
                     {/* 闪电图标 - 在分割线中间 */}
                     <div
-                      className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                      className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
                       style={{
                         left: `${realYesPercentage}%`,
                         top: '50%',
@@ -470,23 +401,23 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* 规则部分 */}
                 <div>
-                  <div className="text-white text-base font-medium mb-4">
+                  <div className="mb-4 text-base font-medium text-white">
                     Rules:
                   </div>
-                  <div className="text-gray-400 text-sm leading-relaxed pr-2">
+                  <div className="pr-2 text-sm leading-relaxed text-gray-400">
                     {rulesText}
                   </div>
                 </div>
               </div>
 
               {/* 右侧面板 - My Bid */}
-              <div className="flex-1 p-8 flex flex-col overflow-hidden">
+              <div className="flex flex-1 flex-col overflow-hidden p-8">
                 {/* My Bid 标题和关闭按钮 */}
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-white text-2xl font-semibold">My Bid</h3>
+                <div className="mb-8 flex items-center justify-between">
+                  <h3 className="text-2xl font-semibold text-white">My Bid</h3>
                   <button
                     onClick={onClose}
-                    className="text-white hover:text-gray-300 text-2xl font-light"
+                    className="text-2xl font-light text-white hover:text-gray-300"
                   >
                     ✕
                   </button>
@@ -494,7 +425,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* Vote for 选项 */}
                 <div className="mb-8">
-                  <div className="text-[#58C0CE] text-base font-medium mb-4">
+                  <div className="mb-4 text-base font-medium text-[#58C0CE]">
                     Vote for:
                   </div>
                   <div className="flex gap-4">
@@ -502,8 +433,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       onClick={() => setSelectedOption('yes')}
                       className={`h-12 rounded-2xl font-semibold transition-all duration-200 ${
                         selectedOption === 'yes'
-                          ? 'text-white border-2 border-[#07B6D4]'
-                          : 'bg-transparent text-gray-400 border-2 border-gray-600 hover:border-gray-500'
+                          ? 'border-2 border-[#07B6D4] text-white'
+                          : 'border-2 border-gray-600 bg-transparent text-gray-400 hover:border-gray-500'
                       }`}
                       style={{
                         width: '102px',
@@ -521,8 +452,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       onClick={() => setSelectedOption('no')}
                       className={`h-12 rounded-2xl font-semibold transition-all duration-200 ${
                         selectedOption === 'no'
-                          ? 'text-white border-2 border-[#CB30E0]'
-                          : 'bg-transparent text-gray-400 border-2 border-gray-600 hover:border-gray-500'
+                          ? 'border-2 border-[#CB30E0] text-white'
+                          : 'border-2 border-gray-600 bg-transparent text-gray-400 hover:border-gray-500'
                       }`}
                       style={{
                         width: '102px',
@@ -566,7 +497,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* Amount 输入 */}
                 <div className="mb-6">
-                  <div className="text-[#58C0CE] text-base font-medium mb-4">
+                  <div className="mb-4 text-base font-medium text-[#58C0CE]">
                     Amount
                   </div>
                   <div className="relative">
@@ -582,7 +513,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                           'bg-transparent border-2 border-[#07B6D4] rounded-2xl h-16',
                       }}
                       startContent={
-                        <span className="text-white text-2xl font-semibold pl-4">
+                        <span className="pl-4 text-2xl font-semibold text-white">
                           $
                         </span>
                       }
@@ -592,49 +523,54 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* Payout if you win */}
                 <div className="mb-8">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white text-base">
+                  <div className="flex items-center justify-between">
+                    <span className="text-base text-white">
                       Payout if you win
                     </span>
-                    <span className="text-white text-lg font-semibold">
+                    <span className="text-lg font-semibold text-white">
                       ${payoutIfWin}
                     </span>
                   </div>
                 </div>
 
                 {/* 错误和成功提示 */}
-                {(approveError || buyError) && (
-                  <div className="mb-4 text-red-400 text-sm">
-                    {approveError?.message || buyError?.message}
+                {operationError && (
+                  <div className="mb-4 text-sm text-red-400">
+                    {operationError.message}
                   </div>
                 )}
                 {successMessage && (
-                  <div className="mb-4 text-green-400 text-sm">
+                  <div className="mb-4 text-sm text-green-400">
                     {successMessage}
+                  </div>
+                )}
+                {/* 状态提示 */}
+                {currentStep === 'processing' && (
+                  <div className="mb-4 text-sm text-[#86FDE8]">
+                    Sending Transaction...
                   </div>
                 )}
 
                 {/* Join 按钮 */}
                 <div className="mt-auto flex flex-col items-end gap-2">
                   <div
-                    className="w-[168px] h-[56px] rounded-2xl p-[2px]"
+                    className="h-[56px] w-[168px] rounded-2xl p-[2px]"
                     style={{
                       background:
                         'linear-gradient(to right, #1FA2FF, #12D8FA, #870CD8)',
                     }}
                   >
                     <button
-                      onClick={handleApprove}
+                      onClick={handleBuyShares}
                       disabled={
                         !wallet ||
-                        isApproving ||
-                        isBuying ||
+                        isPending ||
                         !selectedOption ||
                         parseFloat(amount) <= 0
                       }
-                      className="w-full h-full rounded-2xl bg-[#0B041E] text-white font-semibold text-lg hover:opacity-80 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="size-full rounded-2xl bg-[#0B041E] text-lg font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {isApproving || isBuying ? 'Loading...' : 'Join'}
+                      {isPending ? '处理中...' : 'Join'}
                     </button>
                   </div>
                   {!wallet && (

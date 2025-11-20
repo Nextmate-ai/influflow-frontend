@@ -2,9 +2,9 @@
  * 从 Supabase markets_readable 表读取预测市场数据
  */
 
-import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { PredictionCardData } from '@/components/launchpad/dashboard/PredictionCard';
+import { createClient } from '@/lib/supabase/client';
+import { useEffect, useState } from 'react';
 
 /**
  * Supabase markets_readable 表的数据结构
@@ -17,13 +17,14 @@ export interface MarketReadableRow {
   question_description?: string;
   creator?: string;
   end_time?: string | number;
-  state?: number;
-  outcome?: number;
+  state?: number | string; // 支持字符串类型(如 "Active", "Resolved")
+  outcome?: number | string; // 支持字符串类型(如 "Yes", "No", "None")
   yes_pool_total?: number | string;
   no_pool_total?: number | string;
   yes_shares_total?: number | string;
   no_shares_total?: number | string;
   total_volume?: number | string;
+  creator_fees_usd?: number | string; // 创建者费用
   created_at?: string;
   updated_at?: string;
   [key: string]: any; // 允许其他字段
@@ -101,13 +102,14 @@ export function usePredictionMarkets() {
  * 计算投票百分比 - 使用与详情页面相同的优先级逻辑
  * 优先级：yes_price/no_price > yes_invested_ratio/no_invested_ratio > pool 数据计算
  */
-function calculatePercentages(
-  rawData: Record<string, any>,
-): { yesPercentage: number; noPercentage: number } {
+function calculatePercentages(rawData: Record<string, any>): {
+  yesPercentage: number;
+  noPercentage: number;
+} {
   // 优先使用 yes_price/no_price
   const yesPrice = rawData.yes_price || rawData.yesPrice;
   const noPrice = rawData.no_price || rawData.noPrice;
-  
+
   // 其次使用 yes_invested_ratio/no_invested_ratio
   const yesRatio = rawData.yes_invested_ratio || rawData.yesInvestedRatio;
   const noRatio = rawData.no_invested_ratio || rawData.noInvestedRatio;
@@ -159,14 +161,18 @@ function mapMarketRowToPredictionCard(
   row: MarketReadableRow,
 ): PredictionCardData {
   const marketId = String(row.market_id || row.id || '');
-  
+
   // 使用统一的百分比计算函数
   const { yesPercentage, noPercentage } = calculatePercentages(
     row as Record<string, any>,
   );
 
   // 格式化交易量 - 支持多种字段名
-  const volumeValue = row.total_volume_usd || row.total_volume || row.totalVolumeUsd || row.totalVolume;
+  const volumeValue =
+    row.total_volume_usd ||
+    row.total_volume ||
+    row.totalVolumeUsd ||
+    row.totalVolume;
   const totalVolume = formatVolume(volumeValue);
 
   // 计算剩余时间
@@ -222,9 +228,7 @@ function formatVolume(volume: number | string | undefined): string {
 /**
  * 计算剩余时间
  */
-function calculateTimeRemaining(
-  endTime: string | number | undefined,
-): string {
+function calculateTimeRemaining(endTime: string | number | undefined): string {
   if (!endTime) {
     return 'N/A';
   }
@@ -271,4 +275,3 @@ function generateAvatarUrl(creator: string | undefined): string {
   const seed = creator.slice(0, 10).replace(/[^a-zA-Z0-9]/g, '') || 'default';
   return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
 }
-
