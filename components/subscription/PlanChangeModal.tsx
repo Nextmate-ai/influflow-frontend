@@ -204,7 +204,7 @@ export default function PlanChangeModal({
                         className="flex cursor-pointer items-center gap-2"
                         onClick={() => setAcceptTerms(!acceptTerms)}
                       >
-                        <div className="size-[20px] flex justify-center items-center">
+                        <div className="flex size-[20px] items-center justify-center">
                           {acceptTerms ? (
                             <Image
                               src="/icons/mingcute_checkbox-line.svg"
@@ -217,7 +217,7 @@ export default function PlanChangeModal({
                             />
                           ) : (
                             <div
-                              className={`size-[16px] rounded border-2 transition-all border-gray-300 bg-white `}
+                              className={`size-[16px] rounded border-2 border-gray-300 bg-white transition-all `}
                             ></div>
                           )}
                         </div>
@@ -241,7 +241,7 @@ export default function PlanChangeModal({
                   <div className="flex justify-center">
                     <Button
                       size="lg"
-                      className="h-12 min-w-[200px] w-auto rounded-full bg-[#448AFF] font-medium text-white disabled:opacity-50"
+                      className="h-12 w-auto min-w-[200px] rounded-full bg-[#448AFF] font-medium text-white disabled:opacity-50"
                       onPress={onConfirm}
                       isLoading={isLoading}
                       disabled={

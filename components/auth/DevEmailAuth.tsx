@@ -20,7 +20,7 @@ export function DevEmailAuth({ mode, referralCode }: DevEmailAuthProps) {
   const storeRedirectToHome = useAuthStore(
     (state) => state.redirectToHomeAfterLogin,
   );
-  
+
   // 优先从 sessionStorage 读取，确保 OAuth 回调后仍能访问
   const redirectToHomeAfterLogin =
     typeof window !== 'undefined'

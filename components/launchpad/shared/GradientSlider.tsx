@@ -6,6 +6,8 @@ import React from 'react';
 interface GradientSliderProps {
   leftPercentage: number;
   rightPercentage: number;
+  leftPrice?: number; // yes_price (0-1之间的小数)
+  rightPrice?: number; // no_price (0-1之间的小数)
   onChange?: (left: number, right: number) => void;
   disabled?: boolean;
 }
@@ -16,6 +18,8 @@ interface GradientSliderProps {
 export const GradientSlider: React.FC<GradientSliderProps> = ({
   leftPercentage,
   rightPercentage,
+  leftPrice,
+  rightPrice,
   onChange,
   disabled = true,
 }) => {
@@ -60,7 +64,7 @@ export const GradientSlider: React.FC<GradientSliderProps> = ({
 
   return (
     <div className="w-full">
-      {/* 百分比标签 - 在进度条上方 */}
+      {/* 价格标签 - 在进度条上方 */}
       <div className="relative mb-2 h-6">
         {/* 左边数字 - 在左边进度条中心 */}
         <div
@@ -70,7 +74,9 @@ export const GradientSlider: React.FC<GradientSliderProps> = ({
           }}
         >
           <span className="text-lg font-semibold text-[#00B2FF]">
-            {Math.round(leftPercentage)}%
+            {leftPrice !== undefined
+              ? `${(leftPrice * 100).toFixed(1)}%`
+              : `${Math.round(leftPercentage)}%`}
           </span>
         </div>
         {/* 右边数字 - 在右边进度条中心 */}
@@ -81,7 +87,9 @@ export const GradientSlider: React.FC<GradientSliderProps> = ({
           }}
         >
           <span className="text-lg font-semibold text-[#FF2DDF]">
-            {Math.round(rightPercentage)}%
+            {rightPrice !== undefined
+              ? `${(rightPrice * 100).toFixed(1)}%`
+              : `${Math.round(rightPercentage)}%`}
           </span>
         </div>
       </div>

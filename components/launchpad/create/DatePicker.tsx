@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
 import { Input } from '@heroui/react';
+import React from 'react';
 
 interface DatePickerProps {
   closingTime: string;
@@ -23,7 +23,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     <div className="space-y-4">
       {/* 截止时间 */}
       <div>
-        <label className="block text-white text-sm font-semibold mb-3">
+        <label className="mb-3 block text-sm font-semibold text-white">
           Prediction pool closing time
         </label>
         <Input
@@ -33,14 +33,15 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           className="w-full"
           classNames={{
             input: 'bg-transparent text-white',
-            inputWrapper: 'bg-slate-800 border-2 border-slate-600 hover:border-cyan-500 focus:border-cyan-400 rounded-lg',
+            inputWrapper:
+              'bg-slate-800 border-2 border-slate-600 hover:border-cyan-500 focus:border-cyan-400 rounded-lg',
           }}
         />
       </div>
 
       {/* 结果时间 */}
       <div>
-        <label className="block text-white text-sm font-semibold mb-3">
+        <label className="mb-3 block text-sm font-semibold text-white">
           Result announcement time
         </label>
         <Input
@@ -50,13 +51,15 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           className="w-full"
           classNames={{
             input: 'bg-transparent text-white',
-            inputWrapper: 'bg-slate-800 border-2 border-slate-600 hover:border-cyan-500 focus:border-cyan-400 rounded-lg',
+            inputWrapper:
+              'bg-slate-800 border-2 border-slate-600 hover:border-cyan-500 focus:border-cyan-400 rounded-lg',
           }}
         />
       </div>
 
-      <p className="text-slate-400 text-xs">
-        Set clear dates when the prediction pool closes and when results will be announced
+      <p className="text-xs text-slate-400">
+        Set clear dates when the prediction pool closes and when results will be
+        announced
       </p>
     </div>
   );

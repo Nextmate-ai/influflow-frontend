@@ -1,8 +1,9 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
+
 import { Topbar } from '@/components/layout/Topbar';
 import { useAuthStore } from '@/stores/authStore';
-import { usePathname } from 'next/navigation';
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();

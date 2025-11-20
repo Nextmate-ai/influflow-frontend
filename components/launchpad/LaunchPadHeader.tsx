@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
+
 import { WalletConnect } from './WalletConnect';
 
 interface LaunchPadHeaderProps {
@@ -23,12 +24,12 @@ export const LaunchPadHeader: React.FC<LaunchPadHeaderProps> = ({
   };
 
   return (
-    <div className="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700">
-      <div className="max-w-7xl mx-auto px-6 py-6">
+    <div className="w-full border-b border-slate-700 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="mx-auto max-w-7xl p-6">
         {/* Header Top Section */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">
+            <h1 className="mb-2 text-4xl font-bold text-white">
               Turn your opinions into earnings.
             </h1>
             <p className="text-slate-400">
@@ -43,7 +44,7 @@ export const LaunchPadHeader: React.FC<LaunchPadHeaderProps> = ({
             {showCreate && (
               <Link
                 href="/launchpad/create"
-                className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:from-cyan-400 hover:to-blue-400 hover:shadow-xl"
               >
                 Create
               </Link>
@@ -55,9 +56,9 @@ export const LaunchPadHeader: React.FC<LaunchPadHeaderProps> = ({
         <div className="flex gap-8">
           <Link
             href="/launchpad"
-            className={`pb-3 font-medium transition-all duration-200 relative ${
+            className={`relative pb-3 font-medium transition-all duration-200 ${
               isActive('/launchpad') && !isActive('/launchpad/participations')
-                ? 'text-cyan-400 border-b-2 border-cyan-400'
+                ? 'border-b-2 border-cyan-400 text-cyan-400'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -66,9 +67,9 @@ export const LaunchPadHeader: React.FC<LaunchPadHeaderProps> = ({
 
           <Link
             href="/launchpad/participations"
-            className={`pb-3 font-medium transition-all duration-200 relative ${
+            className={`relative pb-3 font-medium transition-all duration-200 ${
               isActive('/launchpad/participations')
-                ? 'text-cyan-400 border-b-2 border-cyan-400'
+                ? 'border-b-2 border-cyan-400 text-cyan-400'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >

@@ -37,7 +37,10 @@ export function useWalletAuth() {
         const info: WalletAuthInfo = {};
 
         // 方法1: 尝试 getAuthDetails 方法
-        if ('getAuthDetails' in wallet && typeof wallet.getAuthDetails === 'function') {
+        if (
+          'getAuthDetails' in wallet &&
+          typeof wallet.getAuthDetails === 'function'
+        ) {
           try {
             const authDetails = await wallet.getAuthDetails();
             console.log('Auth details from getAuthDetails:', authDetails);
@@ -47,7 +50,8 @@ export function useWalletAuth() {
               if (authDetails.name) info.name = authDetails.name;
               if (authDetails.username) info.username = authDetails.username;
               if (authDetails.avatar || authDetails.profile_image_url) {
-                info.avatar = authDetails.avatar || authDetails.profile_image_url;
+                info.avatar =
+                  authDetails.avatar || authDetails.profile_image_url;
               }
               if (authDetails.email) info.email = authDetails.email;
 
@@ -81,7 +85,7 @@ export function useWalletAuth() {
         // 方法2: 检查 wallet 对象本身的属性
         if (!info.name && !info.username) {
           console.log('Wallet object keys:', Object.keys(walletAny));
-          
+
           if (walletAny.user) {
             const user = walletAny.user;
             if (user.name) info.name = user.name;
@@ -117,30 +121,41 @@ export function useWalletAuth() {
           try {
             // thirdweb 可能在 localStorage 中存储认证信息
             const storageKeys = Object.keys(localStorage);
-            const thirdwebKeys = storageKeys.filter(key => 
-              key.includes('thirdweb') || key.includes('inApp') || key.includes('auth')
+            const thirdwebKeys = storageKeys.filter(
+              (key) =>
+                key.includes('thirdweb') ||
+                key.includes('inApp') ||
+                key.includes('auth'),
             );
-            
+
             for (const key of thirdwebKeys) {
               try {
                 const stored = localStorage.getItem(key);
                 if (stored) {
                   const parsed = JSON.parse(stored);
                   console.log(`Checking localStorage key ${key}:`, parsed);
-                  
+
                   // 尝试从存储的数据中提取用户信息
                   if (parsed.user) {
                     const user = parsed.user;
                     if (user.name && !info.name) info.name = user.name;
-                    if (user.username && !info.username) info.username = user.username;
-                    if ((user.avatar || user.profile_image_url) && !info.avatar) {
+                    if (user.username && !info.username)
+                      info.username = user.username;
+                    if (
+                      (user.avatar || user.profile_image_url) &&
+                      !info.avatar
+                    ) {
                       info.avatar = user.avatar || user.profile_image_url;
                     }
                   }
-                  
+
                   if (parsed.name && !info.name) info.name = parsed.name;
-                  if (parsed.username && !info.username) info.username = parsed.username;
-                  if ((parsed.avatar || parsed.profile_image_url) && !info.avatar) {
+                  if (parsed.username && !info.username)
+                    info.username = parsed.username;
+                  if (
+                    (parsed.avatar || parsed.profile_image_url) &&
+                    !info.avatar
+                  ) {
                     info.avatar = parsed.avatar || parsed.profile_image_url;
                   }
                 }
@@ -177,4 +192,3 @@ export function useWalletAuth() {
     hasAuthInfo: !!authInfo && (!!authInfo.name || !!authInfo.username),
   };
 }
-

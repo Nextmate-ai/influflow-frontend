@@ -3,10 +3,29 @@
  * 调用合约的 claim() 方法领取测试代币
  */
 
-import { useSendTransaction } from 'thirdweb/react';
-import { prepareContractCall } from 'thirdweb';
+import { FAUCET_CONTRACT_ADDRESS, THIRDWEB_CLIENT_ID } from '@/constants/env';
+import { createThirdwebClient, getContract } from 'thirdweb';
+import { baseSepolia } from 'thirdweb/chains';
 import { useMemo } from 'react';
-import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
+import { prepareContractCall } from 'thirdweb';
+import { useSendTransaction } from 'thirdweb/react';
+
+// 创建 Thirdweb 客户端
+const client = createThirdwebClient({
+  clientId: THIRDWEB_CLIENT_ID,
+});
+
+// 创建 Faucet 合约实例
+const faucetContract = getContract({
+  client,
+  chain: baseSepolia,
+  address: FAUCET_CONTRACT_ADDRESS,
+});
+
+export interface ClaimTokenOptions {
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}
 
 /**
  * 领取测试 Token
@@ -16,13 +35,21 @@ export function useTokenClaim() {
   const { mutate: sendTransaction, isPending, error } = useSendTransaction();
 
   const claim = useMemo(
-    () => () => {
+    () => (options?: ClaimTokenOptions) => {
       const transaction = prepareContractCall({
-        contract: predictionMarketContract,
+        contract: faucetContract,
         method: 'function claim()',
         params: [],
       });
-      sendTransaction(transaction);
+      sendTransaction(transaction, {
+        onSuccess: () => {
+          options?.onSuccess?.();
+        },
+        onError: (error) => {
+          const err = error instanceof Error ? error : new Error(String(error));
+          options?.onError?.(err);
+        },
+      });
     },
     [sendTransaction],
   );
@@ -33,4 +60,3 @@ export function useTokenClaim() {
     error,
   };
 }
-

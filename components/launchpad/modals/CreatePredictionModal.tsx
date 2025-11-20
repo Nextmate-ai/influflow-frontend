@@ -1,9 +1,10 @@
 'use client';
 
-import { useMarketCreation } from '@/hooks/useMarketCreation';
 import { Input, Modal, ModalContent } from '@heroui/react';
 import React, { useMemo, useState } from 'react';
 import { useActiveWallet } from 'thirdweb/react';
+
+import { useMarketCreation } from '@/hooks/useMarketCreation';
 
 interface CreatePredictionModalProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
   const [selectedSide, setSelectedSide] = useState<1 | 2>(1); // 1 = Yes, 2 = No
 
   const wallet = useActiveWallet();
-  const { approve, createMarket, isPending, currentStep, error } =
+  const { createMarketWithApproval, isPending, currentStep, error } =
     useMarketCreation();
 
   // 将日期字符串转换为 Unix 时间戳（秒）
@@ -159,15 +160,11 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
         ),
       );
 
-      // 第一步：Approve - 等待交易确认
-      console.log('=== 开始 Approve ===');
-      await approve(creatorBet);
-      console.log('=== Approve 完成 ===');
-
-      // 第二步：创建市场 - 等待交易确认
-      console.log('=== 开始创建市场 ===');
-      await createMarket(marketParams);
-      console.log('=== 创建市场完成 ===');
+      // 使用批量交易：一次性完成 Approve 和 CreateMarket
+      // 用户只需签名一次，两笔交易原子性执行
+      console.log('=== 开始批量交易（Approve + CreateMarket）===');
+      await createMarketWithApproval(marketParams);
+      console.log('=== 批量交易完成 ===');
 
       // 成功后关闭模态框
       if (currentStep === 'success') {
@@ -190,13 +187,13 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
       className="dark"
       hideCloseButton
     >
-      <ModalContent className="bg-[#0B041E] border border-[#2DC3D9] rounded-2xl p-0">
+      <ModalContent className="rounded-2xl border border-[#2DC3D9] bg-[#0B041E] p-0">
         {(onClose) => (
-          <div className="flex flex-col relative">
+          <div className="relative flex flex-col">
             {/* 关闭按钮 */}
             <button
               onClick={onClose}
-              className="absolute top-6 right-6 text-[#60A5FA] cursor  z-10 text-[24px] font-light"
+              className="cursor absolute right-6 top-6 z-10  text-[24px] font-light text-[#60A5FA]"
             >
               ✕
             </button>
@@ -206,10 +203,10 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
               <div className="space-y-4">
                 {/* Title 输入 */}
                 <div>
-                  <label className="block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-transparent text-base font-medium mb-1">
+                  <label className="mb-1 block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-base font-medium text-transparent">
                     Title
                   </label>
-                  <p className="text-[#00D9F5] text-[12px] mb-2 italic">
+                  <p className="mb-2 text-[12px] italic text-[#00D9F5]">
                     Ask something we can predict: Will Tesla's stock go up next
                     week?
                   </p>
@@ -229,30 +226,30 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
 
                 {/* Rules 输入 */}
                 <div>
-                  <label className="block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-transparent text-base font-medium mb-1">
+                  <label className="mb-1 block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-base font-medium text-transparent">
                     Rules
                   </label>
                   <textarea
                     value={rules}
                     onChange={(e) => setRules(e.target.value)}
-                    className="w-full h-20 bg-transparent border border-[#2DC3D9] rounded-2xl text-white p-3 placeholder-gray-500 focus:outline-none focus:border-[#2DC3D9] transition-colors resize-none"
+                    className="h-20 w-full resize-none rounded-2xl border border-[#2DC3D9] bg-transparent p-3 text-white transition-colors placeholder:text-gray-500 focus:border-[#2DC3D9] focus:outline-none"
                     placeholder="Define the rules for this prediction..."
                   />
                 </div>
 
                 {/* Options */}
                 <div>
-                  <label className="block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-transparent text-base font-medium mb-2">
+                  <label className="mb-2 block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-base font-medium text-transparent">
                     Options (选择你的立场)
                   </label>
                   <div className="flex gap-4">
                     <button
                       type="button"
                       onClick={() => setSelectedSide(1)}
-                      className={`w-[100px] h-[52px] rounded-2xl text-white text-base font-medium transition-all duration-200 flex items-center justify-center ${
+                      className={`flex h-[52px] w-[100px] items-center justify-center rounded-2xl text-base font-medium text-white transition-all duration-200 ${
                         selectedSide === 1
-                          ? 'bg-[#2DC3D9] border-2 border-[#2DC3D9]'
-                          : 'bg-transparent border border-[#2DC3D9] hover:bg-[#2DC3D9]/10'
+                          ? 'border-2 border-[#2DC3D9] bg-[#2DC3D9]'
+                          : 'border border-[#2DC3D9] bg-transparent hover:bg-[#2DC3D9]/10'
                       }`}
                     >
                       {option1}
@@ -260,10 +257,10 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setSelectedSide(2)}
-                      className={`w-[100px] h-[52px] rounded-2xl text-white text-base font-medium transition-all duration-200 flex items-center justify-center ${
+                      className={`flex h-[52px] w-[100px] items-center justify-center rounded-2xl text-base font-medium text-white transition-all duration-200 ${
                         selectedSide === 2
-                          ? 'bg-[#D602FF] border-2 border-[#D602FF]'
-                          : 'bg-transparent border border-[#D602FF] hover:bg-[#D602FF]/10'
+                          ? 'border-2 border-[#D602FF] bg-[#D602FF]'
+                          : 'border border-[#D602FF] bg-transparent hover:bg-[#D602FF]/10'
                       }`}
                     >
                       {option2}
@@ -273,7 +270,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
 
                 {/* Prediction pool closing time */}
                 <div>
-                  <label className="block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-transparent text-base font-medium mb-1">
+                  <label className="mb-1 block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-base font-medium text-transparent">
                     Prediction pool closing time
                   </label>
                   <Input
@@ -290,7 +287,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                     placeholder="DD/MM/YYYY"
                     endContent={
                       <svg
-                        className="w-5 h-5 text-gray-400"
+                        className="size-5 text-gray-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -308,7 +305,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
 
                 {/* Bid price */}
                 <div>
-                  <label className="block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-transparent text-base font-medium mb-1">
+                  <label className="mb-1 block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-base font-medium text-transparent">
                     Bid price
                   </label>
                   <Input
@@ -323,7 +320,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                         'bg-transparent border border-[#2DC3D9] rounded-2xl h-16',
                     }}
                     startContent={
-                      <span className="text-white text-2xl font-semibold pl-4">
+                      <span className="pl-4 text-2xl font-semibold text-white">
                         $
                       </span>
                     }
@@ -333,28 +330,28 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
 
                 {/* 错误提示 */}
                 {error && (
-                  <div className="text-red-400 text-sm mb-2">
+                  <div className="mb-2 text-sm text-red-400">
                     错误: {error.message || '未知错误'}
                   </div>
                 )}
 
                 {/* 状态提示 */}
                 {currentStep === 'approving' && (
-                  <div className="text-[#86FDE8] text-sm mb-2">正在授权...</div>
+                  <div className="mb-2 text-sm text-[#86FDE8]">正在授权...</div>
                 )}
                 {currentStep === 'creating' && (
-                  <div className="text-[#86FDE8] text-sm mb-2">
+                  <div className="mb-2 text-sm text-[#86FDE8]">
                     正在创建市场...
                   </div>
                 )}
                 {currentStep === 'success' && (
-                  <div className="text-green-400 text-sm mb-2">创建成功！</div>
+                  <div className="mb-2 text-sm text-green-400">创建成功！</div>
                 )}
 
                 {/* Create 按钮 */}
-                <div className="pt-1 flex justify-end">
+                <div className="flex justify-end pt-1">
                   <div
-                    className="w-[168px] h-[56px] rounded-2xl p-[2px]"
+                    className="h-[56px] w-[168px] rounded-2xl p-[2px]"
                     style={{
                       background:
                         'linear-gradient(to right, #1FA2FF, #12D8FA, #870CD8)',
@@ -363,7 +360,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                     <button
                       onClick={handleCreate}
                       disabled={isPending || !wallet}
-                      className="w-full h-full rounded-2xl bg-[#0B041E] text-white font-semibold text-lg hover:opacity-80 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="size-full rounded-2xl bg-[#0B041E] text-lg font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isPending
                         ? currentStep === 'approving'

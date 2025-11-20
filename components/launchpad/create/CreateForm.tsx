@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { TitleInput } from './TitleInput';
-import { OptionsInput } from './OptionsInput';
-import { DatePicker } from './DatePicker';
+
 import { ActionButtons } from './ActionButtons';
+import { DatePicker } from './DatePicker';
+import { OptionsInput } from './OptionsInput';
+import { TitleInput } from './TitleInput';
 
 interface CreateFormData {
   title: string;
@@ -19,10 +20,14 @@ interface CreateFormData {
  */
 export const CreateForm: React.FC = () => {
   const [formData, setFormData] = useState<CreateFormData>({
-    title: 'Will Michelle Yeoh win Best Actress at tomorrow\'s Oscars?',
+    title: "Will Michelle Yeoh win Best Actress at tomorrow's Oscars?",
     options: ['Yes', 'No'],
-    closingTime: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-    resultTime: new Date(Date.now() + 26 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+    closingTime: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 16),
+    resultTime: new Date(Date.now() + 26 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 16),
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -41,17 +46,20 @@ export const CreateForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-8">
-      <div className="max-w-2xl mx-auto px-6 pb-12">
+      <div className="mx-auto max-w-2xl px-6 pb-12">
         {/* 表单标题 */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-white mb-2">Create a New Prediction Market</h2>
+          <h2 className="mb-2 text-3xl font-bold text-white">
+            Create a New Prediction Market
+          </h2>
           <p className="text-slate-400">
-            Define your market clearly to attract predictors and set the rules for resolution
+            Define your market clearly to attract predictors and set the rules
+            for resolution
           </p>
         </div>
 
         {/* 表单容器 */}
-        <div className="bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 border-2 border-slate-700 rounded-2xl p-8 space-y-8">
+        <div className="space-y-8 rounded-2xl border-2 border-slate-700 bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 p-8">
           {/* 标题输入 */}
           <TitleInput
             value={formData.title}
@@ -92,9 +100,11 @@ export const CreateForm: React.FC = () => {
         </div>
 
         {/* 帮助提示 */}
-        <div className="mt-8 p-4 bg-slate-800 border border-slate-700 rounded-lg">
-          <h3 className="text-white font-semibold mb-2">Tips for creating a successful market:</h3>
-          <ul className="text-slate-400 text-sm space-y-1 list-disc list-inside">
+        <div className="mt-8 rounded-lg border border-slate-700 bg-slate-800 p-4">
+          <h3 className="mb-2 font-semibold text-white">
+            Tips for creating a successful market:
+          </h3>
+          <ul className="list-inside list-disc space-y-1 text-sm text-slate-400">
             <li>Make your question clear and unambiguous</li>
             <li>Set realistic closing and result announcement times</li>
             <li>Define how the outcome will be determined</li>

@@ -39,9 +39,11 @@ hooks/
 ## 🎯 核心功能模块
 
 ### 1. **Dashboard（仪表盘）** - `/launchpad`
+
 展示热门预言市场列表，用户可以查看预言并参与投注。
 
 **组件树：**
+
 ```
 LaunchPadHeader (showCreate=true)
 └── DashboardContent
@@ -52,15 +54,18 @@ LaunchPadHeader (showCreate=true)
 ```
 
 **关键特性：**
+
 - 3列响应式网格布局
 - 卡片悬停效果（放大 + 边框发光）
 - 渐变比例滑块展示投票情况
 - 点击卡片打开详情模态框
 
 ### 2. **Create Page（创建页面）** - `/launchpad/create`
+
 用户创建新的预言市场。
 
 **组件树：**
+
 ```
 CreateForm
 ├── TitleInput
@@ -73,15 +78,18 @@ CreateForm
 ```
 
 **表单字段：**
+
 - **标题**：预言问题
 - **选项**：市场选项（最少2个，可添加）
 - **截止时间**：投票截止时间
 - **结果时间**：结果公布时间
 
 ### 3. **Participations Page（参与历史）** - `/launchpad/participations`
+
 显示用户的参与和创建历史。
 
 **组件树：**
+
 ```
 LaunchPadHeader (showCreate=false)
 └── ParticipationsTable
@@ -93,6 +101,7 @@ LaunchPadHeader (showCreate=false)
 ```
 
 **表格列：**
+
 - 预言标题
 - 交易量
 - 奖励
@@ -113,7 +122,7 @@ import {
   LaunchPadHeader,
   DashboardContent,
   CreateForm,
-  ParticipationsTable
+  ParticipationsTable,
 } from '@/components/launchpad';
 ```
 
@@ -146,13 +155,14 @@ import type {
   Prediction,
   Participation,
   CreateMarketFormData,
-  PredictionCardData
+  PredictionCardData,
 } from '@/components/launchpad/types';
 ```
 
 ## 🎨 设计系统
 
 ### 颜色方案
+
 - **背景**：`bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900`
 - **卡片**：`bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900`
 - **是**：青色 `cyan-400` / `cyan-500`
@@ -160,6 +170,7 @@ import type {
 - **边框**：`border-slate-700`
 
 ### 常用类名集合
+
 ```css
 /* Header 按钮 */
 "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400"
@@ -176,16 +187,19 @@ import type {
 当前代码中的 API 调用位置（已预留注释）：
 
 1. **`useLaunchPad.ts`** - `useLaunchPadPredictions()`
+
    ```typescript
    // const response = await fetch('/api/launchpad/predictions');
    ```
 
 2. **`useLaunchPad.ts`** - `useLaunchPadParticipations()`
+
    ```typescript
    // const response = await fetch('/api/launchpad/participations');
    ```
 
 3. **`useLaunchPad.ts`** - `useCreateMarket()`
+
    ```typescript
    // const response = await fetch('/api/launchpad/create', { ... });
    ```
@@ -198,6 +212,7 @@ import type {
 ## 🔄 数据流示例
 
 ### 参与预言流程
+
 ```
 用户在 PredictionCard 点击
   ↓
@@ -219,6 +234,7 @@ DashboardContent 设置 selectedPrediction
 ```
 
 ### 创建市场流程
+
 ```
 用户填写 CreateForm
   ↓
@@ -251,6 +267,7 @@ const handleLaunchPad = () => {
 所有组件都已配置响应式 Tailwind 类：
 
 - **仪表盘网格**：
+
   ```
   grid-cols-1 md:grid-cols-2 lg:grid-cols-3
   ```
@@ -273,13 +290,15 @@ const handleLaunchPad = () => {
 ## 📝 组件 Props 说明
 
 ### LaunchPadHeader
+
 ```typescript
 interface LaunchPadHeaderProps {
-  showCreate?: boolean;  // 是否显示 Create 按钮
+  showCreate?: boolean; // 是否显示 Create 按钮
 }
 ```
 
 ### PredictionCard
+
 ```typescript
 interface PredictionCardProps {
   id: string;
@@ -294,6 +313,7 @@ interface PredictionCardProps {
 ```
 
 ### UserDetailModal
+
 ```typescript
 interface UserDetailModalProps {
   isOpen: boolean;

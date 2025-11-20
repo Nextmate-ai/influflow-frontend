@@ -37,10 +37,10 @@ export function WalletUserInfo({ onClick }: WalletUserInfoProps) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+      className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-80"
     >
       {/* 用户头像 - 与 SharedHeader 样式完全一致 */}
-      <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-[#60A5FA]">
+      <div className="relative size-12 overflow-hidden rounded-full border-2 border-[#60A5FA]">
         {hasAvatar && authInfo.avatar ? (
           <Image
             src={authInfo.avatar}
@@ -54,8 +54,8 @@ export function WalletUserInfo({ onClick }: WalletUserInfoProps) {
           />
         ) : null}
         {!hasAvatar && (
-          <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-            <span className="text-white text-lg font-semibold">
+          <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
+            <span className="text-lg font-semibold text-white">
               {address ? address.slice(2, 4).toUpperCase() : 'W'}
             </span>
           </div>
@@ -63,10 +63,10 @@ export function WalletUserInfo({ onClick }: WalletUserInfoProps) {
       </div>
       {/* 用户信息 - 与 SharedHeader 样式完全一致 */}
       <div className="flex flex-col items-start">
-        <span className="text-white text-sm font-medium">
+        <span className="text-sm font-medium text-white">
           {isLoadingAuth ? '...' : displayName}
         </span>
-        <span className="text-[#86FDE8] text-xs">{formattedAddress}</span>
+        <span className="text-xs text-[#86FDE8]">{formattedAddress}</span>
       </div>
     </button>
   );

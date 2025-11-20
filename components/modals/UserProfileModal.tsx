@@ -1,12 +1,28 @@
 'use client';
 
-import React, { useEffect } from 'react';
 import { Modal, ModalContent } from '@heroui/react';
 import Image from 'next/image';
-import { useActiveWallet } from 'thirdweb/react';
+import React, { useEffect } from 'react';
+import { createThirdwebClient } from 'thirdweb';
+import { baseSepolia } from 'thirdweb/chains';
+import { ConnectButton, useActiveWallet } from 'thirdweb/react';
+import { inAppWallet } from 'thirdweb/wallets';
 
+import { ClaimTokenButton } from '@/components/launchpad/ClaimTokenButton';
+import { THIRDWEB_CLIENT_ID, TOKEN_CONTRACT_ADDRESS } from '@/constants/env';
 import { useAuthStore } from '@/stores/authStore';
-import { useTokenBalance } from '@/hooks/useTokenBalance';
+
+const client = createThirdwebClient({
+  clientId: THIRDWEB_CLIENT_ID,
+});
+
+const wallets = [
+  inAppWallet({
+    auth: {
+      options: ['x'],
+    },
+  }),
+];
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -27,18 +43,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 }) => {
   const { user } = useAuthStore();
   const wallet = useActiveWallet();
-  const { balance, isLoading: isLoadingBalance } = useTokenBalance();
 
   // 获取钱包地址
   const walletAddress = wallet?.getAccount()?.address || '';
   const formattedAddress = walletAddress
     ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
     : 'Not Connected';
-
-  // 格式化 Token 余额
-  const formattedBalance = isLoadingBalance
-    ? '...'
-    : (Number(balance) / 1e18).toFixed(4);
 
   // 复制地址到剪贴板
   const handleCopyAddress = async () => {
@@ -109,34 +119,36 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         },
       }}
     >
-      <ModalContent 
-        className="bg-transparent backdrop-blur-md border border-[#2DC3D9] rounded-[12px] p-0 overflow-hidden !transition-none"
+      <ModalContent
+        className="overflow-hidden rounded-[12px] border border-[#2DC3D9] bg-transparent p-0 backdrop-blur-md !transition-none"
         style={{ height: 'calc(100vh - 92px)' }}
       >
-        {(onClose) => (
-          <div className="flex flex-col relative h-full overflow-hidden">
+        {(onCloseModal: () => void) => (
+          <div className="relative flex h-full flex-col overflow-hidden">
             {/* 关闭按钮 */}
             <button
-              onClick={onClose}
-              className="absolute top-6 right-6 text-[#60A5FA] cursor-pointer z-10 text-[24px] font-light hover:text-gray-300"
+              onClick={onCloseModal}
+              className="absolute right-6 top-6 z-10 cursor-pointer text-[24px] font-light text-[#60A5FA] hover:text-gray-300"
             >
               ✕
             </button>
 
-            <div className="p-8 pt-16 h-full flex flex-col">
+            <div className="flex h-full flex-col p-8 pt-16">
               {/* 标题 */}
-              <h2 className="text-white text-2xl font-semibold mb-8 text-center">
+              <h2 className="mb-8 text-center text-2xl font-semibold text-white">
                 My Profile
               </h2>
 
               {/* 用户头像和钱包地址 */}
-              <div className="flex flex-col items-center mb-8">
-                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-[#60A5FA] mb-4">
+              <div className="mb-8 flex flex-col items-center">
+                <div className="relative mb-4 size-20 overflow-hidden rounded-full border-2 border-[#60A5FA]">
                   {wallet ? (
                     // 如果有钱包，显示钱包头像（基于地址生成）
-                    <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                      <span className="text-white text-2xl font-semibold">
-                        {walletAddress ? walletAddress.slice(2, 4).toUpperCase() : 'W'}
+                    <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
+                      <span className="text-2xl font-semibold text-white">
+                        {walletAddress
+                          ? walletAddress.slice(2, 4).toUpperCase()
+                          : 'W'}
                       </span>
                     </div>
                   ) : user?.avatar ? (
@@ -149,8 +161,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     />
                   ) : (
                     // 默认头像
-                    <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                      <span className="text-white text-2xl font-semibold">
+                    <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
+                      <span className="text-2xl font-semibold text-white">
                         {user?.name?.charAt(0).toUpperCase() || 'U'}
                       </span>
                     </div>
@@ -159,16 +171,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 {/* 钱包地址和复制按钮 */}
                 {wallet && walletAddress ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-white text-sm font-medium">
+                    <span className="text-sm font-medium text-white">
                       {formattedAddress}
                     </span>
                     <button
                       onClick={handleCopyAddress}
-                      className="text-[#86FDE8] hover:text-[#60A5FA] transition-colors cursor-pointer"
+                      className="cursor-pointer text-[#86FDE8] transition-colors hover:text-[#60A5FA]"
                       title="Copy address"
                     >
                       <svg
-                        className="w-4 h-4"
+                        className="size-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -184,96 +196,56 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     </button>
                   </div>
                 ) : (
-                  <h3 className="text-white text-lg font-semibold">
+                  <h3 className="text-lg font-semibold text-white">
                     {user?.name || 'User'}
                   </h3>
                 )}
               </div>
 
-              {/* My Wallet 部分 - 仅显示 Token 数量 */}
+              {/* My Wallet 部分 - 替换为 Thirdweb ConnectButton */}
               <div className="mb-8">
-                <h3 className="text-white text-base font-medium mb-4">
+                <h3 className="mb-4 text-base font-medium text-white">
                   My Wallet
                 </h3>
-                {wallet ? (
-                  <div className="flex items-center justify-between bg-transparent border border-[#2DC3D9] rounded-2xl p-4">
-                    <div className="flex items-center gap-3">
-                      {/* Token 图标 */}
-                      <div className="w-8 h-8 flex items-center justify-center">
-                        <svg
-                          className="w-6 h-6"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24Z"
-                            fill="#627EEA"
-                          />
-                          <path
-                            d="M12.498 3V9.6525L17.9955 12.165L12.498 3Z"
-                            fill="white"
-                            fillOpacity="0.602"
-                          />
-                          <path
-                            d="M12.498 3L7 12.165L12.498 9.6525V3Z"
-                            fill="white"
-                          />
-                          <path
-                            d="M12.498 16.476V20.9963L18 12.8085L12.498 16.476Z"
-                            fill="white"
-                            fillOpacity="0.602"
-                          />
-                          <path
-                            d="M12.498 20.9963V16.4753L7 12.8085L12.498 20.9963Z"
-                            fill="white"
-                          />
-                          <path
-                            d="M12.498 15.4298L17.9955 12.8085L12.498 9.65399V15.4298Z"
-                            fill="white"
-                            fillOpacity="0.2"
-                          />
-                          <path
-                            d="M7 12.8085L12.498 15.4298V9.65399L7 12.8085Z"
-                            fill="white"
-                            fillOpacity="0.602"
-                          />
-                        </svg>
-                      </div>
-                      <div className="flex flex-col items-start">
-                        <span className="text-white text-lg font-semibold">
-                          {formattedBalance} Tokens
-                        </span>
-                        <span className="text-[#86FDE8] text-xs">
-                          Token Balance
-                        </span>
-                      </div>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 [&_button]:w-full [&_button]:!rounded-2xl [&_button]:!border [&_button]:!border-[#2DC3D9] [&_button]:!bg-transparent [&_button]:!p-4 [&_button]:!transition-all [&_button]:!duration-200 [&_button]:hover:!bg-[#2DC3D9]/10">
+                    <ConnectButton
+                      client={client}
+                      wallets={wallets}
+                      accountAbstraction={{
+                        chain: baseSepolia,
+                        sponsorGas: true,
+                      }}
+                      connectModal={{
+                        size: 'compact',
+                      }}
+                      theme="dark"
+                      detailsButton={{
+                        displayBalanceToken: {
+                          [baseSepolia.id]: TOKEN_CONTRACT_ADDRESS,
+                        },
+                      }}
+                    />
                   </div>
-                ) : (
-                  <div className="flex items-center justify-center bg-transparent border border-[#2DC3D9] rounded-2xl p-4">
-                    <span className="text-gray-400 text-sm">
-                      Wallet not connected
-                    </span>
-                  </div>
-                )}
+                  <ClaimTokenButton />
+                </div>
               </div>
 
               {/* My History 部分 */}
-              <div className="flex-1 flex flex-col">
-                <h3 className="text-white text-base font-medium mb-4">
+              <div className="flex flex-1 flex-col">
+                <h3 className="mb-4 text-base font-medium text-white">
                   My History
                 </h3>
-                <div className="space-y-3 flex-1">
+                <div className="flex-1 space-y-3">
                   {/* Participations 按钮 */}
                   <button
                     onClick={handleParticipations}
-                    className="w-full flex items-center gap-3 bg-transparent border border-[#2DC3D9] rounded-2xl p-4 hover:bg-[#2DC3D9]/10 transition-all duration-200"
+                    className="flex w-full items-center gap-3 rounded-2xl border border-[#2DC3D9] bg-transparent p-4 transition-all duration-200 hover:bg-[#2DC3D9]/10"
                   >
                     {/* 复选框+时钟图标 */}
-                    <div className="w-6 h-6 flex items-center justify-center relative">
+                    <div className="relative flex size-6 items-center justify-center">
                       <svg
-                        className="w-6 h-6"
+                        className="size-6"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -334,7 +306,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         />
                       </svg>
                     </div>
-                    <span className="text-white text-base font-medium">
+                    <span className="text-base font-medium text-white">
                       Participations
                     </span>
                   </button>
@@ -342,12 +314,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   {/* Creations 按钮 */}
                   <button
                     onClick={handleCreations}
-                    className="w-full flex items-center gap-3 bg-transparent border border-[#2DC3D9] rounded-2xl p-4 hover:bg-[#2DC3D9]/10 transition-all duration-200"
+                    className="flex w-full items-center gap-3 rounded-2xl border border-[#2DC3D9] bg-transparent p-4 transition-all duration-200 hover:bg-[#2DC3D9]/10"
                   >
                     {/* 文档图标 */}
-                    <div className="w-6 h-6 flex items-center justify-center">
+                    <div className="flex size-6 items-center justify-center">
                       <svg
-                        className="w-6 h-6"
+                        className="size-6"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -399,7 +371,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         />
                       </svg>
                     </div>
-                    <span className="text-white text-base font-medium">
+                    <span className="text-base font-medium text-white">
                       Creations
                     </span>
                   </button>

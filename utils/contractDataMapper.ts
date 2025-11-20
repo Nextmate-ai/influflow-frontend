@@ -3,8 +3,8 @@
  * 将合约返回的数据格式转换为前端组件所需的格式
  */
 
-import { MarketResponse } from '@/lib/contracts/predictionMarket';
 import { PredictionCardData } from '@/components/launchpad/dashboard/PredictionCard';
+import { MarketResponse } from '@/lib/contracts/predictionMarket';
 
 /**
  * 格式化 BigInt 为可读的字符串
@@ -13,14 +13,14 @@ function formatBigInt(value: bigint, decimals: number = 18): string {
   const divisor = BigInt(10 ** decimals);
   const whole = value / divisor;
   const fraction = value % divisor;
-  
+
   if (fraction === BigInt(0)) {
     return whole.toString();
   }
-  
+
   const fractionStr = fraction.toString().padStart(decimals, '0');
   const trimmed = fractionStr.replace(/0+$/, '');
-  
+
   return trimmed ? `${whole}.${trimmed}` : whole.toString();
 }
 
@@ -29,7 +29,7 @@ function formatBigInt(value: bigint, decimals: number = 18): string {
  */
 function formatVolume(volume: bigint): string {
   const num = Number(volume) / 1e18; // 假设使用 18 位小数
-  
+
   if (num >= 1000000) {
     return `${(num / 1000000).toFixed(1)}M Vol.`;
   } else if (num >= 1000) {
@@ -91,8 +91,26 @@ export function mapMarketDataToPredictionCard(
   const noTotal = Number(data.noPoolTotal);
   const total = yesTotal + noTotal;
 
-  const yesPercentage = total > 0 ? Math.round((yesTotal / total) * 100) : 50;
-  const noPercentage = total > 0 ? Math.round((noTotal / total) * 100) : 50;
+  // 处理边界情况
+  let yesPercentage: number;
+  let noPercentage: number;
+
+  if (yesTotal === 0 && noTotal === 0) {
+    yesPercentage = 0;
+    noPercentage = 0;
+  } else if (noTotal === 0) {
+    yesPercentage = 100;
+    noPercentage = 0;
+  } else if (yesTotal === 0) {
+    yesPercentage = 0;
+    noPercentage = 100;
+  } else if (total > 0) {
+    yesPercentage = Math.round((yesTotal / total) * 100);
+    noPercentage = Math.round((noTotal / total) * 100);
+  } else {
+    yesPercentage = 50;
+    noPercentage = 50;
+  }
 
   return {
     id: marketId,
@@ -106,4 +124,3 @@ export function mapMarketDataToPredictionCard(
     option: '', // 默认不选择
   };
 }
-

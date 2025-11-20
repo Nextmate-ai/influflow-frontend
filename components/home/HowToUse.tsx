@@ -58,7 +58,7 @@ export const HowToUse = ({
   const renderContext = () => {
     return (
       <div className="flex flex-col items-center justify-center">
-        <h2 className="text-[20px] font-[400] text-black mb-[24px]">
+        <h2 className="mb-[24px] text-[20px] font-[400] text-black">
           How to use Influxy?
         </h2>
 
@@ -89,12 +89,12 @@ export const HowToUse = ({
                   alt={step.alt}
                   width={220}
                   height={260}
-                  className="w-full h-auto"
+                  className="h-auto w-full"
                 />
 
                 {isHoverable && (
                   <div
-                    className="transition-all duration-300 ease-in-out flex items-center justify-center absolute cursor-pointer bottom-[10%] left-[50%] translate-x-[-50%] w-[67px] h-[24px] text-[11px] rounded-[6px] font-[400] text-white bg-black hover:bg-[#448aff] hover:opacity-100!"
+                    className="hover:opacity-100! absolute bottom-[10%] left-[50%] flex h-[24px] w-[67px] translate-x-[-50%] cursor-pointer items-center justify-center rounded-[6px] bg-black text-[11px] font-[400] text-white transition-all duration-300 ease-in-out hover:bg-[#448aff]"
                     onClick={isHoverable ? handleClick : undefined}
                   >
                     Try Now
@@ -113,7 +113,7 @@ export const HowToUse = ({
       <Modal size="5xl" isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <ModalContent>
           <ModalBody>
-            <div className="p-8 flex flex-col items-center justify-center ">
+            <div className="flex flex-col items-center justify-center p-8 ">
               {renderContext()}
             </div>
           </ModalBody>
@@ -126,7 +126,7 @@ export const HowToUse = ({
       {!hidden && (
         <div
           onClick={() => setIsOpen(true)}
-          className="absolute left-[50%] text-[12px] translate-x-[-50%] bottom-[24px] px-[16px] text-[#828282] h-[45px] flex items-center justify-center bg-[#F2F7FF] rounded-full cursor-pointer hover:bg-[#E2E8F0]"
+          className="absolute bottom-[24px] left-[50%] flex h-[45px] translate-x-[-50%] cursor-pointer items-center justify-center rounded-full bg-[#F2F7FF] px-[16px] text-[12px] text-[#828282] hover:bg-[#E2E8F0]"
         >
           How to use Influxy{' '}
           <Image

@@ -22,22 +22,23 @@ import {
 
 import { useAuthStore } from '@/stores/authStore';
 import '@/styles/welcome-screen.css';
+
+import { driver } from 'driver.js';
+
 import {
   IContentFormat,
   IMode,
   ITrendingTopic,
   ITrendsRecommendTweet,
 } from '@/types/api';
-
-import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 
-import { HowToUse } from './HowToUse';
-
+import { IS_FRESH_USER_KEY } from '@/constants';
 import { goToStepAfterStableSameAnchor } from '@/utils/tutorial';
 
-import { IS_FRESH_USER_KEY } from '@/constants';
 import { BackgroundGradientAnimation } from '../ui/background-gradient-animation';
+
+import { HowToUse } from './HowToUse';
 
 const TrendingTopicsPage = lazy(() =>
   import('@/components/trending/TrendingTopicsPage').then((module) => ({
@@ -414,7 +415,7 @@ export const WelcomeScreen = ({
       <motion.div
         key="simple-mode"
         id="textarea-ref-simple"
-        className="relative mt-[24px] w-[400px] mx-auto"
+        className="relative mx-auto mt-[24px] w-[400px]"
         initial={{ width: 400, borderRadius: '20px' }}
         animate={{ width: 400, borderRadius: '20px' }}
         exit={{ width: 640, borderRadius: '16px' }}
@@ -435,7 +436,7 @@ export const WelcomeScreen = ({
           onFocus={() => setIsFocus(true)}
           onBlur={() => setIsFocus(false)}
           onInput={adjustTextareaHeight}
-          className="w-full rounded-full resize-none pt-[8px] pl-[16px] text-gray-700  placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-1"
+          className="w-full resize-none rounded-full pl-[16px] pt-[8px] text-gray-700  placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-1"
           style={{
             height: '40px',
           }}
@@ -451,7 +452,7 @@ export const WelcomeScreen = ({
         <Button
           isIconOnly
           color="primary"
-          className="absolute top-[0] right-[0px] size-[40px] min-w-0 rounded-full"
+          className="absolute right-0 top-0 size-[40px] min-w-0 rounded-full"
           onPress={handleTopicSubmit}
           disabled={!topicInput.trim()}
         >
@@ -472,7 +473,7 @@ export const WelcomeScreen = ({
       <motion.div
         key="complex-mode"
         id="textarea-ref-complex"
-        className="relative mt-[24px] w-[640px] mx-auto"
+        className="relative mx-auto mt-[24px] w-[640px]"
         initial={{ width: 640, borderRadius: '16px' }}
         animate={{ width: 640, borderRadius: '16px' }}
         exit={{ width: 400, borderRadius: '20px' }}
@@ -503,7 +504,7 @@ export const WelcomeScreen = ({
             e.stopPropagation();
           }}
           onInput={adjustTextareaHeight}
-          className="shadow-lg w-full resize-none rounded-2xl p-4 pb-[58px] pr-12 text-gray-700  placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-1 overflow-y-auto"
+          className="w-full resize-none overflow-y-auto rounded-2xl p-4 pb-[58px] pr-12 text-gray-700  shadow-lg placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-1"
           style={{
             minHeight: '120px',
             maxHeight: '300px',
@@ -639,7 +640,7 @@ export const WelcomeScreen = ({
         {/* 首页 Section */}
         <motion.div
           ref={homepageRef}
-          className="relative bg-white m-3 flex min-h-[94vh] items-center justify-center overflow-hidden rounded-[20px]"
+          className="relative m-3 flex min-h-[94vh] items-center justify-center overflow-hidden rounded-[20px] bg-white"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
@@ -648,7 +649,7 @@ export const WelcomeScreen = ({
             containerClassName="absolute inset-0 -z-10 h-full w-full"
             interactive={true}
           />
-          <div className="relative flex flex-col px-[24px] text-center items-center">
+          <div className="relative flex flex-col items-center px-[24px] text-center">
             {!isFreshUser && (
               <h2 className="text-[24px] font-[400] text-black">
                 Hey {isAuthenticated ? user?.name || 'there' : 'there'}, what

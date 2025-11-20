@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
 import { Input } from '@heroui/react';
+import React from 'react';
 
 interface TitleInputProps {
   value: string;
@@ -19,7 +19,9 @@ export const TitleInput: React.FC<TitleInputProps> = ({
 }) => {
   return (
     <div>
-      <label className="block text-white text-sm font-semibold mb-3">Title</label>
+      <label className="mb-3 block text-sm font-semibold text-white">
+        Title
+      </label>
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -27,10 +29,11 @@ export const TitleInput: React.FC<TitleInputProps> = ({
         className="w-full"
         classNames={{
           input: 'bg-transparent text-white text-lg',
-          inputWrapper: 'bg-slate-800 border-2 border-slate-600 hover:border-cyan-500 focus:border-cyan-400 rounded-lg',
+          inputWrapper:
+            'bg-slate-800 border-2 border-slate-600 hover:border-cyan-500 focus:border-cyan-400 rounded-lg',
         }}
       />
-      <p className="text-slate-400 text-xs mt-2">
+      <p className="mt-2 text-xs text-slate-400">
         Create a clear, specific prediction question for the market
       </p>
     </div>

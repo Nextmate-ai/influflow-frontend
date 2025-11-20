@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { CreateForm } from '@/components/launchpad/create/CreateForm';
 
 /**

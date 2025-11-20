@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import React, { useState } from 'react';
+
 import { GradientSlider } from '../shared/GradientSlider';
 import { StatCard } from '../shared/StatCard';
 
@@ -47,6 +48,28 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
   onCardClick,
 }) => {
   const [isHovering, setIsHovering] = useState(false);
+
+  // 从 rawData 中提取 yes_invested_ratio 和 no_invested_ratio
+  const yesInvestedRatio =
+    rawData?.yes_invested_ratio !== undefined
+      ? parseFloat(String(rawData.yes_invested_ratio))
+      : rawData?.yesInvestedRatio !== undefined
+        ? parseFloat(String(rawData.yesInvestedRatio))
+        : undefined;
+  const noInvestedRatio =
+    rawData?.no_invested_ratio !== undefined
+      ? parseFloat(String(rawData.no_invested_ratio))
+      : rawData?.noInvestedRatio !== undefined
+        ? parseFloat(String(rawData.noInvestedRatio))
+        : undefined;
+
+  // 如果有 invested_ratio，使用它们来计算进度条宽度，否则使用传入的百分比
+  const displayYesPercentage =
+    yesInvestedRatio !== undefined
+      ? yesInvestedRatio * 100
+      : yesPercentage;
+  const displayNoPercentage =
+    noInvestedRatio !== undefined ? noInvestedRatio * 100 : noPercentage;
 
   const handleCardClick = () => {
     if (onCardClick) {
@@ -112,11 +135,11 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`relative flex flex-col border border-[#60A5FA] rounded-2xl p-6 pt-[32px] pb-[20px] cursor-pointer transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/20 group`}
+      className={`group relative flex cursor-pointer flex-col rounded-2xl border border-[#60A5FA] p-6 pb-[20px] pt-[32px] transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/20`}
     >
       {/* 用户信息和头像 */}
-      <div className="flex items-start gap-4 mb-[20px]">
-        <div className="relative w-16 h-16 rounded-full overflow-hidden group-hover:border-cyan-400 transition-colors flex-shrink-0">
+      <div className="mb-[20px] flex items-start gap-4">
+        <div className="relative size-16 shrink-0 overflow-hidden rounded-full transition-colors group-hover:border-cyan-400">
           <Image
             src="/images/avatar_bg.png"
             alt={title}
@@ -124,8 +147,8 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
             className="object-cover"
           />
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-white text-base leading-[32px] line-clamp-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="line-clamp-2 text-base leading-[32px] text-white">
             {title}
           </h3>
         </div>
@@ -140,22 +163,24 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
           {/* 投票比例 */}
           <div className="mb-[16px] mt-[-20px]">
             <GradientSlider
-              leftPercentage={yesPercentage}
-              rightPercentage={noPercentage}
+              leftPercentage={displayYesPercentage}
+              rightPercentage={displayNoPercentage}
+              leftPrice={yesInvestedRatio}
+              rightPrice={noInvestedRatio}
             />
           </div>
 
           {/* 投票比例数字 */}
-          <div className="flex justify-around items-center mb-[24px] text-sm text-white">
+          <div className="mb-[24px] flex items-center justify-around text-sm text-white">
             <div
               onClick={handleYesClick}
-              className="w-[140px] h-[40px] flex items-center justify-center border-2 border-[#07B6D4] rounded-[16px] cursor-pointer hover:bg-[#07B6D4]/10 transition-colors"
+              className="flex h-[40px] w-[140px] cursor-pointer items-center justify-center rounded-[16px] border-2 border-[#07B6D4] transition-colors hover:bg-[#07B6D4]/10"
             >
               Yes
             </div>
             <div
               onClick={handleNoClick}
-              className="w-[140px] h-[40px] flex items-center justify-center border-2 border-[#CB30E0] rounded-[16px] cursor-pointer hover:bg-[#CB30E0]/10 transition-colors"
+              className="flex h-[40px] w-[140px] cursor-pointer items-center justify-center rounded-[16px] border-2 border-[#CB30E0] transition-colors hover:bg-[#CB30E0]/10"
             >
               No
             </div>
@@ -164,8 +189,8 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
       </div>
 
       {/* 统计信息 */}
-      <div className="flex justify-between items-center text-xs space-x-2 mt-auto">
-        <div className="text-white text-base leading-[32px] line-clamp-2">
+      <div className="mt-auto flex items-center justify-between space-x-2 text-xs">
+        <div className="line-clamp-2 text-base leading-[32px] text-white">
           <Image
             src="/images/twitter_card.png"
             alt="avatar"

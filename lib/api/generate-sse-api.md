@@ -1,7 +1,7 @@
 # Generate SSE API
 
 ## 创建推文生成会话 POST /api/twitter/generate/session
- 
+
 #### 功能说明：
 
 基于用户输入创建推文生成会话，为流式生成做准备
@@ -11,29 +11,30 @@
 
 #### 请求参数：
 
-* user_input: 用户输入内容（必填）
-  * 描述要生成的推文主题或内容需求
-  * 最少1个字符，支持中英文
-* content_format: 内容格式，可选值：
-  * thread: 推文串格式（默认）
-  * longform: 长文格式
-* mode: 生成模式，可选值：
-  * lite: 轻量模式（默认）- 10积分，支持流式输出
-  * analysis: 分析模式 - 10积分，深度分析+流式输出
-  * deep: 深度研究模式 - 50积分，仅支持同步输出（不支持流式）
-  * 注意：session模式不支持draft草案模式
+- user_input: 用户输入内容（必填）
+  - 描述要生成的推文主题或内容需求
+  - 最少1个字符，支持中英文
+- content_format: 内容格式，可选值：
+  - thread: 推文串格式（默认）
+  - longform: 长文格式
+- mode: 生成模式，可选值：
+  - lite: 轻量模式（默认）- 10积分，支持流式输出
+  - analysis: 分析模式 - 10积分，深度分析+流式输出
+  - deep: 深度研究模式 - 50积分，仅支持同步输出（不支持流式）
+  - 注意：session模式不支持draft草案模式
 
 #### 积分消耗：
 
-* lite/analysis模式: 10 credits
-* deep模式: 50 credits
-* 积分不足时返回错误，不会创建session
+- lite/analysis模式: 10 credits
+- deep模式: 50 credits
+- 积分不足时返回错误，不会创建session
 
 #### 响应说明：
 
-* session_id: 会话ID，用于后续流式生成调用
-* 会话包含用户输入、个性化设置、生成模式等所有配置信息
-* session具有一定有效期，建议创建后及时使用
+- session_id: 会话ID，用于后续流式生成调用
+- 会话包含用户输入、个性化设置、生成模式等所有配置信息
+- session具有一定有效期，建议创建后及时使用
+
 #### 使用流程：
 
 1. 调用此接口获取session_id
@@ -42,12 +43,12 @@
 
 #### 错误场景：
 
-* 积分不足：返回 INSUFFICIENT_CREDITS 错误
-* 用户输入为空或过短：返回参数验证错误
-* 服务器内部错误：返回 INTERNAL_ERROR 错误
+- 积分不足：返回 INSUFFICIENT_CREDITS 错误
+- 用户输入为空或过短：返回参数验证错误
+- 服务器内部错误：返回 INTERNAL_ERROR 错误
 
 ```json
-// req 
+// req
 {
   "user_input": "string",
   "content_format": "thread",
@@ -55,7 +56,7 @@
 }
 
 
-// res 
+// res
 {
   "status": "string",
   "message": "string",
@@ -66,63 +67,71 @@
 }
 ```
 
-
 ## 流式生成Twitter推文内容（基于会话） GET /api/twitter/generate/stream
 
 #### 功能说明：
-* 基于已创建的会话，实时流式生成完整的推文串或长文内容
-* 返回Server-Sent Events (SSE)格式的实时数据流
-* 支持生成过程的实时进度更新和状态监控
-* 使用session管理，确保生成过程的安全性和连续性
-* 在生成完成后自动扣除对应积分
+
+- 基于已创建的会话，实时流式生成完整的推文串或长文内容
+- 返回Server-Sent Events (SSE)格式的实时数据流
+- 支持生成过程的实时进度更新和状态监控
+- 使用session管理，确保生成过程的安全性和连续性
+- 在生成完成后自动扣除对应积分
 
 #### 请求参数：
-* **session_id**: 会话ID（必填）
-  * 从 /api/twitter/generate/session 接口获得
-  * 会话必须存在且有效，否则返回错误
-  * 会话包含所有生成所需的配置信息
+
+- **session_id**: 会话ID（必填）
+  - 从 /api/twitter/generate/session 接口获得
+  - 会话必须存在且有效，否则返回错误
+  - 会话包含所有生成所需的配置信息
 
 #### 支持的生成模式：
-* **lite模式**: 轻量快速生成，支持流式输出
-* **analysis模式**: 深度分析生成，包含更多研究步骤，支持流式输出
-* **deep模式**: 仅支持同步接口，不支持此流式接口
+
+- **lite模式**: 轻量快速生成，支持流式输出
+- **analysis模式**: 深度分析生成，包含更多研究步骤，支持流式输出
+- **deep模式**: 仅支持同步接口，不支持此流式接口
 
 #### 响应格式：
-* 使用SSE (Server-Sent Events) 实时推送生成进度
-* Content-Type: text/event-stream
-* 事件类型包括：
-  * expand_url.start/done: URL扩展处理
-  * analyze_input.start/done: 输入分析处理
-  * web_search.start/done: 网络搜索处理（analysis模式）
-  * generate_tweet.start/done: 推文生成处理
-  * extract_outline.start/done: 大纲提取处理
-  * session.done: 生成完成，包含最终结果
-  * error: 错误事件
+
+- 使用SSE (Server-Sent Events) 实时推送生成进度
+- Content-Type: text/event-stream
+- 事件类型包括：
+  - expand_url.start/done: URL扩展处理
+  - analyze_input.start/done: 输入分析处理
+  - web_search.start/done: 网络搜索处理（analysis模式）
+  - generate_tweet.start/done: 推文生成处理
+  - extract_outline.start/done: 大纲提取处理
+  - session.done: 生成完成，包含最终结果
+  - error: 错误事件
 
 #### 使用场景：
-* 适用于需要实时反馈生成进度的前端应用
-* 支持长时间运行的内容生成任务（特别是analysis模式）
-* 可以在生成过程中向用户展示实时状态和进度
-* 提供更好的用户体验，避免长时间等待
+
+- 适用于需要实时反馈生成进度的前端应用
+- 支持长时间运行的内容生成任务（特别是analysis模式）
+- 可以在生成过程中向用户展示实时状态和进度
+- 提供更好的用户体验，避免长时间等待
 
 #### 使用流程：
+
 1. 先调用 /api/twitter/generate/session 创建会话
 2. 使用返回的session_id调用此接口进行流式生成
 3. 监听SSE事件流，实时显示生成进度
 4. 等待 session.done 事件获取最终生成结果
 
 ### 错误处理：
-* session不存在或无效：返回错误事件
-* 生成过程中出错：返回error事件并中断流
-* 积分不足：在session创建时已验证，此处不会出现
-* 网络或服务异常：返回相应的错误事件
+
+- session不存在或无效：返回错误事件
+- 生成过程中出错：返回error事件并中断流
+- 积分不足：在session创建时已验证，此处不会出现
+- 网络或服务异常：返回相应的错误事件
 
 #### 注意事项：
-* deep模式不支持流式输出，请使用同步生成接口
-* 建议在前端实现超时机制，避免长时间等待
-* SSE连接可能因网络问题中断，需要实现重连机制
+
+- deep模式不支持流式输出，请使用同步生成接口
+- 建议在前端实现超时机制，避免长时间等待
+- SSE连接可能因网络问题中断，需要实现重连机制
 
 #### 参考数据例子
+
 ```yml
 event: session.start
 data: {"event_type": "session.start", "message": "Start...", "data": {}}
@@ -274,7 +283,6 @@ data: {"event_type": "session.done", "message": "Done", "data": {"outline": {"id
 
 
 ```
-
 
 ```yml
 event: session.start

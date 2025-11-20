@@ -13,9 +13,9 @@ export const ParticipationStats: React.FC<ParticipationStatsProps> = ({
   totalEarnings,
 }) => {
   return (
-    <div className="flex justify-end items-center mb-6 px-6 pt-6">
+    <div className="mb-6 flex items-center justify-end px-6 pt-6">
       <div className="text-right">
-        <p className="text-gray-400 text-sm mb-1">Total Earnings</p>
+        <p className="mb-1 text-sm text-gray-400">Total Earnings</p>
         <p className="text-3xl font-bold text-[#86FDE8]">{totalEarnings}</p>
       </div>
     </div>

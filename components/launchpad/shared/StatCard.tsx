@@ -21,7 +21,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   const content = (
     <div className="flex items-center gap-[12px] text-sm text-white">
       {icon}
-      <span className="text-base font-white">{value}</span>
+      <span className="font-white text-base">{value}</span>
     </div>
   );
 

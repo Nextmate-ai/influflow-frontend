@@ -3,15 +3,15 @@
  * 使用 thirdweb v5 的 useReadContract
  */
 
-import { useReadContract } from 'thirdweb/react';
-import { useMemo } from 'react';
+import { PredictionCardData } from '@/components/launchpad/dashboard/PredictionCard';
 import {
-  predictionMarketContract,
   GET_MARKET_METHOD,
   MarketResponse,
+  predictionMarketContract,
 } from '@/lib/contracts/predictionMarket';
 import { mapMarketDataToPredictionCard } from '@/utils/contractDataMapper';
-import { PredictionCardData } from '@/components/launchpad/dashboard/PredictionCard';
+import { useMemo } from 'react';
+import { useReadContract } from 'thirdweb/react';
 
 /**
  * 读取单个预测市场数据
@@ -55,4 +55,3 @@ export function usePredictionMarket(
     error,
   };
 }
-
