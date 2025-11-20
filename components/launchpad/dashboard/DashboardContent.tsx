@@ -90,16 +90,6 @@ export const DashboardContent: React.FC = () => {
     // 从 predictions 列表中找到对应的完整数据（包含 rawData）
     const fullPrediction = predictions.find((p) => p.id === prediction.id);
 
-    // 调试：检查数据传递
-    console.log('点击预测卡片:', {
-      predictionId: prediction.id,
-      foundFullPrediction: !!fullPrediction,
-      hasRawData: !!(fullPrediction?.rawData || prediction.rawData),
-      rawDataKeys: fullPrediction?.rawData
-        ? Object.keys(fullPrediction.rawData)
-        : [],
-    });
-
     setSelectedPrediction({
       ...prediction,
       // 如果找到了完整数据，使用它的 rawData，否则使用传入的 rawData

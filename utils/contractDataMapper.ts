@@ -91,8 +91,26 @@ export function mapMarketDataToPredictionCard(
   const noTotal = Number(data.noPoolTotal);
   const total = yesTotal + noTotal;
 
-  const yesPercentage = total > 0 ? Math.round((yesTotal / total) * 100) : 50;
-  const noPercentage = total > 0 ? Math.round((noTotal / total) * 100) : 50;
+  // 处理边界情况
+  let yesPercentage: number;
+  let noPercentage: number;
+
+  if (yesTotal === 0 && noTotal === 0) {
+    yesPercentage = 0;
+    noPercentage = 0;
+  } else if (noTotal === 0) {
+    yesPercentage = 100;
+    noPercentage = 0;
+  } else if (yesTotal === 0) {
+    yesPercentage = 0;
+    noPercentage = 100;
+  } else if (total > 0) {
+    yesPercentage = Math.round((yesTotal / total) * 100);
+    noPercentage = Math.round((noTotal / total) * 100);
+  } else {
+    yesPercentage = 50;
+    noPercentage = 50;
+  }
 
   return {
     id: marketId,

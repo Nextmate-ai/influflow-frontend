@@ -83,9 +83,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  // 预测的投票状态（右侧面板使用，可以基于用户选择动态计算）
-  const [predictionYesPercentage, setPredictionYesPercentage] = useState(45);
-  const [predictionNoPercentage, setPredictionNoPercentage] = useState(55);
 
   // 计算合约调用参数（使用防抖后的金额）
   const debouncedAmountValue = parseFloat(debouncedAmount) || 0;
@@ -130,84 +127,62 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
         ? (Number(payout) / 1e18).toFixed(2)
         : '0.00';
 
-  // 从 rawData 中获取真实数据，如果没有则使用默认值
+  // 从 rawData 中获取真实数据
   const rawData = prediction.rawData || {};
-
-  // 调试：打印接收到的数据
-  useEffect(() => {
-    if (isOpen) {
-      console.log('详情弹窗打开，接收到的 prediction:', prediction);
-      console.log('rawData:', rawData);
-      console.log('rawData 的所有字段:', rawData ? Object.keys(rawData) : []);
-    }
-  }, [isOpen, prediction, rawData]);
-
-  // 获取问题描述（规则文本）- 支持多种字段名格式
-  const rulesText =
-    rawData.question_description ||
-    rawData.questionDescription ||
-    'No description available.';
-
-  // 获取创建者地址
+  const rulesText = rawData.question_description || rawData.questionDescription || 'No description available.';
   const creator = rawData.creator || 'Unknown';
 
-  // 计算真实的投票百分比（基于 rawData）
-  // 优先使用 yes_price/no_price，如果没有则使用 yes_invested_ratio/no_invested_ratio
-  // 或者使用 yes_pool_usd 和 no_pool_usd 来计算
+  // 提取数据源
+  const yesInvestedRatio = rawData.yes_invested_ratio || rawData.yesInvestedRatio;
+  const noInvestedRatio = rawData.no_invested_ratio || rawData.noInvestedRatio;
   const yesPrice = rawData.yes_price || rawData.yesPrice;
   const noPrice = rawData.no_price || rawData.noPrice;
-  const yesRatio = rawData.yes_invested_ratio || rawData.yesInvestedRatio;
-  const noRatio = rawData.no_invested_ratio || rawData.noInvestedRatio;
-
-  // 如果都没有，尝试从 pool 数据计算
   const yesPoolUsd = parseFloat(
-    String(
-      rawData.yes_pool_usd ||
-        rawData.yesPoolUsd ||
-        rawData.yes_pool_total ||
-        rawData.yesPoolTotal ||
-        0,
-    ),
+    String(rawData.yes_pool_usd || rawData.yesPoolUsd || rawData.yes_pool_total || rawData.yesPoolTotal || 0)
   );
   const noPoolUsd = parseFloat(
-    String(
-      rawData.no_pool_usd ||
-        rawData.noPoolUsd ||
-        rawData.no_pool_total ||
-        rawData.noPoolTotal ||
-        0,
-    ),
+    String(rawData.no_pool_usd || rawData.noPoolUsd || rawData.no_pool_total || rawData.noPoolTotal || 0)
   );
   const poolTotal = yesPoolUsd + noPoolUsd;
 
-  // 优先使用 yes_invested_ratio/no_invested_ratio
-  const yesInvestedRatio = yesRatio !== undefined ? parseFloat(String(yesRatio)) : undefined;
-  const noInvestedRatio = noRatio !== undefined ? parseFloat(String(noRatio)) : undefined;
-
-  // 计算显示的百分比和进度条宽度
-  const realYesPercentage = yesInvestedRatio !== undefined
-    ? yesInvestedRatio * 100
-    : yesPrice
-      ? Math.round(parseFloat(String(yesPrice)) * 100)
-      : poolTotal > 0
-        ? Math.round((yesPoolUsd / poolTotal) * 100)
-        : prediction.yesPercentage;
-
-  const realNoPercentage = noInvestedRatio !== undefined
-    ? noInvestedRatio * 100
-    : noPrice
-      ? Math.round(parseFloat(String(noPrice)) * 100)
-      : poolTotal > 0
-        ? Math.round((noPoolUsd / poolTotal) * 100)
-        : prediction.noPercentage;
-
-  // 更新预测的投票状态为真实数据
-  useEffect(() => {
-    if (isOpen && rawData) {
-      setPredictionYesPercentage(realYesPercentage);
-      setPredictionNoPercentage(realNoPercentage);
+  // 计算百分比的辅助函数
+  const calculatePercentage = (
+    investedRatio: any,
+    price: any,
+    poolUsd: number,
+    fallback: number
+  ): number => {
+    if (investedRatio !== undefined) {
+      return parseFloat(String(investedRatio)) * 100;
     }
-  }, [isOpen, rawData, realYesPercentage, realNoPercentage]);
+    if (price !== undefined) {
+      return Math.round(parseFloat(String(price)) * 100);
+    }
+    if (poolTotal > 0) {
+      return Math.round((poolUsd / poolTotal) * 100);
+    }
+    return fallback;
+  };
+
+  // 计算显示的百分比
+  let realYesPercentage: number;
+  let realNoPercentage: number;
+
+  // 优先处理边界情况
+  if (yesPoolUsd === 0 && noPoolUsd === 0) {
+    realYesPercentage = 0;
+    realNoPercentage = 0;
+  } else if (noPoolUsd === 0) {
+    realYesPercentage = 100;
+    realNoPercentage = 0;
+  } else if (yesPoolUsd === 0) {
+    realYesPercentage = 0;
+    realNoPercentage = 100;
+  } else {
+    // 正常情况：使用数据源计算
+    realYesPercentage = calculatePercentage(yesInvestedRatio, yesPrice, yesPoolUsd, prediction.yesPercentage);
+    realNoPercentage = calculatePercentage(noInvestedRatio, noPrice, noPoolUsd, prediction.noPercentage);
+  }
 
   // 当弹窗打开时，清除错误和成功消息
   useEffect(() => {
@@ -356,29 +331,38 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         }}
                       >
                         {yesInvestedRatio !== undefined
-                          ? `${(yesInvestedRatio * 100).toFixed(1)}%`
-                          : `${Math.round(realYesPercentage)}%`} Yes
+                          ? `${realYesPercentage.toFixed(1)}%`
+                          : `${realYesPercentage}%`} Yes
                       </span>
                     </div>
-                    <div
-                      className="absolute right-0 top-0 flex h-full items-center justify-end rounded-r-full bg-gradient-to-l from-[#870CD8] to-[#FF2DDF]"
-                      style={{
-                        width: `${realNoPercentage}%`,
-                        zIndex: 1,
-                      }}
-                    >
-                      <span
-                        className="whitespace-nowrap text-sm font-medium text-white"
+                    {realNoPercentage > 0 && (
+                      <div
+                        className="absolute right-0 top-0 flex h-full items-center justify-end rounded-r-full bg-gradient-to-l from-[#870CD8] to-[#FF2DDF]"
                         style={{
-                          paddingLeft: realNoPercentage < 20 ? '8px' : '12px',
-                          paddingRight: '12px',
+                          width: `${realNoPercentage}%`,
+                          zIndex: 1,
                         }}
                       >
-                        {noInvestedRatio !== undefined
-                          ? `${(noInvestedRatio * 100).toFixed(1)}%`
-                          : `${Math.round(realNoPercentage)}%`} No
-                      </span>
-                    </div>
+                        <span
+                          className="whitespace-nowrap text-sm font-medium text-white"
+                          style={{
+                            paddingLeft: realNoPercentage < 20 ? '8px' : '12px',
+                            paddingRight: '12px',
+                          }}
+                        >
+                          {noInvestedRatio !== undefined
+                            ? `${realNoPercentage.toFixed(1)}%`
+                            : `${realNoPercentage}%`} No
+                        </span>
+                      </div>
+                    )}
+                    {realNoPercentage === 0 && (
+                      <div className="absolute right-0 top-0 flex h-full items-center justify-end pr-3">
+                        <span className="whitespace-nowrap text-sm font-medium text-white">
+                          0% No
+                        </span>
+                      </div>
+                    )}
                     {/* 闪电图标 - 在分割线中间 */}
                     <div
                       className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
@@ -469,31 +453,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     </button>
                   </div>
                 </div>
-
-                {/* Voting Status Prediction */}
-                {/* <div className="mb-8">
-                  <div className="text-[#58C0CE] text-base font-medium mb-4">
-                    Voting Status Prediction
-                  </div>
-                  <GradientSlider
-                    leftPercentage={predictionYesPercentage}
-                    rightPercentage={predictionNoPercentage}
-                  />
-                  <div className="flex justify-between items-center mt-2">
-                    <div className="text-center">
-                      <div className="text-[#00B2FF] text-lg font-semibold">
-                        {predictionYesPercentage}%
-                      </div>
-                      <div className="text-white text-sm">Yes</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-[#FF2DDF] text-lg font-semibold">
-                        {predictionNoPercentage}%
-                      </div>
-                      <div className="text-white text-sm">No</div>
-                    </div>
-                  </div>
-                </div> */}
 
                 {/* Amount 输入 */}
                 <div className="mb-6">

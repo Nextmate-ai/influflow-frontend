@@ -64,16 +64,10 @@ export function usePredictionMarkets() {
           return;
         }
 
-        // 调试：打印实际获取的数据
-        console.log('从数据库获取的原始数据:', data);
-        console.log('第一条数据的字段:', data[0] ? Object.keys(data[0]) : []);
-
         // 转换数据格式
         const mappedPredictions = data.map((row: MarketReadableRow) =>
           mapMarketRowToPredictionCard(row),
         );
-
-        console.log('转换后的预测数据:', mappedPredictions);
         setPredictions(mappedPredictions);
       } catch (err) {
         console.error('Failed to fetch prediction markets:', err);
@@ -99,57 +93,48 @@ export function usePredictionMarkets() {
 }
 
 /**
- * 计算投票百分比 - 使用与详情页面相同的优先级逻辑
- * 优先级：yes_price/no_price > yes_invested_ratio/no_invested_ratio > pool 数据计算
+ * 计算投票百分比
+ * 优先级：invested_ratio > price > pool 数据计算
  */
 function calculatePercentages(rawData: Record<string, any>): {
   yesPercentage: number;
   noPercentage: number;
 } {
-  // 优先使用 yes_price/no_price
+  // 提取数据源
+  const yesInvestedRatio = rawData.yes_invested_ratio || rawData.yesInvestedRatio;
+  const noInvestedRatio = rawData.no_invested_ratio || rawData.noInvestedRatio;
   const yesPrice = rawData.yes_price || rawData.yesPrice;
   const noPrice = rawData.no_price || rawData.noPrice;
-
-  // 其次使用 yes_invested_ratio/no_invested_ratio
-  const yesRatio = rawData.yes_invested_ratio || rawData.yesInvestedRatio;
-  const noRatio = rawData.no_invested_ratio || rawData.noInvestedRatio;
-
-  // 如果都没有，尝试从 pool 数据计算
   const yesPoolUsd = parseFloat(
-    String(
-      rawData.yes_pool_usd ||
-        rawData.yesPoolUsd ||
-        rawData.yes_pool_total ||
-        rawData.yesPoolTotal ||
-        0,
-    ),
+    String(rawData.yes_pool_usd || rawData.yesPoolUsd || rawData.yes_pool_total || rawData.yesPoolTotal || 0)
   );
   const noPoolUsd = parseFloat(
-    String(
-      rawData.no_pool_usd ||
-        rawData.noPoolUsd ||
-        rawData.no_pool_total ||
-        rawData.noPoolTotal ||
-        0,
-    ),
+    String(rawData.no_pool_usd || rawData.noPoolUsd || rawData.no_pool_total || rawData.noPoolTotal || 0)
   );
   const poolTotal = yesPoolUsd + noPoolUsd;
 
-  const yesPercentage = yesPrice
-    ? Math.round(parseFloat(String(yesPrice)) * 100)
-    : yesRatio
-      ? Math.round(parseFloat(String(yesRatio)) * 100)
-      : poolTotal > 0
-        ? Math.round((yesPoolUsd / poolTotal) * 100)
-        : 50;
+  // 计算百分比的辅助函数
+  const calcPercentage = (ratio: any, price: any, poolUsd: number, fallback: number): number => {
+    if (ratio !== undefined) return parseFloat(String(ratio)) * 100;
+    if (price !== undefined) return Math.round(parseFloat(String(price)) * 100);
+    if (poolTotal > 0) return Math.round((poolUsd / poolTotal) * 100);
+    return fallback;
+  };
 
-  const noPercentage = noPrice
-    ? Math.round(parseFloat(String(noPrice)) * 100)
-    : noRatio
-      ? Math.round(parseFloat(String(noRatio)) * 100)
-      : poolTotal > 0
-        ? Math.round((noPoolUsd / poolTotal) * 100)
-        : 50;
+  // 处理边界情况
+  if (yesPoolUsd === 0 && noPoolUsd === 0) {
+    return { yesPercentage: 0, noPercentage: 0 };
+  }
+  if (noPoolUsd === 0) {
+    return { yesPercentage: 100, noPercentage: 0 };
+  }
+  if (yesPoolUsd === 0) {
+    return { yesPercentage: 0, noPercentage: 100 };
+  }
+
+  // 正常情况
+  const yesPercentage = calcPercentage(yesInvestedRatio, yesPrice, yesPoolUsd, 50);
+  const noPercentage = calcPercentage(noInvestedRatio, noPrice, noPoolUsd, 50);
 
   return { yesPercentage, noPercentage };
 }
@@ -180,16 +165,6 @@ function mapMarketRowToPredictionCard(
 
   // 生成头像 URL（基于 creator 地址）
   const image = generateAvatarUrl(row.creator || marketId);
-
-  // 调试：打印单条数据的转换
-  console.log('转换单条数据:', {
-    marketId,
-    title: row.question_title,
-    yesPercentage,
-    noPercentage,
-    totalVolume,
-    rawDataKeys: Object.keys(row),
-  });
 
   return {
     id: marketId,
