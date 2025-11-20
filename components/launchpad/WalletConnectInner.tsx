@@ -167,7 +167,7 @@ function ClaimTokenButton() {
 
   return (
     <button
-      onClick={claim}
+      onClick={() => claim()}
       disabled={isPending}
       className="rounded-lg bg-gradient-to-r from-[#D245C3] to-[#5731AC] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
     >
