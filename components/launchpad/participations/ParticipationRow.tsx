@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+
 import { useClaimPayout } from '@/hooks/useClaimPayout';
 import { useClaimCreatorFees } from '@/hooks/useClaimCreatorFees';
 
@@ -227,7 +228,7 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
                 {isClaimCreatorFeesPending ? (
                   <span className="flex items-center gap-2">
                     <svg
-                      className="h-4 w-4 animate-spin"
+                      className="size-4 animate-spin"
                       viewBox="0 0 24 24"
                       fill="none"
                     >
@@ -322,7 +323,7 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
             {isPending ? (
               <span className="flex items-center gap-2">
                 <svg
-                  className="h-4 w-4 animate-spin"
+                  className="size-4 animate-spin"
                   viewBox="0 0 24 24"
                   fill="none"
                 >

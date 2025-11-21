@@ -5,7 +5,7 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { useCallback, useEffect, useState } from 'react';
-import { useActiveWallet } from 'thirdweb/react';
+import { useWallets } from '@privy-io/react-auth';
 import { MarketReadableRow } from './usePredictionMarkets';
 
 export interface ParticipationRowData {
@@ -70,7 +70,7 @@ function removeAddressPrefix(address: string): string {
  * 获取用户参与或创建的市场数据
  */
 export function useUserParticipations(viewType: ViewType = 'creations') {
-  const wallet = useActiveWallet();
+  const { wallets } = useWallets();
   const [participations, setParticipations] = useState<ParticipationRowData[]>(
     [],
   );
@@ -80,7 +80,9 @@ export function useUserParticipations(viewType: ViewType = 'creations') {
 
   useEffect(() => {
     const fetchParticipations = async () => {
-      if (!wallet) {
+      const userAddress = wallets[0]?.address;
+
+      if (!userAddress) {
         setParticipations([]);
         setIsLoading(false);
         return;
@@ -89,13 +91,6 @@ export function useUserParticipations(viewType: ViewType = 'creations') {
       try {
         setIsLoading(true);
         setError(null);
-
-        const userAddress = wallet.getAccount()?.address;
-        if (!userAddress) {
-          setParticipations([]);
-          setIsLoading(false);
-          return;
-        }
 
         // 移除地址前缀，数据库中的地址没有前缀
         const normalizedAddress = removeAddressPrefix(userAddress);
@@ -275,7 +270,7 @@ export function useUserParticipations(viewType: ViewType = 'creations') {
     };
 
     fetchParticipations();
-  }, [wallet, viewType, refetchTrigger]);
+  }, [wallets, viewType, refetchTrigger]);
 
   // Refetch 函数，用于手动刷新数据
   const refetch = useCallback(() => {

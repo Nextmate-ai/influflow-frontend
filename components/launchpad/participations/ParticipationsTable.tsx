@@ -27,7 +27,7 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
   return (
     <div className="flex h-[600px] flex-col overflow-hidden rounded-2xl border border-[#2DC3D9] bg-[#0B041E]">
       {/* 表格 */}
-      <div className="table-scrollbar flex-1 overflow-y-auto px-6 py-6">
+      <div className="table-scrollbar flex-1 overflow-y-auto p-6">
         {isLoading ? (
           <div className="flex h-full items-center justify-center">
             <p className="text-gray-400">Loading...</p>

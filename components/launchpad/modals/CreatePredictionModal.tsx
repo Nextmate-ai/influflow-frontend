@@ -2,7 +2,7 @@
 
 import { Input, Modal, ModalContent } from '@heroui/react';
 import React, { useMemo, useState } from 'react';
-import { useActiveWallet } from 'thirdweb/react';
+import { usePrivy } from '@privy-io/react-auth';
 
 import { useMarketCreation } from '@/hooks/useMarketCreation';
 
@@ -31,7 +31,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
   const [bidAmount, setBidAmount] = useState('0');
   const [selectedSide, setSelectedSide] = useState<1 | 2>(1); // 1 = Yes, 2 = No
 
-  const wallet = useActiveWallet();
+  const { authenticated } = usePrivy();
   const { createMarketWithApproval, isPending, currentStep, error } =
     useMarketCreation();
 
@@ -95,7 +95,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
   }, [bidAmount]);
 
   const handleCreate = async () => {
-    if (!wallet) {
+    if (!authenticated) {
       alert('请先连接钱包');
       return;
     }
@@ -126,8 +126,8 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
         questionTitle: title,
         questionDescription: rules,
         endTime,
-        creatorSide: selectedSide,
-        creatorBet,
+        creatorSide: selectedSide, // 1 = Yes, 2 = No
+        creatorBet: creatorBet,
       };
 
       // 打印完整的创建市场参数
@@ -139,7 +139,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
         'endTime (日期):',
         new Date(Number(marketParams.endTime) * 1000).toLocaleString(),
       );
-      console.log('creatorSide:', marketParams.creatorSide);
+      console.log('creatorSide:', marketParams.creatorSide, selectedSide === 1 ? '(Yes)' : '(No)');
       console.log('creatorBet (wei):', marketParams.creatorBet.toString());
       console.log(
         'creatorBet (hex):',
@@ -186,6 +186,8 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
       backdrop="blur"
       className="dark"
       hideCloseButton
+      isDismissable={!isPending}
+      isKeyboardDismissDisabled={isPending}
     >
       <ModalContent className="rounded-2xl border border-[#2DC3D9] bg-[#0B041E] p-0">
         {(onClose) => (
@@ -193,7 +195,8 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
             {/* 关闭按钮 */}
             <button
               onClick={onClose}
-              className="cursor absolute right-6 top-6 z-10  text-[24px] font-light text-[#60A5FA]"
+              disabled={isPending}
+              className="cursor absolute right-6 top-6 z-10  text-[24px] font-light text-[#60A5FA] disabled:cursor-not-allowed disabled:opacity-30"
             >
               ✕
             </button>
@@ -337,7 +340,12 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
 
                 {/* 状态提示 */}
                 {currentStep === 'approving' && (
-                  <div className="mb-2 text-sm text-[#86FDE8]">正在授权...</div>
+                  <div className="mb-2 text-sm text-[#86FDE8]">正在发送授权交易...</div>
+                )}
+                {currentStep === 'waiting_approval' && (
+                  <div className="mb-2 text-sm text-[#86FDE8]">
+                    等待授权交易确认中...（请勿关闭窗口）
+                  </div>
                 )}
                 {currentStep === 'creating' && (
                   <div className="mb-2 text-sm text-[#86FDE8]">
@@ -359,15 +367,17 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                   >
                     <button
                       onClick={handleCreate}
-                      disabled={isPending || !wallet}
+                      disabled={isPending || !authenticated}
                       className="size-full rounded-2xl bg-[#0B041E] text-lg font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isPending
                         ? currentStep === 'approving'
                           ? '授权中...'
-                          : currentStep === 'creating'
-                            ? '创建中...'
-                            : '处理中...'
+                          : currentStep === 'waiting_approval'
+                            ? '等待确认...'
+                            : currentStep === 'creating'
+                              ? '创建中...'
+                              : '处理中...'
                         : 'Create'}
                     </button>
                   </div>
