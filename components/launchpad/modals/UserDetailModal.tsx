@@ -514,12 +514,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 {/* 状态提示 */}
                 {currentStep === 'approving' && (
                   <div className="mb-4 text-sm text-[#86FDE8]">
-                    正在发送授权交易...
-                  </div>
-                )}
-                {currentStep === 'waiting_approval' && (
-                  <div className="mb-4 text-sm text-[#86FDE8]">
-                    等待授权交易确认中...（请勿关闭窗口）
+                    正在授权...（请勿关闭窗口）
                   </div>
                 )}
                 {currentStep === 'buying' && (
@@ -550,11 +545,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       {isPending
                         ? currentStep === 'approving'
                           ? '授权中...'
-                          : currentStep === 'waiting_approval'
-                            ? '等待确认...'
-                            : currentStep === 'buying'
-                              ? '购买中...'
-                              : '处理中...'
+                          : currentStep === 'buying'
+                            ? '购买中...'
+                            : '处理中...'
                         : 'Join'}
                     </button>
                   </div>
