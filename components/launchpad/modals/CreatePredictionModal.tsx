@@ -1,10 +1,12 @@
 'use client';
 
 import { Input, Modal, ModalContent } from '@heroui/react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
+import { useRouter } from 'next/navigation';
 
 import { useMarketCreation } from '@/hooks/useMarketCreation';
+import { addToast } from '@/components/base/toast';
 
 interface CreatePredictionModalProps {
   isOpen: boolean;
@@ -27,20 +29,52 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
   );
   const [option1, setOption1] = useState('Yes');
   const [option2, setOption2] = useState('No');
-  const [closingDate, setClosingDate] = useState('25/04/2026');
+  const [closingDate, setClosingDate] = useState('');
   const [bidAmount, setBidAmount] = useState('0');
   const [selectedSide, setSelectedSide] = useState<1 | 2>(1); // 1 = Yes, 2 = No
 
   const { authenticated } = usePrivy();
+  const router = useRouter();
   const { createMarketWithApproval, isPending, currentStep, error } =
     useMarketCreation();
+
+  // 监听成功状态，自动关闭并跳转
+  useEffect(() => {
+    if (currentStep === 'success') {
+      addToast({
+        title: 'Success',
+        description: 'Market created successfully!',
+        color: 'success',
+      });
+      setTimeout(() => {
+        onClose();
+        router.push('/launchpad');
+      }, 1500);
+    }
+  }, [currentStep, onClose, router]);
+
+  // 监听错误状态，使用toast提示
+  useEffect(() => {
+    if (error && currentStep === 'error') {
+      addToast({
+        title: 'Error',
+        description: error.message || 'Failed to create market',
+        color: 'danger',
+      });
+    }
+  }, [error, currentStep]);
 
   // 将日期字符串转换为 Unix 时间戳（秒）
   const endTime = useMemo(() => {
     try {
-      // 假设日期格式为 DD/MM/YYYY
-      const [day, month, year] = closingDate.split('/');
-      const date = new Date(`${year}-${month}-${day}`);
+      if (!closingDate) {
+        return BigInt(0);
+      }
+      // 支持 datetime-local 格式 (YYYY-MM-DDTHH:mm)
+      const date = new Date(closingDate);
+      if (isNaN(date.getTime())) {
+        return BigInt(0);
+      }
       return BigInt(Math.floor(date.getTime() / 1000));
     } catch {
       return BigInt(0);
@@ -89,34 +123,54 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
 
       return result;
     } catch (error) {
-      console.error('金额转换错误:', error);
+      console.error('Amount conversion error:', error);
       return BigInt(0);
     }
   }, [bidAmount]);
 
   const handleCreate = async () => {
     if (!authenticated) {
-      alert('请先连接钱包');
+      addToast({
+        title: 'Error',
+        description: 'Please connect your wallet first',
+        color: 'danger',
+      });
       return;
     }
 
     if (!title.trim()) {
-      alert('请输入标题');
+      addToast({
+        title: 'Error',
+        description: 'Please enter a title',
+        color: 'danger',
+      });
       return;
     }
 
     if (!rules.trim()) {
-      alert('请输入规则');
+      addToast({
+        title: 'Error',
+        description: 'Please enter rules',
+        color: 'danger',
+      });
       return;
     }
 
     if (creatorBet === BigInt(0)) {
-      alert('请输入投注金额');
+      addToast({
+        title: 'Error',
+        description: 'Please enter a bid amount',
+        color: 'danger',
+      });
       return;
     }
 
     if (endTime === BigInt(0)) {
-      alert('请输入有效的结束时间');
+      addToast({
+        title: 'Error',
+        description: 'Please enter a valid closing time',
+        color: 'danger',
+      });
       return;
     }
 
@@ -136,7 +190,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
       console.log('questionDescription:', marketParams.questionDescription);
       console.log('endTime:', marketParams.endTime.toString());
       console.log(
-        'endTime (日期):',
+        'endTime (date):',
         new Date(Number(marketParams.endTime) * 1000).toLocaleString(),
       );
       console.log('creatorSide:', marketParams.creatorSide, selectedSide === 1 ? '(Yes)' : '(No)');
@@ -146,9 +200,9 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
         '0x' + marketParams.creatorBet.toString(16),
       );
       console.log('creatorBet (ETH):', Number(marketParams.creatorBet) / 1e18);
-      console.log('原始 bidAmount:', bidAmount);
+      console.log('Original bidAmount:', bidAmount);
       console.log(
-        '完整参数对象:',
+        'Complete parameters object:',
         JSON.stringify(
           {
             ...marketParams,
@@ -165,16 +219,9 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
       console.log('=== 开始批量交易（Approve + CreateMarket）===');
       await createMarketWithApproval(marketParams);
       console.log('=== 批量交易完成 ===');
-
-      // 成功后关闭模态框
-      if (currentStep === 'success') {
-        setTimeout(() => {
-          onClose();
-        }, 2000);
-      }
     } catch (err) {
-      console.error('创建市场失败:', err);
-      alert(`创建失败: ${err instanceof Error ? err.message : '未知错误'}`);
+      console.error('Failed to create market:', err);
+      // 错误已经在useEffect中通过toast处理
     }
   };
 
@@ -243,7 +290,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                 {/* Options */}
                 <div>
                   <label className="mb-2 block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-base font-medium text-transparent">
-                    Options (选择你的立场)
+                    Options (Select your position)
                   </label>
                   <div className="flex gap-4">
                     <button
@@ -279,7 +326,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                   <Input
                     value={closingDate}
                     onChange={(e) => setClosingDate(e.target.value)}
-                    type="text"
+                    type="datetime-local"
                     className="w-full"
                     classNames={{
                       input:
@@ -287,22 +334,6 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                       inputWrapper:
                         'bg-transparent border border-[#2DC3D9] rounded-2xl hover:border-[#2DC3D9] focus-within:border-[#2DC3D9]',
                     }}
-                    placeholder="DD/MM/YYYY"
-                    endContent={
-                      <svg
-                        className="size-5 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    }
                   />
                 </div>
 
@@ -331,29 +362,19 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                   />
                 </div>
 
-                {/* 错误提示 */}
-                {error && (
-                  <div className="mb-2 text-sm text-red-400">
-                    错误: {error.message || '未知错误'}
-                  </div>
-                )}
-
                 {/* 状态提示 */}
                 {currentStep === 'approving' && (
-                  <div className="mb-2 text-sm text-[#86FDE8]">正在发送授权交易...</div>
+                  <div className="mb-2 text-sm text-[#86FDE8]">Sending approval transaction...</div>
                 )}
                 {currentStep === 'waiting_approval' && (
                   <div className="mb-2 text-sm text-[#86FDE8]">
-                    等待授权交易确认中...（请勿关闭窗口）
+                    Waiting for approval confirmation... (Please do not close the window)
                   </div>
                 )}
                 {currentStep === 'creating' && (
                   <div className="mb-2 text-sm text-[#86FDE8]">
-                    正在创建市场...
+                    Creating market...
                   </div>
-                )}
-                {currentStep === 'success' && (
-                  <div className="mb-2 text-sm text-green-400">创建成功！</div>
                 )}
 
                 {/* Create 按钮 */}
@@ -372,12 +393,12 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                     >
                       {isPending
                         ? currentStep === 'approving'
-                          ? '授权中...'
+                          ? 'Approving...'
                           : currentStep === 'waiting_approval'
-                            ? '等待确认...'
+                            ? 'Waiting...'
                             : currentStep === 'creating'
-                              ? '创建中...'
-                              : '处理中...'
+                              ? 'Creating...'
+                              : 'Processing...'
                         : 'Create'}
                     </button>
                   </div>

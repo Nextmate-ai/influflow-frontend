@@ -43,19 +43,19 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
                 {viewType === 'participations' ? (
                   <>
                     <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
-                      Prediction
+                      Topic
                     </th>
                     <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
-                      Opinion
+                      Side
                     </th>
                     <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
-                      Bet
+                      Wager
                     </th>
                     <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
-                      Outcome
+                      Result
                     </th>
                     <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
-                      To Win
+                      Potential Winnings
                     </th>
                     <th className="px-6 py-4 text-center font-normal text-[#8ae5f6]">
                       Status

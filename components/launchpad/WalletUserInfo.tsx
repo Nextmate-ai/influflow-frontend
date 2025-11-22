@@ -1,7 +1,6 @@
 'use client';
 
 import { usePrivy, useWallets } from '@privy-io/react-auth';
-import Image from 'next/image';
 import React from 'react';
 
 import { useWalletAuth } from '@/hooks/useWalletAuth';
@@ -32,9 +31,6 @@ export function WalletUserInfo({ onClick }: WalletUserInfoProps) {
     ? `${address.slice(0, 6)}...${address.slice(-4)}`
     : '';
 
-  // 获取显示名称：优先使用 X 昵称，否则使用地址
-  const displayName = authInfo?.name || authInfo?.username || formattedAddress;
-
   // 获取头像：优先使用 X 头像，否则使用基于地址生成的头像
   const hasAvatar = !!authInfo?.avatar && !imageError;
 
@@ -44,13 +40,12 @@ export function WalletUserInfo({ onClick }: WalletUserInfoProps) {
       className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-80"
     >
       {/* 用户头像 - 与 SharedHeader 样式完全一致 */}
-      <div className="relative size-12 overflow-hidden rounded-full border-2 border-[#60A5FA]">
+      <div className="relative size-12 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30">
         {hasAvatar && authInfo.avatar ? (
-          <Image
+          <img
             src={authInfo.avatar}
-            alt={displayName}
-            fill
-            className="object-cover"
+            alt={authInfo.username || authInfo.name || 'User'}
+            className="size-full object-cover"
             onError={() => {
               // 如果头像加载失败，切换到默认头像
               setImageError(true);
@@ -59,15 +54,19 @@ export function WalletUserInfo({ onClick }: WalletUserInfoProps) {
         ) : (
           <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
             <span className="text-lg font-semibold text-white">
-              {address ? address.slice(2, 4).toUpperCase() : 'W'}
+              {authInfo?.username?.charAt(0).toUpperCase() || 
+               authInfo?.name?.charAt(0).toUpperCase() || 
+               (address ? address.slice(2, 4).toUpperCase() : 'W')}
             </span>
           </div>
         )}
       </div>
-      {/* 用户信息 - 与 SharedHeader 样式完全一致 */}
+      {/* 用户信息 - 优先显示 X/Twitter username */}
       <div className="flex flex-col items-start">
         <span className="text-sm font-medium text-white">
-          {isLoadingAuth ? '...' : displayName}
+          {isLoadingAuth ? '...' : 
+           authInfo?.username ? `@${authInfo.username}` : 
+           authInfo?.name || formattedAddress}
         </span>
         <span className="text-xs text-[#86FDE8]">{formattedAddress}</span>
       </div>

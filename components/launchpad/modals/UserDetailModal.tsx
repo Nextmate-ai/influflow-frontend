@@ -5,9 +5,11 @@ import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useReadContract } from 'wagmi';
+import { useRouter } from 'next/navigation';
 
 import { useBuyShares } from '@/hooks/useBuyShares';
 import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
+import { addToast } from '@/components/base/toast';
 
 import { StatCard } from '../shared/StatCard';
 
@@ -51,10 +53,37 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
   // 钱包和购买份额 hook
   const { authenticated } = usePrivy();
+  const router = useRouter();
   const { wallets } = useWallets();
   const walletAddress = wallets[0]?.address || '';
   const { buySharesWithApproval, isPending, currentStep, error } =
     useBuyShares();
+
+  // 监听成功状态，自动关闭并跳转
+  useEffect(() => {
+    if (currentStep === 'success') {
+      addToast({
+        title: 'Success',
+        description: 'Successfully purchased shares!',
+        color: 'success',
+      });
+      setTimeout(() => {
+        onClose();
+        router.push('/launchpad');
+      }, 1500);
+    }
+  }, [currentStep, onClose, router]);
+
+  // 监听错误状态，使用toast提示
+  useEffect(() => {
+    if (error && currentStep === 'error') {
+      addToast({
+        title: 'Error',
+        description: error.message || 'Failed to buy shares',
+        color: 'danger',
+      });
+    }
+  }, [error, currentStep]);
 
   // 当弹窗打开或 prediction 变化时，根据 option 设置初始选择
   useEffect(() => {
@@ -197,28 +226,33 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     }
   }, [isOpen]);
 
-  // 监听 error 状态变化
-  useEffect(() => {
-    if (error) {
-      setOperationError(error);
-    }
-  }, [error]);
-
   // 使用批量交易：一次性完成 approve 和 buyShares
   const handleBuyShares = async () => {
     if (!authenticated) {
-      setOperationError(new Error('Wallet not connected'));
+      addToast({
+        title: 'Error',
+        description: 'Please connect your wallet first',
+        color: 'danger',
+      });
       return;
     }
 
     if (!selectedOption) {
-      setOperationError(new Error('Please select Yes or No'));
+      addToast({
+        title: 'Error',
+        description: 'Please select Yes or No',
+        color: 'danger',
+      });
       return;
     }
 
     const amountValue = parseFloat(amount);
     if (isNaN(amountValue) || amountValue <= 0) {
-      setOperationError(new Error('Please enter a valid amount'));
+      addToast({
+        title: 'Error',
+        description: 'Please enter a valid amount',
+        color: 'danger',
+      });
       return;
     }
 
@@ -242,12 +276,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       });
 
       console.log('=== 批量交易完成 ===');
-      setSuccessMessage('Successfully purchased shares!');
+      // 成功消息已经在useEffect中通过toast处理
     } catch (err) {
-      console.error('购买份额失败:', err);
-      setOperationError(
-        err instanceof Error ? err : new Error('Failed to buy shares'),
-      );
+      console.error('Failed to buy shares:', err);
+      // 错误已经在useEffect中通过toast处理
     }
   };
 
@@ -500,26 +532,15 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   </div>
                 </div>
 
-                {/* 错误和成功提示 */}
-                {operationError && (
-                  <div className="mb-4 text-sm text-red-400">
-                    {operationError.message}
-                  </div>
-                )}
-                {successMessage && (
-                  <div className="mb-4 text-sm text-green-400">
-                    {successMessage}
-                  </div>
-                )}
                 {/* 状态提示 */}
                 {currentStep === 'approving' && (
                   <div className="mb-4 text-sm text-[#86FDE8]">
-                    正在授权...（请勿关闭窗口）
+                    Approving... (Please do not close the window)
                   </div>
                 )}
                 {currentStep === 'buying' && (
                   <div className="mb-4 text-sm text-[#86FDE8]">
-                    正在购买份额...
+                    Buying shares...
                   </div>
                 )}
 
@@ -544,10 +565,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     >
                       {isPending
                         ? currentStep === 'approving'
-                          ? '授权中...'
+                          ? 'Approving...'
                           : currentStep === 'buying'
-                            ? '购买中...'
-                            : '处理中...'
+                            ? 'Buying...'
+                            : 'Processing...'
                         : 'Join'}
                     </button>
                   </div>

@@ -2,12 +2,12 @@
 
 import { Modal, ModalContent } from '@heroui/react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
-import Image from 'next/image';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { formatEther } from 'viem';
 
 import { ClaimTokenButton } from '@/components/launchpad/ClaimTokenButton';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
+import { useWalletAuth } from '@/hooks/useWalletAuth';
 import { useAuthStore } from '@/stores/authStore';
 
 interface UserProfileModalProps {
@@ -30,12 +30,22 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const { user } = useAuthStore();
   const { authenticated, logout } = usePrivy();
   const { wallets } = useWallets();
+  const { authInfo } = useWalletAuth(); // 获取 Privy 的 X/Twitter 用户信息
+  console.log('authInfo', authInfo);
+  
+  // 图片加载错误状态
+  const [avatarError, setAvatarError] = useState(false);
+  const [mainAvatarError, setMainAvatarError] = useState(false);
 
   // 获取钱包地址
   const walletAddress = wallets[0]?.address || '';
   const formattedAddress = walletAddress
     ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
     : 'Not Connected';
+
+  // 优先使用 X/Twitter 信息，否则使用钱包地址
+  const displayName = authInfo?.name || authInfo?.username || formattedAddress;
+  const displayAvatar = authInfo?.avatar;
 
   // 获取 Token 余额
   const { balance: tokenBalance } = useTokenBalance();
@@ -76,6 +86,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       };
     }
   }, [isOpen]);
+
+  // 当 authInfo 变化时重置头像错误状态
+  useEffect(() => {
+    setAvatarError(false);
+    setMainAvatarError(false);
+  }, [authInfo?.avatar, displayAvatar]);
 
   return (
     <Modal
@@ -118,15 +134,66 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       >
         {(onCloseModal: () => void) => (
           <div className="relative flex h-full flex-col overflow-hidden">
-            {/* 关闭按钮 */}
-            <button
-              onClick={onCloseModal}
-              className="absolute right-6 top-6 z-10 cursor-pointer text-[24px] font-light text-[#60A5FA] hover:text-gray-300"
-            >
-              ✕
-            </button>
+            {/* Header - X 用户信息和关闭按钮 */}
+            <div className="relative flex items-center justify-between border-b border-[#2DC3D9]/20 px-6 py-4">
+              {authInfo && (authInfo.username || authInfo.avatar) ? (
+                <div className="flex items-center gap-3">
+                  {authInfo.avatar && !avatarError ? (
+                    <div className="relative size-12 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30">
+                      <img
+                        src={authInfo.avatar}
+                        alt={authInfo.username || authInfo.name || 'User'}
+                        className="size-full object-cover"
+                        onError={() => setAvatarError(true)}
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative size-12 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30 bg-gradient-to-br from-purple-400 to-pink-400">
+                      <div className="flex size-full items-center justify-center">
+                        <span className="text-lg font-semibold text-white">
+                          {authInfo.username?.charAt(0).toUpperCase() || authInfo.name?.charAt(0).toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    {authInfo.username ? (
+                      <span className="text-base font-semibold text-white">
+                        @{authInfo.username}
+                      </span>
+                    ) : authInfo.name ? (
+                      <span className="text-base font-semibold text-white">
+                        {authInfo.name}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="relative size-12 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30 bg-gradient-to-br from-purple-400 to-pink-400">
+                    <div className="flex size-full items-center justify-center">
+                      <span className="text-lg font-semibold text-white">
+                        {displayName?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-base font-semibold text-white">
+                      {displayName || 'User'}
+                    </span>
+                  </div>
+                </div>
+              )}
+              {/* 关闭按钮 */}
+              <button
+                onClick={onCloseModal}
+                className="cursor-pointer text-[24px] font-light text-[#60A5FA] transition-colors hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
 
-            <div className="flex h-full flex-col p-8 pt-16">
+            <div className="flex h-full flex-col overflow-y-auto p-8">
               {/* 标题 */}
               <h2 className="mb-8 text-center text-2xl font-semibold text-white">
                 My Profile
@@ -134,61 +201,78 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
               {/* 用户头像和钱包地址 */}
               <div className="mb-8 flex flex-col items-center">
-                <div className="relative mb-4 size-20 overflow-hidden rounded-full border-2 border-[#60A5FA]">
-                  {authenticated && walletAddress ? (
-                    // 如果有钱包，显示钱包头像（基于地址生成）
+                <div className="relative mb-4 size-20 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30">
+                  {displayAvatar && !mainAvatarError ? (
+                    // 优先显示 X/Twitter 头像
+                    <img
+                      src={displayAvatar}
+                      alt={displayName || 'User'}
+                      className="size-full object-cover"
+                      onError={() => setMainAvatarError(true)}
+                    />
+                  ) : authenticated && walletAddress ? (
+                    // 如果没有 X/Twitter 头像，显示钱包头像（基于地址生成）
                     <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
                       <span className="text-2xl font-semibold text-white">
                         {walletAddress.slice(2, 4).toUpperCase()}
                       </span>
                     </div>
-                  ) : user?.avatar ? (
+                  ) : user?.avatar && !mainAvatarError ? (
                     // 如果没有钱包但有用户头像，显示用户头像
-                    <Image
+                    <img
                       src={user.avatar}
                       alt={user.name || 'User'}
-                      fill
-                      className="object-cover"
+                      className="size-full object-cover"
+                      onError={() => setMainAvatarError(true)}
                     />
                   ) : (
                     // 默认头像
                     <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
                       <span className="text-2xl font-semibold text-white">
-                        {user?.name?.charAt(0).toUpperCase() || 'U'}
+                        {displayName?.charAt(0).toUpperCase() || user?.name?.charAt(0).toUpperCase() || 'U'}
                       </span>
                     </div>
                   )}
                 </div>
-                {/* 钱包地址和复制按钮 */}
+                {/* 显示名称和钱包地址 */}
                 {authenticated && walletAddress ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-white">
-                      {formattedAddress}
-                    </span>
-                    <button
-                      onClick={handleCopyAddress}
-                      className="cursor-pointer text-[#86FDE8] transition-colors hover:text-[#60A5FA]"
-                      title="Copy address"
-                    >
-                      <svg
-                        className="size-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
+                  <div className="flex flex-col items-center gap-2">
+                    {/* 显示 X/Twitter 用户名 */}
+                    {authInfo?.username && (
+                      <h3 className="text-lg font-semibold text-white">
+                        @{authInfo.username}
+                      </h3>
+                    )}
+                    {/* 钱包地址和复制按钮 */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-400">
+                        {formattedAddress}
+                      </span>
+                      <button
+                        onClick={handleCopyAddress}
+                        className="cursor-pointer text-[#86FDE8] transition-colors hover:text-[#60A5FA]"
+                        title="Copy address"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </button>
+                        <svg
+                          className="size-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <h3 className="text-lg font-semibold text-white">
-                    {user?.name || 'User'}
+                    {displayName || user?.name || 'User'}
                   </h3>
                 )}
               </div>
@@ -215,20 +299,18 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   {/* Actions Row - Faucet 和 Disconnect */}
                   <div className="flex items-center gap-3">
                     <ClaimTokenButton />
-                    <div className="flex-1">
-                      {authenticated ? (
-                        <button
-                          onClick={logout}
-                          className="w-full rounded-2xl border border-red-500 bg-transparent p-4 text-red-500 transition-all duration-200 hover:bg-red-500/10"
-                        >
-                          Disconnect
-                        </button>
-                      ) : (
-                        <div className="rounded-2xl border border-[#2DC3D9] bg-transparent p-4 text-center text-gray-400">
-                          Not connected
-                        </div>
-                      )}
-                    </div>
+                    {authenticated ? (
+                      <button
+                        onClick={logout}
+                        className="rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+                      >
+                        Disconnect
+                      </button>
+                    ) : (
+                      <div className="rounded-lg border border-[#2DC3D9] bg-transparent px-4 py-2 text-center text-sm text-gray-400">
+                        Not connected
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 
 import { WalletConnect } from '@/components/launchpad/WalletConnect';
 import { UserProfileModal } from '@/components/modals/UserProfileModal';
+import { useWalletAuth } from '@/hooks/useWalletAuth';
 import { useAuthStore } from '@/stores/authStore';
 
 interface SharedHeaderProps {
@@ -28,7 +29,9 @@ export const SharedHeader = ({
 }: SharedHeaderProps) => {
   const { isAuthenticated, openLoginModal, logout, user, setSession } =
     useAuthStore();
+  const { authInfo } = useWalletAuth(); // 获取 Privy 的 X/Twitter 用户信息
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const pathname = usePathname();
 
   // 判断是否是 launchpad 页面
@@ -55,6 +58,11 @@ export const SharedHeader = ({
       );
     }
   }, [isAuthenticated, user, setSession]);
+
+  // 当 authInfo 变化时重置头像错误状态
+  useEffect(() => {
+    setAvatarError(false);
+  }, [authInfo?.avatar]);
 
   const handleUserClick = () => {
     if (isAuthenticated) {
@@ -94,9 +102,16 @@ export const SharedHeader = ({
                   onClick={handleUserClick}
                   className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-80"
                 >
-                  {/* 用户头像 */}
-                  <div className="relative size-12 overflow-hidden rounded-full border-2 border-[#60A5FA]">
-                    {user.avatar ? (
+                  {/* 用户头像 - 优先显示 X/Twitter 头像 */}
+                  <div className="relative size-12 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30">
+                    {authInfo?.avatar && !avatarError ? (
+                      <img
+                        src={authInfo.avatar}
+                        alt={authInfo.username || authInfo.name || 'User'}
+                        className="size-full object-cover"
+                        onError={() => setAvatarError(true)}
+                      />
+                    ) : user.avatar ? (
                       <Image
                         src={user.avatar}
                         alt={user.name || 'User'}
@@ -106,15 +121,17 @@ export const SharedHeader = ({
                     ) : (
                       <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
                         <span className="text-lg font-semibold text-white">
-                          {user.name?.charAt(0).toUpperCase() || 'U'}
+                          {authInfo?.username?.charAt(0).toUpperCase() || 
+                           authInfo?.name?.charAt(0).toUpperCase() || 
+                           user.name?.charAt(0).toUpperCase() || 'U'}
                         </span>
                       </div>
                     )}
                   </div>
-                  {/* 用户信息 */}
+                  {/* 用户信息 - 优先显示 X/Twitter username */}
                   <div className="flex flex-col items-start">
                     <span className="text-sm font-medium text-white">
-                      {user.name || 'User'}
+                      {authInfo?.username ? `@${authInfo.username}` : authInfo?.name || user.name || 'User'}
                     </span>
                     <span className="text-xs text-[#86FDE8]">
                       {user.email || ''}

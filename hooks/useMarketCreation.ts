@@ -66,7 +66,7 @@ export function useMarketCreation() {
         // 获取当前钱包地址
         const wallet = wallets.find((w) => w.walletClientType === 'privy');
         if (!wallet || !wallet.address) {
-          throw new Error('未找到钱包地址');
+          throw new Error('Wallet address not found');
         }
         const userAddress = wallet.address as `0x${string}`;
         console.log('用户地址:', userAddress);
@@ -83,7 +83,7 @@ export function useMarketCreation() {
 
         if (balance < params.creatorBet) {
           throw new Error(
-            `余额不足。需要 ${params.creatorBet.toString()}, 当前余额 ${balance.toString()}`,
+            `Insufficient balance. Required ${params.creatorBet.toString()}, current balance ${balance.toString()}`,
           );
         }
 

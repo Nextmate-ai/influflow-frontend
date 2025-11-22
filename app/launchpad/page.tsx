@@ -36,7 +36,7 @@ export default function LaunchPadDashboard() {
           onParticipationsClick={handleParticipationsClick}
           onCreationsClick={handleCreationsClick}
         />
-        <div className="px-[64px]">
+        <div className="mx-auto max-w-[1440px] px-[64px]">
           <div className="my-[12px] text-center text-2xl text-white">
             Turn your opinions into earnings.
           </div>

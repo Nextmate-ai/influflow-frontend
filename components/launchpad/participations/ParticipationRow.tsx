@@ -264,7 +264,7 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
   // participations 视图
   return (
     <tr className="border-b border-[#2DC3D9]/30 transition-colors hover:bg-[#2DC3D9]/5">
-      {/* Prediction - 最长为340像素，超过支持换行，居中对齐 */}
+      {/* Topic - 最长为340像素，超过支持换行，居中对齐 */}
       <td className="px-6 py-4 text-center">
         <p
           className="break-words font-medium text-white"
@@ -274,19 +274,19 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
         </p>
       </td>
 
-      {/* Opinion - 正常展示，居中对齐 */}
+      {/* Side - 显示用户选择的立场，居中对齐 */}
       <td className="px-6 py-4 text-center">
         <span className="text-white">{opinion || '-'}</span>
       </td>
 
-      {/* Bet - 显示投注金额，居中对齐 */}
+      {/* Wager - 显示投注金额，居中对齐 */}
       <td className="px-6 py-4 text-center">
         <span className="font-semibold text-white">
           ${betAmount > 0 ? betAmount.toFixed(2) : '0.00'}
         </span>
       </td>
 
-      {/* Outcome - Win/Loss/TBD，居中对齐 */}
+      {/* Result - Win/Loss/TBD，居中对齐 */}
       <td className="px-6 py-4 text-center">
         <span
           className={`font-semibold ${
@@ -301,7 +301,7 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
         </span>
       </td>
 
-      {/* To Win - 显示预期收益，居中对齐 */}
+      {/* Potential Winnings - 显示预期收益，居中对齐 */}
       <td className="px-6 py-4 text-center">
         <span className="font-semibold text-white">
           ${expectedPayout > 0 ? expectedPayout.toFixed(2) : '0.00'}
