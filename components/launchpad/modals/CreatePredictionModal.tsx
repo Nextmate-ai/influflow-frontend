@@ -6,11 +6,13 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useRouter } from 'next/navigation';
 
 import { useMarketCreation } from '@/hooks/useMarketCreation';
+import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { addToast } from '@/components/base/toast';
 
 interface CreatePredictionModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 /**
@@ -20,23 +22,21 @@ interface CreatePredictionModalProps {
 export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
   isOpen,
   onClose,
+  onSuccess,
 }) => {
-  const [title, setTitle] = useState(
-    "Will Michelle Yeoh win Best Actress at tomorrow's Oscars?",
-  );
-  const [rules, setRules] = useState(
-    'The 2025 New York City mayoral election will be held on November 4, 2025, to elect the mayor of New York City.',
-  );
+  const [title, setTitle] = useState('');
+  const [rules, setRules] = useState('');
   const [option1, setOption1] = useState('Yes');
   const [option2, setOption2] = useState('No');
   const [closingDate, setClosingDate] = useState('');
-  const [bidAmount, setBidAmount] = useState('0');
+  const [bidAmount, setBidAmount] = useState('');
   const [selectedSide, setSelectedSide] = useState<1 | 2>(1); // 1 = Yes, 2 = No
 
   const { authenticated } = usePrivy();
   const router = useRouter();
   const { createMarketWithApproval, isPending, currentStep, error } =
     useMarketCreation();
+  const { balance: tokenBalance } = useTokenBalance();
 
   // 监听成功状态，自动关闭并跳转
   useEffect(() => {
@@ -46,12 +46,13 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
         description: 'Market created successfully!',
         color: 'success',
       });
+      onSuccess?.(); // 调用成功回调刷新数据
       setTimeout(() => {
         onClose();
         router.push('/launchpad');
       }, 1500);
     }
-  }, [currentStep, onClose, router]);
+  }, [currentStep, onClose, router, onSuccess]);
 
   // 监听错误状态，使用toast提示
   useEffect(() => {
@@ -169,6 +170,16 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
       addToast({
         title: 'Error',
         description: 'Please enter a valid closing time',
+        color: 'danger',
+      });
+      return;
+    }
+
+    // 检查余额
+    if (tokenBalance < creatorBet) {
+      addToast({
+        title: 'Error',
+        description: `Insufficient balance. Required: ${(Number(creatorBet) / 1e18).toFixed(2)}, Current: ${(Number(tokenBalance) / 1e18).toFixed(2)}`,
         color: 'danger',
       });
       return;
@@ -327,7 +338,9 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                     value={closingDate}
                     onChange={(e) => setClosingDate(e.target.value)}
                     type="datetime-local"
-                    className="w-full"
+                    className="w-full [&_input::-webkit-calendar-picker-indicator]:cursor-pointer [&_input::-webkit-datetime-edit-text]:text-white [&_input::-webkit-datetime-edit-month-field]:text-white [&_input::-webkit-datetime-edit-day-field]:text-white [&_input::-webkit-datetime-edit-year-field]:text-white [&_input::-webkit-datetime-edit-hour-field]:text-white [&_input::-webkit-datetime-edit-minute-field]:text-white [&_input::-webkit-datetime-edit-ampm-field]:text-white"
+                    placeholder="YYYY-MM-DD HH:mm"
+                    lang="en"
                     classNames={{
                       input:
                         'bg-transparent text-white text-base placeholder-gray-500',

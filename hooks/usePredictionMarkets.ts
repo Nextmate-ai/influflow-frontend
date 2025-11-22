@@ -37,58 +37,65 @@ export function usePredictionMarkets() {
   const [predictions, setPredictions] = useState<PredictionCardData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const fetchMarkets = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const supabase = createClient();
+
+      // 从 nextmate schema 的 markets_readable 表读取数据
+      // 如果表在 nextmate schema 中，使用 .schema('nextmate')
+      // 如果表在 public schema 中，直接使用表名
+      const { data, error: queryError } = await supabase
+        .schema('nextmate')
+        .from('markets_readable')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (queryError) {
+        throw new Error(`Supabase query error: ${queryError.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        setPredictions([]);
+        return;
+      }
+
+      // 转换数据格式
+      const mappedPredictions = data.map((row: MarketReadableRow) =>
+        mapMarketRowToPredictionCard(row),
+      );
+      setPredictions(mappedPredictions);
+    } catch (err) {
+      console.error('Failed to fetch prediction markets:', err);
+      setError(
+        err instanceof Error
+          ? err
+          : new Error('Failed to fetch prediction markets'),
+      );
+      setPredictions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchMarkets = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const supabase = createClient();
-
-        // 从 nextmate schema 的 markets_readable 表读取数据
-        // 如果表在 nextmate schema 中，使用 .schema('nextmate')
-        // 如果表在 public schema 中，直接使用表名
-        const { data, error: queryError } = await supabase
-          .schema('nextmate')
-          .from('markets_readable')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (queryError) {
-          throw new Error(`Supabase query error: ${queryError.message}`);
-        }
-
-        if (!data || data.length === 0) {
-          setPredictions([]);
-          return;
-        }
-
-        // 转换数据格式
-        const mappedPredictions = data.map((row: MarketReadableRow) =>
-          mapMarketRowToPredictionCard(row),
-        );
-        setPredictions(mappedPredictions);
-      } catch (err) {
-        console.error('Failed to fetch prediction markets:', err);
-        setError(
-          err instanceof Error
-            ? err
-            : new Error('Failed to fetch prediction markets'),
-        );
-        setPredictions([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchMarkets();
-  }, []);
+  }, [refreshKey]);
+
+  // 提供刷新函数
+  const refresh = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
 
   return {
     predictions,
     isLoading,
     error,
+    refresh,
   };
 }
 

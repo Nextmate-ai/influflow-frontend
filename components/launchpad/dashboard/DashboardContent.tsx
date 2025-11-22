@@ -74,14 +74,37 @@ const MOCK_PREDICTIONS = [
  *
  * 从 Supabase 的 markets_readable 表读取数据
  */
+type FilterStatus = 'live' | 'finished';
+
 export const DashboardContent: React.FC = () => {
   const [selectedPrediction, setSelectedPrediction] =
     useState<PredictionCardData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('live');
 
   // 从 Supabase 读取市场数据
-  const { predictions, isLoading, error } = usePredictionMarkets();
+  const { predictions, isLoading, error, refresh } = usePredictionMarkets();
+
+  // 根据筛选状态过滤预测
+  const filteredPredictions = predictions.filter((prediction) => {
+    const state = prediction.rawData?.state;
+    if (filterStatus === 'live') {
+      // Live: 显示 Active 状态
+      return state === 0 || state === '0' || state === 'Active';
+    } else if (filterStatus === 'finished') {
+      // Finished: 显示 Resolved 或 Void 状态
+      return (
+        state === 1 ||
+        state === '1' ||
+        state === 'Resolved' ||
+        state === 2 ||
+        state === '2' ||
+        state === 'Void'
+      );
+    }
+    return true;
+  });
 
   const handlePredictionClick = (
     prediction: PredictionCardData,
@@ -106,8 +129,30 @@ export const DashboardContent: React.FC = () => {
   return (
     <div>
       <div className="mb-[20px] flex items-center justify-between">
-        <div className="flex h-[56px] items-center justify-center rounded-[10px] border border-[#60A5FA] px-[24px]">
-          Popular Live Auction
+        <div className="flex items-center gap-4">
+          {/* Radio 切换按钮 */}
+          <div className="flex h-[56px] items-center gap-2 rounded-[10px] border border-[#60A5FA] bg-[#0B041E] p-1">
+            <button
+              onClick={() => setFilterStatus('live')}
+              className={`flex h-full items-center justify-center rounded-lg px-6 text-base font-semibold transition-all duration-200 ${
+                filterStatus === 'live'
+                  ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
+                  : 'bg-transparent text-gray-400 hover:text-white'
+              }`}
+            >
+              Live
+            </button>
+            <button
+              onClick={() => setFilterStatus('finished')}
+              className={`flex h-full items-center justify-center rounded-lg px-6 text-base font-semibold transition-all duration-200 ${
+                filterStatus === 'finished'
+                  ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
+                  : 'bg-transparent text-gray-400 hover:text-white'
+              }`}
+            >
+              Finished
+            </button>
+          </div>
         </div>
         <button
           onClick={handleCreateClick}
@@ -120,7 +165,7 @@ export const DashboardContent: React.FC = () => {
       </div>
 
       <AuctionGrid
-        predictions={predictions}
+        predictions={filteredPredictions}
         onPredictionClick={handlePredictionClick}
       />
 
@@ -132,12 +177,20 @@ export const DashboardContent: React.FC = () => {
             setTimeout(() => setSelectedPrediction(null), 300);
           }}
           prediction={selectedPrediction}
+          onSuccess={() => {
+            // 下注成功后刷新数据
+            refresh();
+          }}
         />
       )}
 
       <CreatePredictionModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={() => {
+          // 创建成功后刷新数据
+          refresh();
+        }}
       />
     </div>
   );

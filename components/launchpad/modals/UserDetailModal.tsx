@@ -8,6 +8,7 @@ import { useReadContract } from 'wagmi';
 import { useRouter } from 'next/navigation';
 
 import { useBuyShares } from '@/hooks/useBuyShares';
+import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
 import { addToast } from '@/components/base/toast';
 
@@ -28,6 +29,7 @@ interface UserDetailModalProps {
     option: string;
     rawData?: Record<string, any>; // 完整的原始数据
   };
+  onSuccess?: () => void;
 }
 
 /**
@@ -38,6 +40,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   isOpen,
   onClose,
   prediction,
+  onSuccess,
 }) => {
   const [amount, setAmount] = useState('0');
   // 防抖后的金额值，用于合约调用
@@ -58,6 +61,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const walletAddress = wallets[0]?.address || '';
   const { buySharesWithApproval, isPending, currentStep, error } =
     useBuyShares();
+  const { balance: tokenBalance } = useTokenBalance();
 
   // 监听成功状态，自动关闭并跳转
   useEffect(() => {
@@ -67,12 +71,13 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
         description: 'Successfully purchased shares!',
         color: 'success',
       });
+      onSuccess?.(); // 调用成功回调刷新数据
       setTimeout(() => {
         onClose();
         router.push('/launchpad');
       }, 1500);
     }
-  }, [currentStep, onClose, router]);
+  }, [currentStep, onClose, router, onSuccess]);
 
   // 监听错误状态，使用toast提示
   useEffect(() => {
@@ -256,6 +261,17 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       return;
     }
 
+    // 检查余额
+    const amountInWei = BigInt(Math.floor(amountValue * 1e18));
+    if (tokenBalance < amountInWei) {
+      addToast({
+        title: 'Error',
+        description: `Insufficient balance. Required: ${amountValue.toFixed(2)}, Current: ${(Number(tokenBalance) / 1e18).toFixed(2)}`,
+        color: 'danger',
+      });
+      return;
+    }
+
     try {
       setOperationError(null);
       setSuccessMessage(null);
@@ -264,7 +280,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       const marketId = BigInt(prediction.id);
       // 合约期望：yes = 1, no = 2
       const side = selectedOption === 'yes' ? 1 : 2;
-      const amountInWei = BigInt(Math.floor(amountValue * 1e18));
 
       console.log('=== 开始批量交易（Approve + BuyShares）===');
 

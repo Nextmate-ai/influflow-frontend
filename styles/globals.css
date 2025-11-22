@@ -81,3 +81,30 @@ body {
 .modal-left-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #3b82f6;
 }
+
+/* 修复 datetime-local 输入框的中文显示问题 */
+input[type="datetime-local"]::-webkit-datetime-edit-text {
+  color: white;
+}
+input[type="datetime-local"]::-webkit-datetime-edit-month-field {
+  color: white;
+}
+input[type="datetime-local"]::-webkit-datetime-edit-day-field {
+  color: white;
+}
+input[type="datetime-local"]::-webkit-datetime-edit-year-field {
+  color: white;
+}
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field {
+  color: white;
+}
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field {
+  color: white;
+}
+input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
+  color: white;
+}
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(1);
+}

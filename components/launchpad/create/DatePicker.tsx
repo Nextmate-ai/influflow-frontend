@@ -30,7 +30,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           type="datetime-local"
           value={closingTime}
           onChange={(e) => onClosingTimeChange(e.target.value)}
-          className="w-full"
+          className="w-full [&_input::-webkit-calendar-picker-indicator]:cursor-pointer [&_input::-webkit-datetime-edit-text]:text-white [&_input::-webkit-datetime-edit-month-field]:text-white [&_input::-webkit-datetime-edit-day-field]:text-white [&_input::-webkit-datetime-edit-year-field]:text-white [&_input::-webkit-datetime-edit-hour-field]:text-white [&_input::-webkit-datetime-edit-minute-field]:text-white [&_input::-webkit-datetime-edit-ampm-field]:text-white"
+          lang="en"
           classNames={{
             input: 'bg-transparent text-white',
             inputWrapper:
@@ -48,7 +49,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           type="datetime-local"
           value={resultTime}
           onChange={(e) => onResultTimeChange(e.target.value)}
-          className="w-full"
+          className="w-full [&_input::-webkit-calendar-picker-indicator]:cursor-pointer [&_input::-webkit-datetime-edit-text]:text-white [&_input::-webkit-datetime-edit-month-field]:text-white [&_input::-webkit-datetime-edit-day-field]:text-white [&_input::-webkit-datetime-edit-year-field]:text-white [&_input::-webkit-datetime-edit-hour-field]:text-white [&_input::-webkit-datetime-edit-minute-field]:text-white [&_input::-webkit-datetime-edit-ampm-field]:text-white"
+          lang="en"
           classNames={{
             input: 'bg-transparent text-white',
             inputWrapper:

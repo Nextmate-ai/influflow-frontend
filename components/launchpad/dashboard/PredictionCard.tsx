@@ -63,6 +63,21 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
         ? parseFloat(String(rawData.noInvestedRatio))
         : undefined;
 
+  // 获取市场状态
+  const getMarketStatus = () => {
+    const state = rawData?.state;
+    if (state === 0 || state === '0' || state === 'Active') {
+      return { label: 'Active', color: 'text-green-400' };
+    } else if (state === 1 || state === '1' || state === 'Resolved') {
+      return { label: 'Resolved', color: 'text-blue-400' };
+    } else if (state === 2 || state === '2' || state === 'Void') {
+      return { label: 'Void', color: 'text-gray-400' };
+    }
+    return { label: 'Active', color: 'text-green-400' }; // 默认
+  };
+
+  const marketStatus = getMarketStatus();
+
   // 如果有 invested_ratio，使用它们来计算进度条宽度，否则使用传入的百分比
   const displayYesPercentage =
     yesInvestedRatio !== undefined
@@ -148,9 +163,14 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
           />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="line-clamp-2 text-base leading-[32px] text-white">
-            {title}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="line-clamp-2 text-base leading-[32px] text-white">
+              {title}
+            </h3>
+            <span className={`shrink-0 text-xs font-medium ${marketStatus.color}`}>
+              {marketStatus.label}
+            </span>
+          </div>
         </div>
       </div>
 
