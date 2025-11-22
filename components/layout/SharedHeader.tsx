@@ -76,19 +76,19 @@ export const SharedHeader = ({
     <>
       <div
         className={cn(
-          'relative z-10 my-[30px] flex w-full items-center justify-between bg-transparent px-[64px]',
+          'relative z-10 my-[30px] flex w-full items-center justify-between bg-transparent px-4 md:px-[64px]',
           className,
         )}
       >
         <Image
-          className="ml-3 h-[24px] w-auto"
+          className="ml-0 md:ml-3 h-[20px] md:h-[24px] w-auto"
           src="/images/logo_white.png"
           width={159}
           height={30}
           alt="Influxy Logo"
         />
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {/* Launchpad 页面显示钱包连接按钮 */}
           {isLaunchPadPage ? (
             <WalletConnect
@@ -103,7 +103,7 @@ export const SharedHeader = ({
                   className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-80"
                 >
                   {/* 用户头像 - 优先显示 X/Twitter 头像 */}
-                  <div className="relative size-12 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30">
+                  <div className="relative size-10 md:size-12 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30">
                     {authInfo?.avatar && !avatarError ? (
                       <img
                         src={authInfo.avatar}
@@ -129,7 +129,7 @@ export const SharedHeader = ({
                     )}
                   </div>
                   {/* 用户信息 - 优先显示 X/Twitter username */}
-                  <div className="flex flex-col items-start">
+                  <div className="hidden md:flex flex-col items-start">
                     <span className="text-sm font-medium text-white">
                       {authInfo?.username ? `@${authInfo.username}` : authInfo?.name || user.name || 'User'}
                     </span>
@@ -140,7 +140,7 @@ export const SharedHeader = ({
                 </button>
               ) : (
                 <button
-                  className="mr-3 h-[40px] w-[96px] rounded-[5px] bg-[#252525] text-white"
+                  className="mr-0 md:mr-3 h-[36px] md:h-[40px] w-[80px] md:w-[96px] rounded-[5px] bg-[#252525] text-sm md:text-base text-white"
                   onClick={() => openLoginModal()}
                 >
                   Login

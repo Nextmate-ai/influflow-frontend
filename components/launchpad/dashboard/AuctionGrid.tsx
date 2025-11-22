@@ -27,10 +27,7 @@ export const AuctionGrid: React.FC<AuctionGridProps> = ({
 }) => {
   return (
     <div
-      className="grid gap-x-[52px] gap-y-[42px]"
-      style={{
-        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-      }}
+      className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-x-[52px] md:gap-y-[42px]"
     >
       {predictions.map((prediction) => (
         <PredictionCard

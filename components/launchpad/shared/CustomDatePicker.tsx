@@ -39,8 +39,9 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       const rect = inputRef.current.getBoundingClientRect();
       // 日历的实际高度：月份导航(48px) + 星期标题(32px) + 日期网格(约240px，6行*40px) + 今天按钮(48px) + padding(32px) = 约400px
       // 但为了安全，使用更准确的计算
-      const popupHeight = 360; // 弹出层的实际高度（Today按钮移到横向后高度减少）
-      const popupWidth = 320; // 弹出层的宽度（横向拉宽）
+      const isMobile = window.innerWidth < 768;
+      const popupHeight = isMobile ? 340 : 360; // 移动端稍微小一点
+      const popupWidth = isMobile ? Math.min(340, window.innerWidth - 32) : 320; // 移动端适配屏幕宽度
       const viewportHeight = window.innerHeight;
       const viewportWidth = window.innerWidth;
       
@@ -62,13 +63,18 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       
       // 计算水平位置
       let left = rect.left + window.scrollX;
-      // 如果右侧空间不足，则向左调整
-      if (left + popupWidth > viewportWidth + window.scrollX) {
-        left = viewportWidth + window.scrollX - popupWidth - 16;
-      }
-      // 确保不超出左边界
-      if (left < window.scrollX) {
-        left = window.scrollX + 16;
+      // 移动端居中显示
+      if (isMobile) {
+        left = (viewportWidth - popupWidth) / 2 + window.scrollX;
+      } else {
+        // 桌面端：如果右侧空间不足，则向左调整
+        if (left + popupWidth > viewportWidth + window.scrollX) {
+          left = viewportWidth + window.scrollX - popupWidth - 16;
+        }
+        // 确保不超出左边界
+        if (left < window.scrollX) {
+          left = window.scrollX + 16;
+        }
       }
       
       setPopupPosition({ top, left });
@@ -211,29 +217,30 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
     );
   };
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const popupContent = isOpen && popupPosition && typeof window !== 'undefined' && (
     <div
       ref={pickerRef}
       data-date-picker
-      className="fixed z-[10000] w-[320px] overflow-y-auto rounded-2xl border border-[#2DC3D9] bg-[#0B041E] p-4 shadow-xl"
+      className={`fixed z-[10000] ${isMobile ? 'w-[calc(100vw-32px)] max-w-[340px]' : 'w-[320px]'} overflow-y-auto rounded-2xl border border-[#2DC3D9] bg-[#0B041E] p-3 md:p-4 shadow-xl`}
       onClick={(e) => {
         // 只阻止冒泡到 Modal，不影响内部点击
         e.stopPropagation();
       }}
       style={{
-        top: `${popupPosition.top - 20}px`,
+        top: `${popupPosition.top - (isMobile ? 10 : 20)}px`,
         left: `${popupPosition.left}px`,
-        // maxHeight: `${Math.min(360, Math.max(300, window.innerHeight - (popupPosition.top - window.scrollY) - 16))}px`,
+        maxHeight: isMobile ? `${Math.min(340, window.innerHeight - 32)}px` : undefined,
       }}
     >
       {/* 月份导航和Today按钮 */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-3 md:mb-4 flex items-center justify-between">
         <button
           onClick={handlePrevMonth}
-          className="rounded-lg p-2 text-white transition-colors hover:bg-[#2DC3D9]/20"
+          className="rounded-lg p-1.5 md:p-2 text-white transition-colors hover:bg-[#2DC3D9]/20"
         >
           <svg
-            className="h-5 w-5"
+            className="h-4 w-4 md:h-5 md:w-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -246,22 +253,22 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             />
           </svg>
         </button>
-        <div className="text-base font-semibold text-white">
+        <div className="text-sm md:text-base font-semibold text-white">
           {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <button
             onClick={handleToday}
-            className="rounded-lg bg-[#2DC3D9]/20 px-3 py-1.5 text-xs font-medium text-[#2DC3D9] transition-colors hover:bg-[#2DC3D9]/30"
+            className="rounded-lg bg-[#2DC3D9]/20 px-2 md:px-3 py-1 md:py-1.5 text-[10px] md:text-xs font-medium text-[#2DC3D9] transition-colors hover:bg-[#2DC3D9]/30"
           >
             Today
           </button>
           <button
             onClick={handleNextMonth}
-            className="rounded-lg p-2 text-white transition-colors hover:bg-[#2DC3D9]/20"
+            className="rounded-lg p-1.5 md:p-2 text-white transition-colors hover:bg-[#2DC3D9]/20"
           >
             <svg
-              className="h-5 w-5"
+              className="h-4 w-4 md:h-5 md:w-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -282,7 +289,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         {dayNames.map((day) => (
           <div
             key={day}
-            className="flex items-center justify-center py-2 text-xs font-medium text-gray-400"
+            className="flex items-center justify-center py-1.5 md:py-2 text-[10px] md:text-xs font-medium text-gray-400"
           >
             {day}
           </div>
@@ -293,7 +300,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       <div className="grid grid-cols-7 gap-1">
         {days.map((day, index) => {
           if (day === null) {
-            return <div key={index} className="h-10" />;
+            return <div key={index} className="h-8 md:h-10" />;
           }
 
           const isTodayDate = isToday(day);
@@ -303,7 +310,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             <button
               key={index}
               onClick={() => handleDateSelect(day)}
-              className={`h-10 rounded-lg text-sm font-medium transition-all ${
+              className={`h-8 md:h-10 rounded-lg text-xs md:text-sm font-medium transition-all ${
                 isSelectedDate
                   ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
                   : isTodayDate

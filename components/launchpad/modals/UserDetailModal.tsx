@@ -308,16 +308,34 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       hideCloseButton
       isDismissable={!isPending}
       isKeyboardDismissDisabled={isPending}
+      classNames={{
+        wrapper: 'md:p-4',
+        base: 'md:max-w-[1200px] md:max-h-[90vh]',
+      }}
     >
-      <ModalContent className="rounded-2xl border border-[#60A5FA] bg-[#0B041E] p-0">
+      <ModalContent className="rounded-none md:rounded-2xl bg-[#0B041E] p-0 h-full md:h-auto max-h-screen md:max-h-[90vh] overflow-hidden">
         {(onClose) => (
-          <div className="relative flex h-full max-h-[75vh] flex-col">
-            <div className="flex h-full flex-row overflow-hidden">
+          <div className="relative flex h-full flex-col">
+            {/* 移动端顶部返回按钮区域 */}
+            <div className="md:hidden flex items-center h-14 px-4 border-b border-[#60A5FA]/20 shrink-0">
+              <button
+                onClick={onClose}
+                disabled={isPending}
+                className="flex items-center justify-center w-10 h-10 text-white transition-colors hover:text-[#60A5FA] disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                <img
+                  src="/icons/back-arrow.png"
+                  alt="Back"
+                  className="w-6 h-6"
+                />
+              </button>
+            </div>
+            <div className="flex h-full flex-col md:flex-row overflow-hidden">
               {/* 左侧面板 - 预测详情 */}
-              <div className="modal-left-scrollbar flex-1 overflow-y-auto border-r border-[#60A5FA] p-8">
+              <div className="modal-left-scrollbar flex-1 overflow-y-auto border-b md:border-b-0 md:border-r border-[#60A5FA] p-4 md:p-8">
                 {/* 用户头像和Name */}
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="relative size-16 shrink-0 overflow-hidden rounded-full">
+                <div className="mb-4 md:mb-6 flex items-center gap-3 md:gap-4">
+                  <div className="relative size-12 md:size-16 shrink-0 overflow-hidden rounded-full">
                     <Image
                       src="/images/avatar_bg.png"
                       alt={prediction.title}
@@ -325,25 +343,26 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       className="object-cover"
                     />
                   </div>
-                  <div className="max-w-[200px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-base font-medium text-transparent">
+                  <div className="max-w-[200px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-sm md:text-base font-medium text-transparent">
                     {creator.slice(0, 6)}...{creator.slice(-4)}
                   </div>
                 </div>
 
                 {/* 预测问题 */}
-                <h2 className="mb-6 text-2xl font-semibold leading-tight text-white">
+                <h2 className="mb-4 md:mb-6 text-lg md:text-2xl font-semibold leading-tight text-white">
                   {prediction.title}
                 </h2>
 
                 {/* 交易量和剩余时间 - 使用 StatCard */}
-                <div className="mb-8 flex items-center gap-4">
+                <div className="mb-6 md:mb-8 flex items-center gap-3 md:gap-4">
                   <StatCard
                     icon={
                       <Image
                         src="/images/volume.png"
                         alt="volume"
-                        width={12}
-                        height={12}
+                        width={10}
+                        height={10}
+                        className="md:w-3 md:h-3"
                       />
                     }
                     label=""
@@ -354,8 +373,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       <Image
                         src="/images/timer.png"
                         alt="timer"
-                        width={12}
-                        height={12}
+                        width={10}
+                        height={10}
+                        className="md:w-3 md:h-3"
                       />
                     }
                     label=""
@@ -364,11 +384,11 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 </div>
 
                 {/* 投票状态 */}
-                <div className="mb-8">
-                  <div className="mb-4 text-base font-medium text-white">
+                <div className="mb-6 md:mb-8">
+                  <div className="mb-3 md:mb-4 text-sm md:text-base font-medium text-white">
                     Voting Status:
                   </div>
-                  <div className="relative h-10 w-full overflow-visible rounded-full">
+                  <div className="relative h-8 md:h-10 w-full overflow-visible rounded-full">
                     {/* 左侧渐变条 */}
                     <div
                       className="absolute left-0 top-0 flex h-full items-center rounded-l-full bg-gradient-to-r from-[#00B2FF] to-[#00FFD0]"
@@ -378,10 +398,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       }}
                     >
                       <span
-                        className="whitespace-nowrap text-sm font-medium text-white"
+                        className="whitespace-nowrap text-xs md:text-sm font-medium text-white"
                         style={{
-                          paddingLeft: '12px',
-                          paddingRight: realYesPercentage < 20 ? '8px' : '12px',
+                          paddingLeft: '8px',
+                          paddingRight: realYesPercentage < 20 ? '4px' : '8px',
                         }}
                       >
                         {yesInvestedRatio !== undefined
@@ -398,10 +418,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         }}
                       >
                         <span
-                          className="whitespace-nowrap text-sm font-medium text-white"
+                          className="whitespace-nowrap text-xs md:text-sm font-medium text-white"
                           style={{
-                            paddingLeft: realNoPercentage < 20 ? '8px' : '12px',
-                            paddingRight: '12px',
+                            paddingLeft: realNoPercentage < 20 ? '4px' : '8px',
+                            paddingRight: '8px',
                           }}
                         >
                           {noInvestedRatio !== undefined
@@ -411,8 +431,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       </div>
                     )}
                     {realNoPercentage === 0 && (
-                      <div className="absolute right-0 top-0 flex h-full items-center justify-end pr-3">
-                        <span className="whitespace-nowrap text-sm font-medium text-white">
+                      <div className="absolute right-0 top-0 flex h-full items-center justify-end pr-2 md:pr-3">
+                        <span className="whitespace-nowrap text-xs md:text-sm font-medium text-white">
                           0% No
                         </span>
                       </div>
@@ -429,9 +449,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       <Image
                         src="/images/lightning.png"
                         alt="divider"
-                        width={32}
-                        height={32}
-                        className="h-10 w-auto"
+                        width={24}
+                        height={24}
+                        className="h-6 md:h-10 w-auto"
                       />
                     </div>
                   </div>
@@ -439,69 +459,69 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* 规则部分 */}
                 <div>
-                  <div className="mb-4 text-base font-medium text-white">
+                  <div className="mb-3 md:mb-4 text-sm md:text-base font-medium text-white">
                     Rules:
                   </div>
-                  <div className="pr-2 text-sm leading-relaxed text-gray-400">
+                  <div className="pr-2 text-xs md:text-sm leading-relaxed text-gray-400">
                     {rulesText}
                   </div>
                 </div>
               </div>
 
               {/* 右侧面板 - My Bid */}
-              <div className="flex flex-1 flex-col overflow-hidden p-8">
+              <div className="flex flex-1 flex-col overflow-hidden p-4 md:p-8">
                 {/* My Bid 标题和关闭按钮 */}
-                <div className="mb-8 flex items-center justify-between">
-                  <h3 className="text-2xl font-semibold text-white">My Bid</h3>
+                <div className="mb-6 md:mb-8 flex items-center justify-between">
+                  <h3 className="text-xl md:text-2xl font-semibold text-white">My Bid</h3>
                   <button
                     onClick={onClose}
                     disabled={isPending}
-                    className="text-2xl font-light text-white hover:text-gray-300 disabled:cursor-not-allowed disabled:opacity-30"
+                    className="hidden md:block text-2xl font-light text-white hover:text-gray-300 disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     ✕
                   </button>
                 </div>
 
                 {/* Vote for 选项 */}
-                <div className="mb-8">
-                  <div className="mb-4 text-base font-medium text-[#58C0CE]">
+                <div className="mb-6 md:mb-8">
+                  <div className="mb-3 md:mb-4 text-sm md:text-base font-medium text-[#58C0CE]">
                     Vote for:
                   </div>
-                  <div className="flex gap-4">
+                  <div className="flex gap-3 md:gap-4">
                     <button
                       onClick={() => setSelectedOption('yes')}
-                      className={`h-12 rounded-2xl font-semibold transition-all duration-200 ${
+                      className={`h-10 md:h-12 flex-1 md:flex-initial rounded-2xl text-sm md:text-base font-semibold transition-all duration-200 ${
                         selectedOption === 'yes'
                           ? 'border-2 border-[#07B6D4] text-white'
                           : 'border-2 border-gray-600 bg-transparent text-gray-400 hover:border-gray-500'
                       }`}
                       style={{
-                        width: '102px',
                         ...(selectedOption === 'yes'
                           ? {
                               background:
                                 'linear-gradient(to right, #040E1E, #268DA4)',
                             }
                           : {}),
+                        ...(selectedOption !== 'yes' ? { width: '102px' } : {}),
                       }}
                     >
                       Yes
                     </button>
                     <button
                       onClick={() => setSelectedOption('no')}
-                      className={`h-12 rounded-2xl font-semibold transition-all duration-200 ${
+                      className={`h-10 md:h-12 flex-1 md:flex-initial rounded-2xl text-sm md:text-base font-semibold transition-all duration-200 ${
                         selectedOption === 'no'
                           ? 'border-2 border-[#CB30E0] text-white'
                           : 'border-2 border-gray-600 bg-transparent text-gray-400 hover:border-gray-500'
                       }`}
                       style={{
-                        width: '102px',
                         ...(selectedOption === 'no'
                           ? {
                               background:
                                 'linear-gradient(to right, #D245C3 0%, #5731AC 100%)',
                             }
                           : {}),
+                        ...(selectedOption !== 'no' ? { width: '102px' } : {}),
                       }}
                     >
                       No
@@ -510,8 +530,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 </div>
 
                 {/* Amount 输入 */}
-                <div className="mb-6">
-                  <div className="mb-4 text-base font-medium text-[#58C0CE]">
+                <div className="mb-4 md:mb-6">
+                  <div className="mb-3 md:mb-4 text-sm md:text-base font-medium text-[#58C0CE]">
                     Amount
                   </div>
                   <div className="relative">
@@ -522,12 +542,12 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       className="w-full"
                       classNames={{
                         input:
-                          'bg-transparent text-white text-right text-3xl font-semibold pr-4',
+                          'bg-transparent text-white text-right text-2xl md:text-3xl font-semibold pr-4',
                         inputWrapper:
-                          'bg-transparent border-2 border-[#07B6D4] rounded-2xl h-16',
+                          'bg-transparent border-2 border-[#07B6D4] rounded-2xl h-14 md:h-16',
                       }}
                       startContent={
-                        <span className="pl-4 text-2xl font-semibold text-white">
+                        <span className="pl-4 text-xl md:text-2xl font-semibold text-white">
                           $
                         </span>
                       }
@@ -536,12 +556,12 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 </div>
 
                 {/* Payout if you win */}
-                <div className="mb-8">
+                <div className="mb-6 md:mb-8">
                   <div className="flex items-center justify-between">
-                    <span className="text-base text-white">
+                    <span className="text-sm md:text-base text-white">
                       Payout if you win
                     </span>
-                    <span className="text-lg font-semibold text-white">
+                    <span className="text-base md:text-lg font-semibold text-white">
                       ${payoutIfWin}
                     </span>
                   </div>
@@ -560,9 +580,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 )}
 
                 {/* Join 按钮 */}
-                <div className="mt-auto flex flex-col items-end gap-2">
+                <div className="mt-auto flex flex-col items-stretch md:items-end gap-2 pt-4 md:pt-0">
                   <div
-                    className="h-[56px] w-[168px] rounded-2xl p-[2px]"
+                    className="h-[48px] md:h-[56px] w-full md:w-[168px] rounded-2xl p-[2px]"
                     style={{
                       background:
                         'linear-gradient(to right, #1FA2FF, #12D8FA, #870CD8)',
@@ -576,7 +596,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         !selectedOption ||
                         parseFloat(amount) <= 0
                       }
-                      className="size-full rounded-2xl bg-[#0B041E] text-lg font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="size-full rounded-2xl bg-[#0B041E] text-base md:text-lg font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isPending
                         ? currentStep === 'approving'
@@ -588,7 +608,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     </button>
                   </div>
                   {!authenticated && (
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-gray-400 text-center md:text-right">
                       Please connect wallet
                     </span>
                   )}
