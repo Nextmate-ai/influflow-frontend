@@ -1,149 +1,103 @@
-/**
- * Token Approve Hook
- * 授权合约使用用户的 token
- */
+// /**
+//  * Token Approve Hook
+//  * 授权合约使用用户的 token
+//  * 使用 Privy 的 gas sponsorship（客户端直接调用）
+//  */
 
-import { useMemo } from 'react';
-import {
-  createThirdwebClient,
-  getContract,
-  prepareContractCall,
-} from 'thirdweb';
-import { baseSepolia } from 'thirdweb/chains';
-import { useActiveWallet, useSendTransaction } from 'thirdweb/react';
+// import { useCallback, useState } from 'react';
+// import { useSendTransaction } from '@privy-io/react-auth';
+// import { encodeFunctionData } from 'viem';
 
-import { THIRDWEB_CLIENT_ID, TOKEN_CONTRACT_ADDRESS } from '@/constants/env';
+// import { tokenContract } from '@/lib/contracts/predictionMarket';
 
-// 创建 Thirdweb 客户端
-const client = createThirdwebClient({
-  clientId: THIRDWEB_CLIENT_ID,
-});
+// /**
+//  * Token Approve Hook
+//  * 用于授权合约使用用户的 token
+//  */
+// export function useTokenApprove() {
+//   const { sendTransaction } = useSendTransaction();
+//   const [isPending, setIsPending] = useState(false);
+//   const [error, setError] = useState<Error | null>(null);
+//   const [txHash, setTxHash] = useState<string | null>(null);
 
-// 创建 Token 合约实例
-const tokenContract = getContract({
-  client,
-  chain: baseSepolia,
-  address: TOKEN_CONTRACT_ADDRESS,
-});
+//   /**
+//    * Approve 操作
+//    */
+//   const approve = useCallback(
+//     async (spender: string, amount: bigint) => {
+//       try {
+//         setIsPending(true);
+//         setError(null);
+//         setTxHash(null);
 
-/**
- * Token Approve 参数
- */
-export interface ApproveParams {
-  spender: string; // 被授权的地址
-  amount: bigint; // 授权金额（wei）
-}
+//         console.log('=== Approve 调用参数 ===');
+//         console.log('Spender:', spender);
+//         console.log('Amount:', amount.toString());
+//         console.log('Amount (ETH):', Number(amount) / 1e18);
 
-/**
- * Token Approve Hook
- * 用于授权合约使用用户的 token
- */
-export function useTokenApprove() {
-  const wallet = useActiveWallet();
-  // 禁用 payModal 以确保显示签名弹窗
-  const { mutate: sendTransaction, isPending, error } = useSendTransaction({});
+//         // 验证参数
+//         if (
+//           !spender ||
+//           spender === '0x0000000000000000000000000000000000000000'
+//         ) {
+//           throw new Error('Invalid spender address');
+//         }
 
-  /**
-   * Approve 操作
-   * 注意：这里需要调用 token 合约的 approve 方法，而不是市场合约
-   * 当前使用市场合约地址作为临时值，需要替换为实际的 token 合约地址
-   */
-  const approve = useMemo(
-    () => (spender: string, amount: bigint) => {
-      // 打印入参
-      console.log('=== Approve 调用参数 ===');
-      console.log('Token Contract Address:', TOKEN_CONTRACT_ADDRESS);
-      console.log('User Address:', wallet?.getAccount()?.address);
-      console.log('spender:', spender);
-      console.log('amount:', amount.toString());
-      console.log('amount (hex):', '0x' + amount.toString(16));
-      console.log('amount (ETH):', Number(amount) / 1e18);
+//         if (amount <= BigInt(0)) {
+//           throw new Error('Invalid amount');
+//         }
 
-      if (!wallet) {
-        console.error('Wallet not connected');
-        return;
-      }
+//         // 编码 approve 调用数据
+//         const data = encodeFunctionData({
+//           abi: tokenContract.abi,
+//           functionName: 'approve',
+//           args: [spender as `0x${string}`, amount],
+//         });
 
-      // 验证参数
-      if (
-        !spender ||
-        spender === '0x0000000000000000000000000000000000000000'
-      ) {
-        console.error('Invalid spender address');
-        return;
-      }
+//         // 使用 Privy 的 sendTransaction 并启用 gas sponsorship
+//         const result = await sendTransaction(
+//           {
+//             to: tokenContract.address,
+//             data,
+//             value: BigInt(0),
+//           },
+//           {
+//             sponsor: true, // 启用 gas sponsorship
+//             uiOptions: {
+//               description: 'This transaction is sponsored by Nextmate. No gas fee required.',
+//               buttonText: 'Approve',
+//               transactionInfo: {
+//                 action: 'Approve Token',
+//                 contractInfo: {
+//                   name: 'USDC Token',
+//                 },
+//               },
+//               successHeader: 'Approval Successful!',
+//               successDescription: 'You can now proceed with your transaction.',
+//             },
+//           },
+//         );
 
-      if (amount <= BigInt(0)) {
-        console.error('Invalid amount');
-        return;
-      }
+//         console.log('=== Approve 成功 ===');
+//         console.log('Transaction hash:', result.hash);
+//         setTxHash(result.hash);
+//       } catch (err) {
+//         console.error('=== Approve 失败 ===');
+//         console.error('Error:', err);
+//         const error = err instanceof Error ? err : new Error(String(err));
+//         setError(error);
+//         throw error;
+//       } finally {
+//         setIsPending(false);
+//       }
+//     },
+//     [sendTransaction],
+//   );
 
-      const transaction = prepareContractCall({
-        contract: tokenContract,
-        method:
-          'function approve(address spender, uint256 amount) returns (bool)',
-        params: [spender, amount],
-      });
-
-      console.log('Transaction prepared:', transaction);
-      console.log('Transaction data:', {
-        to: transaction.to,
-        data: transaction.data,
-        value: transaction.value,
-      });
-      const transactionTo =
-        typeof transaction.to === 'string'
-          ? transaction.to
-          : typeof transaction.to === 'function'
-            ? 'function'
-            : String(transaction.to);
-      console.log('Contract address in transaction:', transactionTo);
-      if (typeof transactionTo === 'string') {
-        console.log(
-          'Is contract address correct?',
-          transactionTo.toLowerCase() === TOKEN_CONTRACT_ADDRESS.toLowerCase(),
-        );
-      }
-
-      console.log('=== 开始发送交易 ===');
-      console.log('Wallet account:', wallet.getAccount());
-
-      // 使用 useSendTransaction，禁用 payModal 以确保显示签名弹窗
-      sendTransaction(transaction, {
-        onSuccess: (result) => {
-          console.log('=== Approve 成功 ===');
-          console.log('Transaction result:', result);
-          console.log('Transaction hash:', result?.transactionHash);
-          console.log('Full result object:', JSON.stringify(result, null, 2));
-
-          // 尝试获取 receipt（如果存在）
-          if (result && typeof result === 'object') {
-            const resultAny = result as any;
-            if (resultAny.receipt) {
-              console.log('Receipt:', resultAny.receipt);
-              console.log('Receipt status:', resultAny.receipt.status);
-              console.log('Gas used:', resultAny.receipt.gasUsed?.toString());
-              console.log(
-                'Block number:',
-                resultAny.receipt.blockNumber?.toString(),
-              );
-            }
-          }
-        },
-        onError: (err) => {
-          console.error('=== Approve 失败 ===');
-          console.error('Error:', err);
-          console.error('Error message:', err?.message);
-          console.error('Error stack:', err?.stack);
-        },
-      });
-    },
-    [sendTransaction, wallet],
-  );
-
-  return {
-    approve,
-    isPending,
-    error,
-  };
-}
+//   return {
+//     approve,
+//     isPending,
+//     error,
+//     data: txHash,
+//   };
+// }

@@ -1,26 +1,14 @@
 /**
  * 领取测试 Token Hook
  * 调用合约的 claim() 方法领取测试代币
+ * 使用 Privy 的 gas sponsorship（客户端直接调用）
  */
 
-import { FAUCET_CONTRACT_ADDRESS, THIRDWEB_CLIENT_ID } from '@/constants/env';
-import { createThirdwebClient, getContract } from 'thirdweb';
-import { baseSepolia } from 'thirdweb/chains';
-import { useMemo } from 'react';
-import { prepareContractCall } from 'thirdweb';
-import { useSendTransaction } from 'thirdweb/react';
+import { useCallback, useState } from 'react';
+import { useSendTransaction } from '@privy-io/react-auth';
+import { encodeFunctionData } from 'viem';
 
-// 创建 Thirdweb 客户端
-const client = createThirdwebClient({
-  clientId: THIRDWEB_CLIENT_ID,
-});
-
-// 创建 Faucet 合约实例
-const faucetContract = getContract({
-  client,
-  chain: baseSepolia,
-  address: FAUCET_CONTRACT_ADDRESS,
-});
+import { faucetContract } from '@/lib/contracts/predictionMarket';
 
 export interface ClaimTokenOptions {
   onSuccess?: () => void;
@@ -32,24 +20,48 @@ export interface ClaimTokenOptions {
  * 可以重复调用
  */
 export function useTokenClaim() {
-  const { mutate: sendTransaction, isPending, error } = useSendTransaction();
+  const { sendTransaction } = useSendTransaction();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  const claim = useMemo(
-    () => (options?: ClaimTokenOptions) => {
-      const transaction = prepareContractCall({
-        contract: faucetContract,
-        method: 'function claim()',
-        params: [],
-      });
-      sendTransaction(transaction, {
-        onSuccess: () => {
-          options?.onSuccess?.();
-        },
-        onError: (error) => {
-          const err = error instanceof Error ? error : new Error(String(error));
-          options?.onError?.(err);
-        },
-      });
+  const claim = useCallback(
+    async (options?: ClaimTokenOptions) => {
+      try {
+        setIsPending(true);
+        setError(null);
+
+        // 编码合约调用数据
+        const data = encodeFunctionData({
+          abi: faucetContract.abi,
+          functionName: 'claim',
+        });
+
+        console.log('=== 开始领取 Token ===');
+        console.log('Faucet address:', faucetContract.address);
+
+        // 使用 Privy 的 sendTransaction 并启用 gas sponsorship
+        const txHash = await sendTransaction(
+          {
+            to: faucetContract.address as `0x${string}`,
+            data,
+            value: BigInt(0),
+          },
+          {
+            sponsor: true, // 启用 gas sponsorship
+          },
+        );
+
+        console.log('领取成功! Transaction hash:', txHash);
+        options?.onSuccess?.();
+      } catch (err) {
+        console.error('=== 领取 Token 失败 ===');
+        console.error('Error:', err);
+        const error = err instanceof Error ? err : new Error(String(err));
+        setError(error);
+        options?.onError?.(error);
+      } finally {
+        setIsPending(false);
+      }
     },
     [sendTransaction],
   );

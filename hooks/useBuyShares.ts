@@ -1,33 +1,24 @@
 /**
  * 购买份额 Hook
  * 包含 approve 和 buyShares 的完整流程
+ * 使用 Privy 的 gas sponsorship（客户端直接调用）
  */
 
-import {
-  PREDICTION_MARKET_CONTRACT_ADDRESS,
-  THIRDWEB_CLIENT_ID,
-  TOKEN_CONTRACT_ADDRESS,
-} from '@/constants/env';
-import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
-import { useMemo, useState } from 'react';
-import {
-  createThirdwebClient,
-  getContract,
-  prepareContractCall,
-} from 'thirdweb';
-import { baseSepolia } from 'thirdweb/chains';
-import { useActiveWallet, useSendBatchTransaction } from 'thirdweb/react';
+import { useCallback, useState } from 'react';
+import { useSendTransaction, useWallets } from '@privy-io/react-auth';
+import { createPublicClient, encodeFunctionData, http } from 'viem';
+import { baseSepolia } from 'viem/chains';
 
-// 创建 Thirdweb 客户端
-const client = createThirdwebClient({
-  clientId: THIRDWEB_CLIENT_ID,
-});
+import {
+  predictionMarketContract,
+  tokenContract,
+} from '@/lib/contracts/predictionMarket';
+import { PREDICTION_MARKET_CONTRACT_ADDRESS } from '@/constants/env';
 
-// 创建 Token 合约实例
-const tokenContract = getContract({
-  client,
+// 创建 public client 用于读取合约状态
+const publicClient = createPublicClient({
   chain: baseSepolia,
-  address: TOKEN_CONTRACT_ADDRESS,
+  transport: http(),
 });
 
 /**
@@ -35,73 +26,172 @@ const tokenContract = getContract({
  */
 export interface BuySharesParams {
   marketId: bigint; // 市场 ID
-  side: number; // 1 = Yes, 2 = No
+  side: 1 | 2; // 1 = Yes, 2 = No
   amount: bigint; // 购买金额（wei）
 }
 
 /**
  * 购买份额 Hook
- * 使用 EIP-7702 账户抽象批量交易
+ * 序列化执行 approve 和 buyShares 两笔交易
  */
 export function useBuyShares() {
-  const {
-    mutate: sendBatchTransaction,
-    isPending,
-    error,
-  } = useSendBatchTransaction();
-  const wallet = useActiveWallet();
+  const { sendTransaction } = useSendTransaction();
+  const { wallets } = useWallets();
+  const [isPending, setIsPending] = useState(false);
   const [currentStep, setCurrentStep] = useState<
-    'idle' | 'processing' | 'success' | 'error'
+    'idle' | 'approving' | 'buying' | 'success' | 'error'
   >('idle');
+  const [error, setError] = useState<Error | null>(null);
+  const [approveAmount, setApproveAmount] = useState<string>('');
 
   /**
-   * 批量购买份额
-   * 同时执行 approve 和 buyShares 两笔交易
-   * 用户只需签名一次，两笔交易原子性执行
+   * 购买份额（包含 approve）
+   * 序列化执行两笔交易
    */
-  const buySharesWithApproval = useMemo(
-    () =>
-      (params: BuySharesParams): Promise<void> => {
-        return new Promise((resolve, reject) => {
-          if (!wallet) {
-            reject(new Error('Wallet not connected'));
-            return;
-          }
+  const buySharesWithApproval = useCallback(
+    async (params: BuySharesParams): Promise<void> => {
+      try {
+        setIsPending(true);
+        setError(null);
+        setCurrentStep('approving');
 
-          setCurrentStep('processing');
+        console.log('=== 开始购买份额流程 ===');
+        console.log('Market ID:', params.marketId.toString());
+        console.log('Side:', params.side);
+        console.log('Amount:', params.amount.toString());
 
-          // 准备批量交易数组
-          const transactions = [
-            // 第一笔:Approve
-            prepareContractCall({
-              contract: tokenContract,
-              method:
-                'function approve(address spender, uint256 amount) returns (bool)',
-              params: [PREDICTION_MARKET_CONTRACT_ADDRESS, params.amount],
-            }),
-            // 第二笔:BuyShares
-            prepareContractCall({
-              contract: predictionMarketContract,
-              method:
-                'function buyShares(uint256 marketId, uint8 side, uint256 amount) returns (uint256 shares)',
-              params: [params.marketId, params.side, params.amount],
-            }),
-          ];
+        // 获取当前钱包地址
+        const wallet = wallets.find((w) => w.walletClientType === 'privy');
+        if (!wallet || !wallet.address) {
+          throw new Error('未找到钱包地址');
+        }
+        const userAddress = wallet.address as `0x${string}`;
+        console.log('用户地址:', userAddress);
 
-          // 使用批量交易发送
-          sendBatchTransaction(transactions, {
-            onSuccess: () => {
-              setCurrentStep('success');
-              resolve();
-            },
-            onError: (error) => {
-              setCurrentStep('error');
-              reject(error);
-            },
-          });
+        // 检查余额
+        const balance = await publicClient.readContract({
+          address: tokenContract.address,
+          abi: tokenContract.abi,
+          functionName: 'balanceOf',
+          args: [userAddress],
         });
-      },
-    [wallet, sendBatchTransaction],
+        console.log('Token 余额:', balance.toString());
+        console.log('需要金额:', params.amount.toString());
+
+        if (balance < params.amount) {
+          throw new Error(
+            `余额不足。需要 ${params.amount.toString()}, 当前余额 ${balance.toString()}`,
+          );
+        }
+
+        // 检查当前授权额度
+        const currentAllowance = await publicClient.readContract({
+          address: tokenContract.address,
+          abi: tokenContract.abi,
+          functionName: 'allowance',
+          args: [userAddress, PREDICTION_MARKET_CONTRACT_ADDRESS as `0x${string}`],
+        });
+        console.log('当前授权额度:', currentAllowance.toString());
+
+        // 第一步: Approve（仅当授权额度不足时）
+        if (currentAllowance < params.amount) {
+          console.log('步骤 1/2: 授权 Token...');
+
+          // 记录授权金额用于显示
+          const amountInTokens = (Number(params.amount) / 1e18).toFixed(2);
+          setApproveAmount(amountInTokens);
+
+          // 编码 approve 调用数据
+          const approveData = encodeFunctionData({
+            abi: tokenContract.abi,
+            functionName: 'approve',
+            args: [
+              PREDICTION_MARKET_CONTRACT_ADDRESS as `0x${string}`,
+              BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'), // 无限授权
+            ],
+          });
+
+          // 使用 Privy 的 sendTransaction 并启用 gas sponsorship
+          const approveTxResult = await sendTransaction(
+            {
+              to: tokenContract.address,
+              data: approveData,
+              value: BigInt(0),
+            },
+            {
+              sponsor: true, // 启用 gas sponsorship
+              uiOptions: {
+                description:
+                  'Before buying shares, you need to authorize the contract.',
+                buttonText: 'Approve',
+                transactionInfo: {
+                  action: 'Approve Token',
+                  contractInfo: {
+                    name: 'USDC Token',
+                  },
+                },
+                successHeader: 'Approval Successful!',
+                successDescription: 'Now proceeding to buy shares...',
+              },
+            },
+          );
+
+          console.log('授权交易已发送! Transaction hash:', approveTxResult.hash);
+          console.log('授权完成，继续购买流程!');
+        } else {
+          console.log('授权额度充足，跳过 approve 步骤');
+        }
+
+        // 第二步: Buy Shares
+        setCurrentStep('buying');
+        console.log('步骤 2/2: 购买份额...');
+
+        // 编码 buyShares 调用数据
+        const buySharesData = encodeFunctionData({
+          abi: predictionMarketContract.abi,
+          functionName: 'buyShares',
+          args: [params.marketId, params.side, params.amount],
+        });
+
+        // 使用 Privy 的 sendTransaction 并启用 gas sponsorship
+        const buySharesTxResult = await sendTransaction(
+          {
+            to: predictionMarketContract.address,
+            data: buySharesData,
+            value: BigInt(0),
+          },
+          {
+            sponsor: true, // 启用 gas sponsorship
+            uiOptions: {
+              description:
+                'Buy shares of the selected side',
+              buttonText: 'Buy Shares',
+              transactionInfo: {
+                action: 'Buy Shares',
+                contractInfo: {
+                  name: 'Prediction Market',
+                },
+              },
+              successHeader: 'Purchase Successful!',
+              successDescription: 'Your shares have been purchased successfully.',
+            },
+          },
+        );
+
+        console.log('购买成功! Transaction hash:', buySharesTxResult.hash);
+        setCurrentStep('success');
+      } catch (err) {
+        console.error('=== 购买份额失败 ===');
+        console.error('Error:', err);
+        const error = err instanceof Error ? err : new Error(String(err));
+        setError(error);
+        setCurrentStep('error');
+        throw error;
+      } finally {
+        setIsPending(false);
+      }
+    },
+    [sendTransaction, wallets],
   );
 
   return {
@@ -109,5 +199,6 @@ export function useBuyShares() {
     isPending,
     currentStep,
     error,
+    approveAmount,
   };
 }

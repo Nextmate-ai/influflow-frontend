@@ -1,7 +1,8 @@
 'use client';
 
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import Image from 'next/image';
-import { useActiveWallet } from 'thirdweb/react';
+import React from 'react';
 
 import { useWalletAuth } from '@/hooks/useWalletAuth';
 
@@ -15,15 +16,18 @@ interface WalletUserInfoProps {
  * 样式与 SharedHeader 中的用户信息展示完全一致
  */
 export function WalletUserInfo({ onClick }: WalletUserInfoProps) {
-  const wallet = useActiveWallet();
+  const { authenticated } = usePrivy();
+  const { wallets } = useWallets();
   const { authInfo, isLoading: isLoadingAuth } = useWalletAuth();
+  const [imageError, setImageError] = React.useState(false);
 
-  // 如果钱包未连接，不显示
-  if (!wallet) {
+  // 如果未认证,不显示
+  if (!authenticated) {
     return null;
   }
 
-  const address = wallet.getAccount()?.address || '';
+  // 获取第一个钱包地址
+  const address = wallets[0]?.address || '';
   const formattedAddress = address
     ? `${address.slice(0, 6)}...${address.slice(-4)}`
     : '';
@@ -32,7 +36,7 @@ export function WalletUserInfo({ onClick }: WalletUserInfoProps) {
   const displayName = authInfo?.name || authInfo?.username || formattedAddress;
 
   // 获取头像：优先使用 X 头像，否则使用基于地址生成的头像
-  const hasAvatar = !!authInfo?.avatar;
+  const hasAvatar = !!authInfo?.avatar && !imageError;
 
   return (
     <button
@@ -47,13 +51,12 @@ export function WalletUserInfo({ onClick }: WalletUserInfoProps) {
             alt={displayName}
             fill
             className="object-cover"
-            onError={(e) => {
-              // 如果头像加载失败，隐藏图片，显示默认头像
-              e.currentTarget.style.display = 'none';
+            onError={() => {
+              // 如果头像加载失败，切换到默认头像
+              setImageError(true);
             }}
           />
-        ) : null}
-        {!hasAvatar && (
+        ) : (
           <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
             <span className="text-lg font-semibold text-white">
               {address ? address.slice(2, 4).toUpperCase() : 'W'}

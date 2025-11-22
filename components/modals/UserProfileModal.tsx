@@ -1,28 +1,14 @@
 'use client';
 
 import { Modal, ModalContent } from '@heroui/react';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import Image from 'next/image';
 import React, { useEffect } from 'react';
-import { createThirdwebClient } from 'thirdweb';
-import { baseSepolia } from 'thirdweb/chains';
-import { ConnectButton, useActiveWallet } from 'thirdweb/react';
-import { inAppWallet } from 'thirdweb/wallets';
+import { formatEther } from 'viem';
 
 import { ClaimTokenButton } from '@/components/launchpad/ClaimTokenButton';
-import { THIRDWEB_CLIENT_ID, TOKEN_CONTRACT_ADDRESS } from '@/constants/env';
+import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { useAuthStore } from '@/stores/authStore';
-
-const client = createThirdwebClient({
-  clientId: THIRDWEB_CLIENT_ID,
-});
-
-const wallets = [
-  inAppWallet({
-    auth: {
-      options: ['x'],
-    },
-  }),
-];
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -42,13 +28,20 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onCreationsClick,
 }) => {
   const { user } = useAuthStore();
-  const wallet = useActiveWallet();
+  const { authenticated, logout } = usePrivy();
+  const { wallets } = useWallets();
 
   // 获取钱包地址
-  const walletAddress = wallet?.getAccount()?.address || '';
+  const walletAddress = wallets[0]?.address || '';
   const formattedAddress = walletAddress
     ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
     : 'Not Connected';
+
+  // 获取 Token 余额
+  const { balance: tokenBalance } = useTokenBalance();
+  const formattedTokenBalance = tokenBalance
+    ? parseFloat(formatEther(tokenBalance)).toFixed(2)
+    : '0.00';
 
   // 复制地址到剪贴板
   const handleCopyAddress = async () => {
@@ -142,13 +135,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               {/* 用户头像和钱包地址 */}
               <div className="mb-8 flex flex-col items-center">
                 <div className="relative mb-4 size-20 overflow-hidden rounded-full border-2 border-[#60A5FA]">
-                  {wallet ? (
+                  {authenticated && walletAddress ? (
                     // 如果有钱包，显示钱包头像（基于地址生成）
                     <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
                       <span className="text-2xl font-semibold text-white">
-                        {walletAddress
-                          ? walletAddress.slice(2, 4).toUpperCase()
-                          : 'W'}
+                        {walletAddress.slice(2, 4).toUpperCase()}
                       </span>
                     </div>
                   ) : user?.avatar ? (
@@ -169,7 +160,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   )}
                 </div>
                 {/* 钱包地址和复制按钮 */}
-                {wallet && walletAddress ? (
+                {authenticated && walletAddress ? (
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-white">
                       {formattedAddress}
@@ -202,32 +193,43 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 )}
               </div>
 
-              {/* My Wallet 部分 - 替换为 Thirdweb ConnectButton */}
+              {/* My Wallet 部分 */}
               <div className="mb-8">
                 <h3 className="mb-4 text-base font-medium text-white">
                   My Wallet
                 </h3>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 [&_button]:w-full [&_button]:!rounded-2xl [&_button]:!border [&_button]:!border-[#2DC3D9] [&_button]:!bg-transparent [&_button]:!p-4 [&_button]:!transition-all [&_button]:!duration-200 [&_button]:hover:!bg-[#2DC3D9]/10">
-                    <ConnectButton
-                      client={client}
-                      wallets={wallets}
-                      accountAbstraction={{
-                        chain: baseSepolia,
-                        sponsorGas: true,
-                      }}
-                      connectModal={{
-                        size: 'compact',
-                      }}
-                      theme="dark"
-                      detailsButton={{
-                        displayBalanceToken: {
-                          [baseSepolia.id]: TOKEN_CONTRACT_ADDRESS,
-                        },
-                      }}
-                    />
+                <div className="space-y-3">
+                  {/* Token Balance Display - 显示 Token 余额 */}
+                  {authenticated && walletAddress && (
+                    <div className="rounded-2xl border border-[#2DC3D9] bg-[#2DC3D9]/5 p-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-400">
+                          Token Balance
+                        </span>
+                        <span className="text-lg font-semibold text-white">
+                          {formattedTokenBalance}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {/* Actions Row - Faucet 和 Disconnect */}
+                  <div className="flex items-center gap-3">
+                    <ClaimTokenButton />
+                    <div className="flex-1">
+                      {authenticated ? (
+                        <button
+                          onClick={logout}
+                          className="w-full rounded-2xl border border-red-500 bg-transparent p-4 text-red-500 transition-all duration-200 hover:bg-red-500/10"
+                        >
+                          Disconnect
+                        </button>
+                      ) : (
+                        <div className="rounded-2xl border border-[#2DC3D9] bg-transparent p-4 text-center text-gray-400">
+                          Not connected
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <ClaimTokenButton />
                 </div>
               </div>
 

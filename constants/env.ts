@@ -14,13 +14,11 @@ export const showEmailAuth =
 export const enableArticleStreaming =
   process.env.NEXT_PUBLIC_ENABLE_ARTICLE_STREAMING === 'true';
 
-// Thirdweb Configuration
-export const THIRDWEB_CLIENT_ID =
-  process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID ||
-  'b5223df1a6e6f4c10c516b14d860dac2';
-export const THIRDWEB_SECRET_KEY =
-  process.env.THIRDWEB_SECRET_KEY ||
-  'UTqTC0QPjc22oNnCARPJEgAiT3DIAkAoc_9SuXWawy2_KDv6SqEa4IPvpB49fbcI5ieQ9m2I_otxQr5Tiuemlg';
+// Privy Configuration
+export const PRIVY_APP_ID =
+  process.env.NEXT_PUBLIC_PRIVY_APP_ID || '';
+export const PRIVY_APP_SECRET =
+  process.env.PRIVY_APP_SECRET || '';
 
 // Contract Configuration
 export const PREDICTION_MARKET_CONTRACT_ADDRESS =

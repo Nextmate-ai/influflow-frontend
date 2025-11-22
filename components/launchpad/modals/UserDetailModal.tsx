@@ -3,7 +3,8 @@
 import { Input, Modal, ModalContent } from '@heroui/react';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
-import { useActiveWallet, useReadContract } from 'thirdweb/react';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { useReadContract } from 'wagmi';
 
 import { useBuyShares } from '@/hooks/useBuyShares';
 import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
@@ -49,7 +50,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // 钱包和购买份额 hook
-  const wallet = useActiveWallet();
+  const { authenticated } = usePrivy();
+  const { wallets } = useWallets();
+  const walletAddress = wallets[0]?.address || '';
   const { buySharesWithApproval, isPending, currentStep, error } =
     useBuyShares();
 
@@ -95,24 +98,26 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       : BigInt(0);
 
   // 调用合约方法获取真实的 payout 值
-  // estimatePayout 返回 (uint256 shares, uint256 payout)
+  // estimatePayout 返回 (shares, payout) 两个值
   const { data: payoutData, isPending: isPayoutPending } = useReadContract({
-    contract: predictionMarketContract,
-    method:
-      'function estimatePayout(uint256 marketId, uint8 side, uint256 amount) view returns (uint256 shares, uint256 payout)',
-    params: [marketId, side, amountInWei],
-    queryOptions: {
+    ...predictionMarketContract,
+    functionName: 'estimatePayout',
+    args: selectedOption !== null && amountInWei > BigInt(0)
+      ? [marketId, side, amountInWei]
+      : undefined,
+    query: {
       enabled:
         isOpen &&
         debouncedAmountValue > 0 &&
         selectedOption !== null &&
         marketId > BigInt(0),
     },
-  });
+  }) as any;
 
   // 计算 payout 显示值（从 wei 转换为美元）
-  // payoutData 是一个元组 [shares, payout]
-  const [shares, payout] = payoutData || [BigInt(0), BigInt(0)];
+  // payoutData 现在是 [shares, payout] 数组
+  const shares = payoutData && Array.isArray(payoutData) ? payoutData[0] : BigInt(0);
+  const payout = payoutData && Array.isArray(payoutData) ? payoutData[1] : BigInt(0);
 
   // 判断是否正在加载或输入中
   const amountValue = parseFloat(amount) || 0;
@@ -123,7 +128,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const payoutIfWin =
     isInputting || isCalculating
       ? '...'
-      : payoutData && payout > BigInt(0)
+      : payout > BigInt(0)
         ? (Number(payout) / 1e18).toFixed(2)
         : '0.00';
 
@@ -201,7 +206,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
   // 使用批量交易：一次性完成 approve 和 buyShares
   const handleBuyShares = async () => {
-    if (!wallet) {
+    if (!authenticated) {
       setOperationError(new Error('Wallet not connected'));
       return;
     }
@@ -254,6 +259,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       backdrop="blur"
       className="dark"
       hideCloseButton
+      isDismissable={!isPending}
+      isKeyboardDismissDisabled={isPending}
     >
       <ModalContent className="rounded-2xl border border-[#60A5FA] bg-[#0B041E] p-0">
         {(onClose) => (
@@ -401,7 +408,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   <h3 className="text-2xl font-semibold text-white">My Bid</h3>
                   <button
                     onClick={onClose}
-                    className="text-2xl font-light text-white hover:text-gray-300"
+                    disabled={isPending}
+                    className="text-2xl font-light text-white hover:text-gray-300 disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     ✕
                   </button>
@@ -504,9 +512,14 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   </div>
                 )}
                 {/* 状态提示 */}
-                {currentStep === 'processing' && (
+                {currentStep === 'approving' && (
                   <div className="mb-4 text-sm text-[#86FDE8]">
-                    Sending Transaction...
+                    正在授权...（请勿关闭窗口）
+                  </div>
+                )}
+                {currentStep === 'buying' && (
+                  <div className="mb-4 text-sm text-[#86FDE8]">
+                    正在购买份额...
                   </div>
                 )}
 
@@ -522,17 +535,23 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     <button
                       onClick={handleBuyShares}
                       disabled={
-                        !wallet ||
+                        !authenticated ||
                         isPending ||
                         !selectedOption ||
                         parseFloat(amount) <= 0
                       }
                       className="size-full rounded-2xl bg-[#0B041E] text-lg font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {isPending ? '处理中...' : 'Join'}
+                      {isPending
+                        ? currentStep === 'approving'
+                          ? '授权中...'
+                          : currentStep === 'buying'
+                            ? '购买中...'
+                            : '处理中...'
+                        : 'Join'}
                     </button>
                   </div>
-                  {!wallet && (
+                  {!authenticated && (
                     <span className="text-xs text-gray-400">
                       Please connect wallet
                     </span>

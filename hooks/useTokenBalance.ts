@@ -3,42 +3,28 @@
  * 用于验证用户是否有足够的 token 余额
  */
 
-import { createThirdwebClient, getContract } from 'thirdweb';
-import { baseSepolia } from 'thirdweb/chains';
-import { useActiveWallet, useReadContract } from 'thirdweb/react';
+import { useWallets } from '@privy-io/react-auth';
+import { useReadContract } from 'wagmi';
 
-import { THIRDWEB_CLIENT_ID, TOKEN_CONTRACT_ADDRESS } from '@/constants/env';
-
-// 创建 Thirdweb 客户端
-const client = createThirdwebClient({
-  clientId: THIRDWEB_CLIENT_ID,
-});
-
-// 创建 Token 合约实例
-const tokenContract = getContract({
-  client,
-  chain: baseSepolia,
-  address: TOKEN_CONTRACT_ADDRESS,
-});
+import { tokenContract } from '@/lib/contracts/predictionMarket';
 
 /**
  * 检查用户 Token 余额
  */
 export function useTokenBalance() {
-  const wallet = useActiveWallet();
+  const { wallets } = useWallets();
+  const address = wallets[0]?.address;
 
   const {
     data: balance,
     isLoading,
     error,
   } = useReadContract({
-    contract: tokenContract,
-    method: 'function balanceOf(address owner) view returns (uint256)',
-    params: wallet
-      ? [wallet.getAccount()?.address || '']
-      : ['0x0000000000000000000000000000000000000000'],
-    queryOptions: {
-      enabled: !!wallet,
+    ...tokenContract,
+    functionName: 'balanceOf',
+    args: address ? [address as `0x${string}`] : undefined,
+    query: {
+      enabled: !!address,
     },
   });
 

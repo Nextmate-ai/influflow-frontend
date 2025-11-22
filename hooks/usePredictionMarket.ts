@@ -1,17 +1,17 @@
 /**
  * 读取单个预测市场数据的 Hook
- * 使用 thirdweb v5 的 useReadContract
+ * 使用 wagmi 的 useReadContract
  */
+
+import { useMemo } from 'react';
+import { useReadContract } from 'wagmi';
 
 import { PredictionCardData } from '@/components/launchpad/dashboard/PredictionCard';
 import {
-  GET_MARKET_METHOD,
   MarketResponse,
   predictionMarketContract,
 } from '@/lib/contracts/predictionMarket';
 import { mapMarketDataToPredictionCard } from '@/utils/contractDataMapper';
-import { useMemo } from 'react';
-import { useReadContract } from 'thirdweb/react';
 
 /**
  * 读取单个预测市场数据
@@ -28,10 +28,10 @@ export function usePredictionMarket(
   }, [marketId]);
 
   const { data, isLoading, error } = useReadContract({
-    contract: predictionMarketContract,
-    method: GET_MARKET_METHOD,
-    params: marketIdBigInt !== null ? [marketIdBigInt] : [BigInt(0)],
-    queryOptions: {
+    ...predictionMarketContract,
+    functionName: 'getMarket',
+    args: marketIdBigInt !== null ? [marketIdBigInt] : undefined,
+    query: {
       enabled: marketIdBigInt !== null,
     },
   });

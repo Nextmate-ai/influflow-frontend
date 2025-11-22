@@ -1,6 +1,6 @@
 'use client';
 
-import { useActiveWallet } from 'thirdweb/react';
+import { usePrivy } from '@privy-io/react-auth';
 
 import { addToast } from '@/components/base/toast';
 import { useTokenClaim } from '@/hooks/useTokenClaim';
@@ -10,11 +10,11 @@ import { useTokenClaim } from '@/hooks/useTokenClaim';
  * 仅在钱包连接后显示
  */
 export function ClaimTokenButton() {
-  const wallet = useActiveWallet();
+  const { authenticated } = usePrivy();
   const { claim, isPending } = useTokenClaim();
 
   // 如果钱包未连接，不显示按钮
-  if (!wallet) {
+  if (!authenticated) {
     return null;
   }
 
@@ -30,7 +30,8 @@ export function ClaimTokenButton() {
       onError: (error) => {
         addToast({
           title: 'Failed',
-          description: 'Failed to claim test tokens. Each address can only claim once per day.',
+          description:
+            'Failed to claim test tokens. Each address can only claim once per day.',
           color: 'danger',
         });
       },
@@ -47,4 +48,3 @@ export function ClaimTokenButton() {
     </button>
   );
 }
-
