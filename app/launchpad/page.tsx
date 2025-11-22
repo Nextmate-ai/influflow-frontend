@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { DashboardContent } from '@/components/launchpad/dashboard/DashboardContent';
 import { ParticipationsTable } from '@/components/launchpad/participations/ParticipationsTable';
 import { SharedHeader } from '@/components/layout/SharedHeader';
-import PrivyProvider from '@/components/providers/PrivyProvider';
 
 type ViewType = 'dashboard' | 'participations' | 'creations';
 
@@ -30,8 +29,7 @@ export default function LaunchPadDashboard() {
   };
 
   return (
-    <PrivyProvider>
-      <div className="min-h-screen bg-[#0B041E] pb-[32px] text-white">
+    <div className="min-h-screen bg-[#0B041E] pb-[32px] text-white">
         <SharedHeader
           className="my-0 py-[30px]"
           onProfileModalOpenChange={setIsProfileModalOpen}
@@ -98,6 +96,5 @@ export default function LaunchPadDashboard() {
           )}
         </div>
       </div>
-    </PrivyProvider>
   );
 }

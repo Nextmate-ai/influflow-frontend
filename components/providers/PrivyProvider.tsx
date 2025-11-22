@@ -2,7 +2,6 @@
 
 import { PrivyProvider as BasePrivyProvider } from '@privy-io/react-auth';
 import { WagmiProvider } from '@privy-io/wagmi';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { baseSepolia } from 'viem/chains';
 import { createConfig, http } from 'wagmi';
 
@@ -15,8 +14,6 @@ const wagmiConfig = createConfig({
     [baseSepolia.id]: http(),
   },
 });
-
-const queryClient = new QueryClient();
 
 export default function PrivyProvider({
   children,
@@ -51,9 +48,7 @@ export default function PrivyProvider({
         defaultChain: baseSepolia,
       }}
     >
-      <QueryClientProvider client={queryClient}>
-        <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
-      </QueryClientProvider>
+      <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
     </BasePrivyProvider>
   );
 }

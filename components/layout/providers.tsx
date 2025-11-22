@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import NoCreditsModal from '@/components/modals/NoCreditsModal';
+import PrivyProvider from '@/components/providers/PrivyProvider';
 import { SubscriptionSync } from '@/components/subscription/SubscriptionSync';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 
@@ -17,31 +18,33 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <HeroUIProvider navigate={router.push}>
       <QueryClientProvider client={queryClient}>
-        <ToastProvider
-          placement={'bottom-center'}
-          toastOffset={20}
-          toastProps={{
-            classNames: {
-              base: 'max-w-fit min-w-[100px]',
-              content: 'min-w-0',
-              wrapper: 'min-w-0',
-              title: 'break-words whitespace-normal',
-              description: 'break-words whitespace-normal',
-            },
-            variant: 'flat',
-          }}
-          regionProps={{
-            classNames: {
-              base: 'z-[1500]',
-            },
-          }}
-        />
-        <AuthProvider>{children}</AuthProvider>
-        <SubscriptionSync />
-        <NoCreditsModal
-          isOpen={showNoCreditsModal}
-          onClose={() => setShowNoCreditsModal(false)}
-        />
+        <PrivyProvider>
+          <ToastProvider
+            placement={'bottom-center'}
+            toastOffset={20}
+            toastProps={{
+              classNames: {
+                base: 'max-w-fit min-w-[100px]',
+                content: 'min-w-0',
+                wrapper: 'min-w-0',
+                title: 'break-words whitespace-normal',
+                description: 'break-words whitespace-normal',
+              },
+              variant: 'flat',
+            }}
+            regionProps={{
+              classNames: {
+                base: 'z-[1500]',
+              },
+            }}
+          />
+          <AuthProvider>{children}</AuthProvider>
+          <SubscriptionSync />
+          <NoCreditsModal
+            isOpen={showNoCreditsModal}
+            onClose={() => setShowNoCreditsModal(false)}
+          />
+        </PrivyProvider>
       </QueryClientProvider>
     </HeroUIProvider>
   );

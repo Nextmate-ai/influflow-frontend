@@ -9,11 +9,11 @@ const WalletConnectInner = dynamic(
   () => import('./WalletConnectInner').then((mod) => mod.WalletConnectInner),
   {
     ssr: false,
-    loading: () => (
-      <div className="rounded-lg bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] px-6 py-2 font-semibold text-white opacity-50">
-        加载中...
-      </div>
-    ),
+    loading: () =>
+      // <div className="rounded-lg bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] px-6 py-2 font-semibold text-white opacity-50">
+      //   加载中...
+      // </div>
+      null,
   },
 );
 
@@ -41,11 +41,10 @@ export function WalletConnect({
 
   // 在客户端挂载前不渲染
   if (!mounted) {
-    return (
-      <div className="rounded-lg bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] px-6 py-2 font-semibold text-white opacity-50">
-        加载中...
-      </div>
-    );
+    return null;
+    // <div className="rounded-lg bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] px-6 py-2 font-semibold text-white opacity-50">
+    //   加载中...
+    // </div>
   }
 
   return (
