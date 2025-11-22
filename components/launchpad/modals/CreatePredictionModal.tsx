@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useMarketCreation } from '@/hooks/useMarketCreation';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { addToast } from '@/components/base/toast';
+import { CustomDatePicker } from '../shared/CustomDatePicker';
 
 interface CreatePredictionModalProps {
   isOpen: boolean;
@@ -66,16 +67,19 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
   }, [error, currentStep]);
 
   // 将日期字符串转换为 Unix 时间戳（秒）
+  // 使用日期当天的 23:59:59 作为结束时间
   const endTime = useMemo(() => {
     try {
       if (!closingDate) {
         return BigInt(0);
       }
-      // 支持 datetime-local 格式 (YYYY-MM-DDTHH:mm)
+      // 支持 date 格式 (YYYY-MM-DD)，设置为当天的 23:59:59
       const date = new Date(closingDate);
       if (isNaN(date.getTime())) {
         return BigInt(0);
       }
+      // 设置为当天的 23:59:59
+      date.setHours(23, 59, 59, 999);
       return BigInt(Math.floor(date.getTime() / 1000));
     } catch {
       return BigInt(0);
@@ -244,10 +248,19 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
       backdrop="blur"
       className="dark"
       hideCloseButton
-      isDismissable={!isPending}
+      isDismissable={false}
       isKeyboardDismissDisabled={isPending}
     >
-      <ModalContent className="rounded-2xl border border-[#2DC3D9] bg-[#0B041E] p-0">
+      <ModalContent 
+        className="rounded-2xl border border-[#2DC3D9] bg-[#0B041E] p-0"
+        onClick={(e) => {
+          // 如果点击的是日期选择器，不关闭 Modal
+          const target = e.target as HTMLElement;
+          if (target.closest('[data-date-picker]')) {
+            e.stopPropagation();
+          }
+        }}
+      >
         {(onClose) => (
           <div className="relative flex flex-col">
             {/* 关闭按钮 */}
@@ -334,19 +347,10 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                   <label className="mb-1 block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-base font-medium text-transparent">
                     Prediction pool closing time
                   </label>
-                  <Input
+                  <CustomDatePicker
                     value={closingDate}
-                    onChange={(e) => setClosingDate(e.target.value)}
-                    type="datetime-local"
-                    className="w-full [&_input::-webkit-calendar-picker-indicator]:cursor-pointer [&_input::-webkit-datetime-edit-text]:text-white [&_input::-webkit-datetime-edit-month-field]:text-white [&_input::-webkit-datetime-edit-day-field]:text-white [&_input::-webkit-datetime-edit-year-field]:text-white [&_input::-webkit-datetime-edit-hour-field]:text-white [&_input::-webkit-datetime-edit-minute-field]:text-white [&_input::-webkit-datetime-edit-ampm-field]:text-white"
-                    placeholder="YYYY-MM-DD HH:mm"
-                    lang="en"
-                    classNames={{
-                      input:
-                        'bg-transparent text-white text-base placeholder-gray-500',
-                      inputWrapper:
-                        'bg-transparent border border-[#2DC3D9] rounded-2xl hover:border-[#2DC3D9] focus-within:border-[#2DC3D9]',
-                    }}
+                    onChange={setClosingDate}
+                    placeholder="Select closing date"
                   />
                 </div>
 
@@ -374,21 +378,6 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                     placeholder="0"
                   />
                 </div>
-
-                {/* 状态提示 */}
-                {currentStep === 'approving' && (
-                  <div className="mb-2 text-sm text-[#86FDE8]">Sending approval transaction...</div>
-                )}
-                {currentStep === 'waiting_approval' && (
-                  <div className="mb-2 text-sm text-[#86FDE8]">
-                    Waiting for approval confirmation... (Please do not close the window)
-                  </div>
-                )}
-                {currentStep === 'creating' && (
-                  <div className="mb-2 text-sm text-[#86FDE8]">
-                    Creating market...
-                  </div>
-                )}
 
                 {/* Create 按钮 */}
                 <div className="flex justify-end pt-1">
