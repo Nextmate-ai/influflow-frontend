@@ -1,5 +1,5 @@
 'use client';
-import { HeroUIProvider, ToastProvider } from '@heroui/react';
+import { HeroUIProvider } from '@heroui/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
@@ -19,25 +19,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <HeroUIProvider navigate={router.push}>
       <QueryClientProvider client={queryClient}>
         <PrivyProvider>
-          <ToastProvider
-            placement={'bottom-center'}
-            toastOffset={20}
-            toastProps={{
-              classNames: {
-                base: 'max-w-fit min-w-[100px]',
-                content: 'min-w-0',
-                wrapper: 'min-w-0',
-                title: 'break-words whitespace-normal',
-                description: 'break-words whitespace-normal',
-              },
-              variant: 'flat',
-            }}
-            regionProps={{
-              classNames: {
-                base: 'z-[1500]',
-              },
-            }}
-          />
           <AuthProvider>{children}</AuthProvider>
           <SubscriptionSync />
           <NoCreditsModal

@@ -300,14 +300,47 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
             </thead>
             <tbody>
               {displayData.length > 0 ? (
-                displayData.map((item, index) => (
-                  <ParticipationRow
-                    key={item.marketId || index}
-                    {...item}
-                    viewType={viewType}
-                    onClaimSuccess={refetch}
-                  />
-                ))
+                displayData.map((item, index) => {
+                  // 从 item 中提取所有已定义的 props,排除非标准 DOM 属性
+                  const {
+                    prediction,
+                    totalVolume,
+                    rewards,
+                    time,
+                    status,
+                    outcome,
+                    opinion,
+                    betAmount,
+                    expectedPayout,
+                    claimed,
+                    marketOutcome,
+                    marketState,
+                    marketId,
+                    creatorFeesClaimed,
+                  } = item;
+
+                  return (
+                    <ParticipationRow
+                      key={item.marketId || index}
+                      prediction={prediction}
+                      totalVolume={totalVolume}
+                      rewards={rewards}
+                      time={time}
+                      status={status}
+                      outcome={outcome}
+                      opinion={opinion}
+                      betAmount={betAmount}
+                      expectedPayout={expectedPayout}
+                      claimed={claimed}
+                      marketOutcome={marketOutcome}
+                      marketState={marketState}
+                      marketId={marketId}
+                      creatorFeesClaimed={creatorFeesClaimed}
+                      viewType={viewType}
+                      onClaimSuccess={refetch}
+                    />
+                  );
+                })
               ) : (
                 <tr>
                   <td
