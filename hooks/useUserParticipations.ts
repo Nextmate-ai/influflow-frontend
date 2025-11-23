@@ -9,6 +9,7 @@ import { useWallets } from '@privy-io/react-auth';
 import { MarketReadableRow } from './usePredictionMarkets';
 
 export interface ParticipationRowData {
+  recordId: string;
   prediction: string;
   totalVolume: string;
   rewards: number;
@@ -294,6 +295,17 @@ function mapPositionToParticipation(
   opinion: 'Yes' | 'No',
   shares: number,
 ): ParticipationRowData {
+  const marketIdValue =
+    position.market_id || market.market_id || market.id || '';
+  const marketId = String(marketIdValue);
+  const positionId = position.id ? String(position.id) : '';
+  const timestamp =
+    position.created_at || position.updated_at || market.created_at || '';
+  const recordId =
+    (positionId && `${positionId}-${opinion}`) ||
+    (marketId && `${marketId}-${opinion}`) ||
+    `${opinion}-${timestamp || 'unknown'}`;
+
   // 格式化交易量
   const volumeValue =
     market.total_volume_usd ||
@@ -341,6 +353,7 @@ function mapPositionToParticipation(
   );
 
   return {
+    recordId,
     prediction:
       market.question_title || market.market_question || 'Untitled Market',
     totalVolume,
@@ -349,7 +362,7 @@ function mapPositionToParticipation(
     status,
     outcome,
     opinion,
-    marketId: String(position.market_id || market.market_id || market.id || ''),
+    marketId,
     betAmount,
     expectedPayout,
     claimed,
@@ -370,6 +383,12 @@ function mapMarketRowToParticipation(
   row: MarketReadableRow,
   viewType: ViewType,
 ): ParticipationRowData {
+  const marketIdValue = row.market_id || row.id || '';
+  const marketId = String(marketIdValue);
+  const recordId = marketId
+    ? `creation-${marketId}`
+    : `creation-${row.created_at || row.question_title || 'unknown'}`;
+
   // 格式化交易量
   const volumeValue =
     row.total_volume_usd ||
@@ -423,6 +442,7 @@ function mapMarketRowToParticipation(
     row.creatorFeesClaimed === 'true';
 
   return {
+    recordId,
     prediction: row.question_title || 'Untitled Market',
     totalVolume,
     rewards,
@@ -430,7 +450,7 @@ function mapMarketRowToParticipation(
     status,
     outcome,
     opinion,
-    marketId: String(row.market_id || row.id || ''),
+    marketId,
     marketState,
     creatorFeesClaimed,
   };

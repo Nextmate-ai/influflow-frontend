@@ -84,7 +84,10 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
           <div className="space-y-4">
             {displayData.map((item, index) => (
               <div
-                key={item.marketId || index}
+                key={
+                  item.recordId ||
+                  `${item.marketId ?? 'unknown'}-${item.opinion ?? 'all'}-${index}`
+                }
                 className="rounded-xl border border-[#075985] bg-[#0B041E] p-4"
               >
                 {/* 预测问题 */}
@@ -326,7 +329,10 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
 
                   return (
                     <ParticipationRow
-                      key={item.marketId || index}
+                      key={
+                        item.recordId ||
+                        `${item.marketId ?? 'unknown'}-${item.opinion ?? 'all'}-${index}`
+                      }
                       prediction={prediction}
                       totalVolume={totalVolume}
                       rewards={rewards}
