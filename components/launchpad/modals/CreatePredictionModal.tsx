@@ -133,6 +133,9 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
     }
   }, [bidAmount]);
 
+  // 最小下注金额：10 美元（转换为 wei）
+  const MIN_BET_AMOUNT = BigInt(10 * 1e18); // 10 美元 = 10 * 10^18 wei
+
   const handleCreate = async () => {
     if (!authenticated) {
       addToast({
@@ -165,6 +168,16 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
       addToast({
         title: 'Error',
         description: 'Please enter a bid amount',
+        color: 'danger',
+      });
+      return;
+    }
+
+    // 检查最小下注金额：至少 10 美元
+    if (creatorBet < MIN_BET_AMOUNT) {
+      addToast({
+        title: 'Error',
+        description: 'Minimum bid amount is $10. Please enter at least $10',
         color: 'danger',
       });
       return;
@@ -381,6 +394,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
                     type="number"
+                    step="0.01"
                     className="w-full"
                     classNames={{
                       input:
@@ -393,8 +407,16 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                         $
                       </span>
                     }
-                    placeholder="0"
+                    placeholder="10"
                   />
+                  <p className="mt-1 text-xs text-slate-400">
+                    Minimum bid amount: $10.00
+                    {creatorBet > BigInt(0) && creatorBet < BigInt(10 * 1e18) && (
+                      <span className="ml-2 text-red-400">
+                        (Current: ${(Number(creatorBet) / 1e18).toFixed(2)})
+                      </span>
+                    )}
+                  </p>
                 </div>
 
                 {/* Create 按钮 */}
