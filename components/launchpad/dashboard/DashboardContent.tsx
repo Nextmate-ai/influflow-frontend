@@ -113,6 +113,16 @@ export const DashboardContent: React.FC = () => {
     // 从 predictions 列表中找到对应的完整数据（包含 rawData）
     const fullPrediction = predictions.find((p) => p.id === prediction.id);
 
+    // 检查市场状态，如果不是活跃状态，不打开下注模态框
+    const state = fullPrediction?.rawData?.state || prediction.rawData?.state;
+    const isActive =
+      state === 0 || state === '0' || state === 'Active' || state === undefined;
+
+    if (!isActive) {
+      // 市场已结束，不允许下注
+      return;
+    }
+
     setSelectedPrediction({
       ...prediction,
       // 如果找到了完整数据，使用它的 rawData，否则使用传入的 rawData
@@ -128,13 +138,13 @@ export const DashboardContent: React.FC = () => {
 
   return (
     <div>
-      <div className="mb-4 md:mb-[20px] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-0">
+      <div className="mb-4 flex flex-col items-stretch justify-between gap-3 md:mb-[20px] md:flex-row md:items-center md:gap-0">
         <div className="flex items-center gap-2 md:gap-4">
           {/* Radio 切换按钮 */}
-          <div className="flex h-[48px] md:h-[56px] items-center gap-1 md:gap-2 rounded-[10px] bg-[#0B041E] p-1 flex-1 md:flex-initial">
+          <div className="flex h-[48px] flex-1 items-center gap-1 rounded-[10px] bg-[#0B041E] p-1 md:h-[56px] md:flex-initial md:gap-2">
             <button
               onClick={() => setFilterStatus('live')}
-              className={`flex h-full items-center justify-center rounded-lg px-3 md:px-6 text-sm md:text-base font-semibold transition-all duration-200 flex-1 md:flex-initial ${
+              className={`flex h-full flex-1 items-center justify-center rounded-lg px-3 text-sm font-semibold transition-all duration-200 md:flex-initial md:px-6 md:text-base ${
                 filterStatus === 'live'
                   ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
                   : 'bg-transparent text-gray-400 hover:text-white'
@@ -144,7 +154,7 @@ export const DashboardContent: React.FC = () => {
             </button>
             <button
               onClick={() => setFilterStatus('finished')}
-              className={`flex h-full items-center justify-center rounded-lg px-3 md:px-6 text-sm md:text-base font-semibold transition-all duration-200 flex-1 md:flex-initial ${
+              className={`flex h-full flex-1 items-center justify-center rounded-lg px-3 text-sm font-semibold transition-all duration-200 md:flex-initial md:px-6 md:text-base ${
                 filterStatus === 'finished'
                   ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
                   : 'bg-transparent text-gray-400 hover:text-white'
@@ -156,9 +166,9 @@ export const DashboardContent: React.FC = () => {
         </div>
         <button
           onClick={handleCreateClick}
-          className="h-[48px] md:h-[56px] rounded-[10px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] p-[2px] transition-all hover:shadow-lg hover:shadow-cyan-500/50 w-full md:w-auto"
+          className="h-[48px] w-full rounded-[10px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] p-[2px] transition-all hover:shadow-lg hover:shadow-cyan-500/50 md:h-[56px] md:w-auto"
         >
-          <div className="flex size-full items-center justify-center rounded-[8px] bg-[#0B041E] px-4 md:px-[24px] text-sm md:text-base font-semibold text-white">
+          <div className="flex size-full items-center justify-center rounded-[8px] bg-[#0B041E] px-4 text-sm font-semibold text-white md:px-[24px] md:text-base">
             Create
           </div>
         </button>

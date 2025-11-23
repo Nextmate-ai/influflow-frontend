@@ -14,6 +14,12 @@ interface AuctionGridProps {
     totalVolume: string;
     timeRemaining: string;
     rawData?: Record<string, any>;
+    creatorInfo?: {
+      address: string;
+      xUsername?: string;
+      xName?: string;
+      xAvatarUrl?: string;
+    };
   }>;
   onPredictionClick?: (prediction: PredictionCardData) => void;
 }
@@ -27,7 +33,7 @@ export const AuctionGrid: React.FC<AuctionGridProps> = ({
 }) => {
   return (
     <div
-      className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-x-[52px] md:gap-y-[42px]"
+      className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-x-[52px] md:gap-y-[42px]"
     >
       {predictions.map((prediction) => (
         <PredictionCard
@@ -40,6 +46,7 @@ export const AuctionGrid: React.FC<AuctionGridProps> = ({
           totalVolume={prediction.totalVolume}
           timeRemaining={prediction.timeRemaining}
           rawData={prediction.rawData}
+          creatorInfo={prediction.creatorInfo}
           onCardClick={onPredictionClick}
         />
       ))}

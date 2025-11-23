@@ -28,6 +28,12 @@ interface UserDetailModalProps {
     timeRemaining: string;
     option: string;
     rawData?: Record<string, any>; // 完整的原始数据
+    creatorInfo?: {
+      address: string;
+      xUsername?: string;
+      xName?: string;
+      xAvatarUrl?: string;
+    };
   };
   onSuccess?: () => void;
 }
@@ -53,6 +59,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   // 下注相关状态
   const [operationError, setOperationError] = useState<Error | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState(false);
 
   // 钱包和购买份额 hook
   const { authenticated } = usePrivy();
@@ -170,6 +177,21 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const rawData = prediction.rawData || {};
   const rulesText = rawData.question_description || rawData.questionDescription || 'No description available.';
   const creator = rawData.creator || 'Unknown';
+
+  // 获取显示的头像和名称
+  const creatorInfo = prediction.creatorInfo;
+  const displayAvatar =
+    avatarError || !creatorInfo?.xAvatarUrl
+      ? '/images/avatar_bg.png'
+      : creatorInfo.xAvatarUrl;
+  const displayName =
+    creatorInfo?.xName ||
+    creatorInfo?.xUsername ||
+    (creatorInfo?.address
+      ? `${creatorInfo.address.slice(0, 6)}...${creatorInfo.address.slice(-4)}`
+      : creator !== 'Unknown'
+      ? `${creator.slice(0, 6)}...${creator.slice(-4)}`
+      : 'Unknown');
 
   // 提取数据源
   const yesInvestedRatio = rawData.yes_invested_ratio || rawData.yesInvestedRatio;
@@ -313,48 +335,57 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
         base: 'md:max-w-[1200px] md:max-h-[90vh]',
       }}
     >
-      <ModalContent className="rounded-none md:rounded-2xl bg-[#0B041E] p-0 h-full md:h-auto max-h-screen md:max-h-[90vh] overflow-hidden">
+      <ModalContent className="h-full max-h-screen overflow-hidden rounded-none bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl">
         {(onClose) => (
           <div className="relative flex h-full flex-col">
             {/* 移动端顶部返回按钮区域 */}
-            <div className="md:hidden flex items-center h-14 px-4 border-b border-[#60A5FA]/20 shrink-0">
+            <div className="flex h-14 shrink-0 items-center border-b border-[#60A5FA]/20 px-4 md:hidden">
               <button
                 onClick={onClose}
                 disabled={isPending}
-                className="flex items-center justify-center w-10 h-10 text-white transition-colors hover:text-[#60A5FA] disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex size-10 items-center justify-center text-white transition-colors hover:text-[#60A5FA] disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <img
                   src="/icons/back-arrow.png"
                   alt="Back"
-                  className="w-6 h-6"
+                  className="size-6"
                 />
               </button>
             </div>
-            <div className="flex h-full flex-col md:flex-row overflow-hidden">
+            <div className="flex h-full flex-col overflow-hidden md:flex-row">
               {/* 左侧面板 - 预测详情 */}
-              <div className="modal-left-scrollbar flex-1 overflow-y-auto border-b md:border-b-0 md:border-r border-[#60A5FA] p-4 md:p-8">
+              <div className="modal-left-scrollbar flex-1 overflow-y-auto border-b border-[#60A5FA] p-4 md:border-b-0 md:border-r md:p-8">
                 {/* 用户头像和Name */}
-                <div className="mb-4 md:mb-6 flex items-center gap-3 md:gap-4">
-                  <div className="relative size-12 md:size-16 shrink-0 overflow-hidden rounded-full">
-                    <Image
-                      src="/images/avatar_bg.png"
-                      alt={prediction.title}
-                      fill
-                      className="object-cover"
-                    />
+                <div className="mb-4 flex items-center gap-3 md:mb-6 md:gap-4">
+                  <div className="relative size-12 shrink-0 overflow-hidden rounded-full md:size-16">
+                    {creatorInfo?.xAvatarUrl && !avatarError ? (
+                      <img
+                        src={creatorInfo.xAvatarUrl}
+                        alt={displayName}
+                        className="size-full object-cover"
+                        onError={() => setAvatarError(true)}
+                      />
+                    ) : (
+                      <Image
+                        src={displayAvatar}
+                        alt={displayName}
+                        fill
+                        className="object-cover"
+                      />
+                    )}
                   </div>
-                  <div className="max-w-[200px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-sm md:text-base font-medium text-transparent">
-                    {creator.slice(0, 6)}...{creator.slice(-4)}
+                  <div className="max-w-[200px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-sm font-medium text-transparent md:text-base">
+                    {displayName}
                   </div>
                 </div>
 
                 {/* 预测问题 */}
-                <h2 className="mb-4 md:mb-6 text-lg md:text-2xl font-semibold leading-tight text-white">
+                <h2 className="mb-4 text-lg font-semibold leading-tight text-white md:mb-6 md:text-2xl">
                   {prediction.title}
                 </h2>
 
                 {/* 交易量和剩余时间 - 使用 StatCard */}
-                <div className="mb-6 md:mb-8 flex items-center gap-3 md:gap-4">
+                <div className="mb-6 flex items-center gap-3 md:mb-8 md:gap-4">
                   <StatCard
                     icon={
                       <Image
@@ -362,7 +393,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         alt="volume"
                         width={10}
                         height={10}
-                        className="md:w-3 md:h-3"
+                        className="md:size-3"
                       />
                     }
                     label=""
@@ -375,7 +406,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         alt="timer"
                         width={10}
                         height={10}
-                        className="md:w-3 md:h-3"
+                        className="md:size-3"
                       />
                     }
                     label=""
@@ -385,10 +416,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* 投票状态 */}
                 <div className="mb-6 md:mb-8">
-                  <div className="mb-3 md:mb-4 text-sm md:text-base font-medium text-white">
+                  <div className="mb-3 text-sm font-medium text-white md:mb-4 md:text-base">
                     Voting Status:
                   </div>
-                  <div className="relative h-8 md:h-10 w-full overflow-visible rounded-full">
+                  <div className="relative h-8 w-full overflow-visible rounded-full md:h-10">
                     {/* 左侧渐变条 */}
                     <div
                       className="absolute left-0 top-0 flex h-full items-center rounded-l-full bg-gradient-to-r from-[#00B2FF] to-[#00FFD0]"
@@ -398,7 +429,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       }}
                     >
                       <span
-                        className="whitespace-nowrap text-xs md:text-sm font-medium text-white"
+                        className="whitespace-nowrap text-xs font-medium text-white md:text-sm"
                         style={{
                           paddingLeft: '8px',
                           paddingRight: realYesPercentage < 20 ? '4px' : '8px',
@@ -418,7 +449,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         }}
                       >
                         <span
-                          className="whitespace-nowrap text-xs md:text-sm font-medium text-white"
+                          className="whitespace-nowrap text-xs font-medium text-white md:text-sm"
                           style={{
                             paddingLeft: realNoPercentage < 20 ? '4px' : '8px',
                             paddingRight: '8px',
@@ -432,7 +463,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     )}
                     {realNoPercentage === 0 && (
                       <div className="absolute right-0 top-0 flex h-full items-center justify-end pr-2 md:pr-3">
-                        <span className="whitespace-nowrap text-xs md:text-sm font-medium text-white">
+                        <span className="whitespace-nowrap text-xs font-medium text-white md:text-sm">
                           0% No
                         </span>
                       </div>
@@ -451,7 +482,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         alt="divider"
                         width={24}
                         height={24}
-                        className="h-6 md:h-10 w-auto"
+                        className="h-6 w-auto md:h-10"
                       />
                     </div>
                   </div>
@@ -459,10 +490,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* 规则部分 */}
                 <div>
-                  <div className="mb-3 md:mb-4 text-sm md:text-base font-medium text-white">
+                  <div className="mb-3 text-sm font-medium text-white md:mb-4 md:text-base">
                     Rules:
                   </div>
-                  <div className="pr-2 text-xs md:text-sm leading-relaxed text-gray-400">
+                  <div className="pr-2 text-xs leading-relaxed text-gray-400 md:text-sm">
                     {rulesText}
                   </div>
                 </div>
@@ -471,12 +502,12 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
               {/* 右侧面板 - My Bid */}
               <div className="flex flex-1 flex-col overflow-hidden p-4 md:p-8">
                 {/* My Bid 标题和关闭按钮 */}
-                <div className="mb-6 md:mb-8 flex items-center justify-between">
-                  <h3 className="text-xl md:text-2xl font-semibold text-white">My Bid</h3>
+                <div className="mb-6 flex items-center justify-between md:mb-8">
+                  <h3 className="text-xl font-semibold text-white md:text-2xl">My Bid</h3>
                   <button
                     onClick={onClose}
                     disabled={isPending}
-                    className="hidden md:block text-2xl font-light text-white hover:text-gray-300 disabled:cursor-not-allowed disabled:opacity-30"
+                    className="hidden text-2xl font-light text-white hover:text-gray-300 disabled:cursor-not-allowed disabled:opacity-30 md:block"
                   >
                     ✕
                   </button>
@@ -484,13 +515,13 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* Vote for 选项 */}
                 <div className="mb-6 md:mb-8">
-                  <div className="mb-3 md:mb-4 text-sm md:text-base font-medium text-[#58C0CE]">
+                  <div className="mb-3 text-sm font-medium text-[#58C0CE] md:mb-4 md:text-base">
                     Vote for:
                   </div>
                   <div className="flex gap-3 md:gap-4">
                     <button
                       onClick={() => setSelectedOption('yes')}
-                      className={`h-10 md:h-12 flex-1 md:flex-initial rounded-2xl text-sm md:text-base font-semibold transition-all duration-200 ${
+                      className={`h-10 w-[102px] rounded-2xl text-sm font-semibold transition-all duration-200 md:h-12 md:text-base ${
                         selectedOption === 'yes'
                           ? 'border-2 border-[#07B6D4] text-white'
                           : 'border-2 border-gray-600 bg-transparent text-gray-400 hover:border-gray-500'
@@ -502,14 +533,13 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                                 'linear-gradient(to right, #040E1E, #268DA4)',
                             }
                           : {}),
-                        ...(selectedOption !== 'yes' ? { width: '102px' } : {}),
                       }}
                     >
                       Yes
                     </button>
                     <button
                       onClick={() => setSelectedOption('no')}
-                      className={`h-10 md:h-12 flex-1 md:flex-initial rounded-2xl text-sm md:text-base font-semibold transition-all duration-200 ${
+                      className={`h-10 w-[102px] rounded-2xl text-sm font-semibold transition-all duration-200 md:h-12 md:text-base ${
                         selectedOption === 'no'
                           ? 'border-2 border-[#CB30E0] text-white'
                           : 'border-2 border-gray-600 bg-transparent text-gray-400 hover:border-gray-500'
@@ -521,7 +551,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                                 'linear-gradient(to right, #D245C3 0%, #5731AC 100%)',
                             }
                           : {}),
-                        ...(selectedOption !== 'no' ? { width: '102px' } : {}),
                       }}
                     >
                       No
@@ -531,7 +560,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* Amount 输入 */}
                 <div className="mb-4 md:mb-6">
-                  <div className="mb-3 md:mb-4 text-sm md:text-base font-medium text-[#58C0CE]">
+                  <div className="mb-3 text-sm font-medium text-[#58C0CE] md:mb-4 md:text-base">
                     Amount
                   </div>
                   <div className="relative">
@@ -547,7 +576,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                           'bg-transparent border-2 border-[#07B6D4] rounded-2xl h-14 md:h-16',
                       }}
                       startContent={
-                        <span className="pl-4 text-xl md:text-2xl font-semibold text-white">
+                        <span className="pl-4 text-xl font-semibold text-white md:text-2xl">
                           $
                         </span>
                       }
@@ -556,13 +585,21 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 </div>
 
                 {/* Payout if you win */}
-                <div className="mb-6 md:mb-8">
+                <div className="mb-6 flex flex-col gap-2 md:mb-8">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm md:text-base text-white">
+                    <span className="text-sm text-white md:text-base">
                       Payout if you win
                     </span>
-                    <span className="text-base md:text-lg font-semibold text-white">
+                    <span className="text-base font-semibold text-white md:text-lg">
                       ${payoutIfWin}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400 md:text-sm">
+                      Service Fee (3%)
+                    </span>
+                    <span className="text-xs text-gray-400 md:text-sm">
+                      ${((parseFloat(amount) || 0) * 0.03).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -580,9 +617,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 )}
 
                 {/* Join 按钮 */}
-                <div className="mt-auto flex flex-col items-stretch md:items-end gap-2 pt-4 md:pt-0">
+                <div className="mt-auto flex flex-col items-stretch gap-2 pt-4 md:items-end md:pt-0">
                   <div
-                    className="h-[48px] md:h-[56px] w-full md:w-[168px] rounded-2xl p-[2px]"
+                    className="h-[48px] w-full rounded-2xl p-[2px] md:h-[56px] md:w-[168px]"
                     style={{
                       background:
                         'linear-gradient(to right, #1FA2FF, #12D8FA, #870CD8)',
@@ -596,7 +633,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         !selectedOption ||
                         parseFloat(amount) <= 0
                       }
-                      className="size-full rounded-2xl bg-[#0B041E] text-base md:text-lg font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="size-full rounded-2xl bg-[#0B041E] text-base font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50 md:text-lg"
                     >
                       {isPending
                         ? currentStep === 'approving'
@@ -608,7 +645,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     </button>
                   </div>
                   {!authenticated && (
-                    <span className="text-xs text-gray-400 text-center md:text-right">
+                    <span className="text-center text-xs text-gray-400 md:text-right">
                       Please connect wallet
                     </span>
                   )}

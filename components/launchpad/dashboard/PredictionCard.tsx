@@ -16,6 +16,12 @@ interface PredictionCardProps {
   timeRemaining: string;
   rawData?: Record<string, any>;
   onCardClick?: (prediction: PredictionCardData, option?: 'yes' | 'no') => void;
+  creatorInfo?: {
+    address: string;
+    xUsername?: string;
+    xName?: string;
+    xAvatarUrl?: string;
+  };
 }
 
 export interface PredictionCardData {
@@ -30,6 +36,13 @@ export interface PredictionCardData {
   option: string;
   // 完整的原始数据，用于详情弹窗
   rawData?: Record<string, any>;
+  // 创建者信息（包含 X/Twitter 信息）
+  creatorInfo?: {
+    address: string;
+    xUsername?: string;
+    xName?: string;
+    xAvatarUrl?: string;
+  };
 }
 
 /**
@@ -46,8 +59,22 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
   timeRemaining,
   rawData,
   onCardClick,
+  creatorInfo,
 }) => {
   const [isHovering, setIsHovering] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
+
+  // 获取显示的头像和名称
+  const displayAvatar =
+    avatarError || !creatorInfo?.xAvatarUrl
+      ? '/images/avatar_bg.png'
+      : creatorInfo.xAvatarUrl;
+  const displayName =
+    creatorInfo?.xName ||
+    creatorInfo?.xUsername ||
+    (creatorInfo?.address
+      ? `${creatorInfo.address.slice(0, 6)}...${creatorInfo.address.slice(-4)}`
+      : 'Unknown');
 
   // 从 rawData 中提取 yes_invested_ratio 和 no_invested_ratio
   const yesInvestedRatio =
@@ -63,20 +90,41 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
         ? parseFloat(String(rawData.noInvestedRatio))
         : undefined;
 
+  // 将 outcome 转换为显示文本
+  const getOutcomeText = (outcome: any): string | null => {
+    if (outcome === undefined || outcome === null) {
+      return null;
+    }
+    // 支持数字和字符串格式
+    if (outcome === 0 || outcome === '0' || outcome === 'No') {
+      return 'No';
+    } else if (outcome === 1 || outcome === '1' || outcome === 'Yes') {
+      return 'Yes';
+    }
+    return null;
+  };
+
   // 获取市场状态
   const getMarketStatus = () => {
     const state = rawData?.state;
     if (state === 0 || state === '0' || state === 'Active') {
-      return { label: 'Active', color: 'text-green-400' };
+      return { label: 'Active', color: 'text-green-400', isActive: true };
     } else if (state === 1 || state === '1' || state === 'Resolved') {
-      return { label: 'Resolved', color: 'text-blue-400' };
+      // 对于 Resolved 状态，尝试获取 outcome 结果
+      const outcomeText = getOutcomeText(rawData?.outcome);
+      if (outcomeText) {
+        const label = `Resolved: ${outcomeText}`;
+        return { label, color: 'text-blue-400', isActive: false };
+      }
+      return { label: 'Resolved', color: 'text-blue-400', isActive: false };
     } else if (state === 2 || state === '2' || state === 'Void') {
-      return { label: 'Void', color: 'text-gray-400' };
+      return { label: 'Void', color: 'text-gray-400', isActive: false };
     }
-    return { label: 'Active', color: 'text-green-400' }; // 默认
+    return { label: 'Active', color: 'text-green-400', isActive: true }; // 默认
   };
 
   const marketStatus = getMarketStatus();
+  const isMarketActive = marketStatus.isActive;
 
   // 如果有 invested_ratio，使用它们来计算进度条宽度，否则使用传入的百分比
   const displayYesPercentage =
@@ -99,12 +147,17 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
         timeRemaining,
         option: '',
         rawData, // 传递完整的原始数据
+        creatorInfo, // 传递创建者信息
       });
     }
   };
 
   const handleYesClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // 如果市场不是活跃状态，不允许下注
+    if (!isMarketActive) {
+      return;
+    }
     if (onCardClick) {
       onCardClick(
         {
@@ -118,6 +171,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
           timeRemaining,
           option: 'yes',
           rawData, // 传递完整的原始数据
+          creatorInfo, // 传递创建者信息
         },
         'yes',
       );
@@ -126,6 +180,10 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
 
   const handleNoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // 如果市场不是活跃状态，不允许下注
+    if (!isMarketActive) {
+      return;
+    }
     if (onCardClick) {
       onCardClick(
         {
@@ -139,6 +197,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
           timeRemaining,
           option: 'no',
           rawData, // 传递完整的原始数据
+          creatorInfo, // 传递创建者信息
         },
         'no',
       );
@@ -150,24 +209,33 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`group relative flex cursor-pointer flex-col rounded-2xl border border-[#60A5FA] p-4 md:p-6 pb-[16px] md:pb-[20px] pt-[24px] md:pt-[32px] transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/20`}
+      className={`group relative flex cursor-pointer flex-col rounded-2xl border border-[#60A5FA] p-4 pb-[16px] pt-[24px] transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/20 md:p-6 md:pb-[20px] md:pt-[32px]`}
     >
       {/* 用户信息和头像 */}
-      <div className="mb-4 md:mb-[20px] flex items-start gap-3 md:gap-4">
-        <div className="relative size-12 md:size-16 shrink-0 overflow-hidden rounded-full transition-colors group-hover:border-cyan-400">
-          <Image
-            src="/images/avatar_bg.png"
-            alt={title}
-            fill
-            className="object-cover"
-          />
+      <div className="mb-4 flex items-start gap-3 md:mb-[20px] md:gap-4">
+        <div className="relative size-12 shrink-0 overflow-hidden rounded-full transition-colors group-hover:border-cyan-400 md:size-16">
+          {creatorInfo?.xAvatarUrl && !avatarError ? (
+            <img
+              src={creatorInfo.xAvatarUrl}
+              alt={displayName}
+              className="size-full object-cover"
+              onError={() => setAvatarError(true)}
+            />
+          ) : (
+            <Image
+              src={displayAvatar}
+              alt={displayName}
+              fill
+              className="object-cover"
+            />
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="line-clamp-2 text-sm md:text-base leading-[24px] md:leading-[32px] text-white">
+            <h3 className="line-clamp-2 text-sm leading-[24px] text-white md:text-base md:leading-[32px]">
               {title}
             </h3>
-            <span className={`shrink-0 text-[10px] md:text-xs font-medium ${marketStatus.color}`}>
+            <span className={`shrink-0 text-[10px] font-medium md:text-xs ${marketStatus.color}`}>
               {marketStatus.label}
             </span>
           </div>
@@ -175,13 +243,13 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
       </div>
 
       <div className="flex items-start justify-start gap-3 md:gap-[20px]">
-        <div className="max-w-[80px] md:max-w-[100px] truncate text-xs md:text-sm bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-transparent">
-          name
+        <div className="max-w-[80px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-xs text-transparent md:max-w-[100px] md:text-sm">
+          {displayName}
         </div>
 
         <div className="flex-1 flex-col">
           {/* 投票比例 */}
-          <div className="mb-3 md:mb-[16px] mt-[-16px] md:mt-[-20px]">
+          <div className="mb-3 mt-[-16px] md:mb-[16px] md:mt-[-20px]">
             <GradientSlider
               leftPercentage={displayYesPercentage}
               rightPercentage={displayNoPercentage}
@@ -191,16 +259,24 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
           </div>
 
           {/* 投票比例数字 */}
-          <div className="mb-4 md:mb-[24px] flex items-center justify-around gap-2 md:gap-0 text-xs md:text-sm text-white">
+          <div className="mb-4 flex items-center justify-around gap-2 text-xs text-white md:mb-[24px] md:gap-0 md:text-sm">
             <div
               onClick={handleYesClick}
-              className="flex h-[36px] md:h-[40px] w-[100px] md:w-[140px] cursor-pointer items-center justify-center rounded-[12px] md:rounded-[16px] border-2 border-[#07B6D4] transition-colors hover:bg-[#07B6D4]/10"
+              className={`flex h-[36px] w-[100px] items-center justify-center rounded-[12px] border-2 border-[#07B6D4] transition-colors md:h-[40px] md:w-[140px] md:rounded-[16px] ${
+                isMarketActive
+                  ? 'cursor-pointer hover:bg-[#07B6D4]/10'
+                  : 'cursor-not-allowed opacity-50'
+              }`}
             >
               Yes
             </div>
             <div
               onClick={handleNoClick}
-              className="flex h-[36px] md:h-[40px] w-[100px] md:w-[140px] cursor-pointer items-center justify-center rounded-[12px] md:rounded-[16px] border-2 border-[#CB30E0] transition-colors hover:bg-[#CB30E0]/10"
+              className={`flex h-[36px] w-[100px] items-center justify-center rounded-[12px] border-2 border-[#CB30E0] transition-colors md:h-[40px] md:w-[140px] md:rounded-[16px] ${
+                isMarketActive
+                  ? 'cursor-pointer hover:bg-[#CB30E0]/10'
+                  : 'cursor-not-allowed opacity-50'
+              }`}
             >
               No
             </div>
@@ -210,13 +286,13 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
 
       {/* 统计信息 */}
       <div className="mt-auto flex items-center justify-between space-x-2 text-xs">
-        <div className="line-clamp-2 text-sm md:text-base leading-[24px] md:leading-[32px] text-white">
+        <div className="line-clamp-2 text-sm leading-[24px] text-white md:text-base md:leading-[32px]">
           <Image
             src="/images/twitter_card.png"
             alt="avatar"
             width={20}
             height={20}
-            className="md:w-6 md:h-6"
+            className="md:size-6"
           />
         </div>
 
@@ -228,7 +304,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
                 alt="avatar"
                 width={10}
                 height={10}
-                className="md:w-3 md:h-3"
+                className="md:size-3"
               />
             }
             label=""
@@ -242,7 +318,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
                 alt="avatar"
                 width={10}
                 height={10}
-                className="md:w-3 md:h-3"
+                className="md:size-3"
               />
             }
             label=""

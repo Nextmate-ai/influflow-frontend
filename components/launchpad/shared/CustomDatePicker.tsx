@@ -217,12 +217,29 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
     );
   };
 
+  // 检查日期是否在有效范围内（今天到7天后）
+  const isDateInRange = (day: number): boolean => {
+    const date = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth(),
+      day,
+    );
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 重置为当天开始
+
+    const sevenDaysLater = new Date(today);
+    sevenDaysLater.setDate(today.getDate() + 7);
+    sevenDaysLater.setHours(23, 59, 59, 999); // 设置为7天后的结束
+
+    return date >= today && date <= sevenDaysLater;
+  };
+
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const popupContent = isOpen && popupPosition && typeof window !== 'undefined' && (
     <div
       ref={pickerRef}
       data-date-picker
-      className={`fixed z-[10000] ${isMobile ? 'w-[calc(100vw-32px)] max-w-[340px]' : 'w-[320px]'} overflow-y-auto rounded-2xl border border-[#2DC3D9] bg-[#0B041E] p-3 md:p-4 shadow-xl`}
+      className={`fixed z-[10000] ${isMobile ? 'w-[calc(100vw-32px)] max-w-[340px]' : 'w-[320px]'} overflow-y-auto rounded-2xl border border-[#2DC3D9] bg-[#0B041E] p-3 shadow-xl md:p-4`}
       onClick={(e) => {
         // 只阻止冒泡到 Modal，不影响内部点击
         e.stopPropagation();
@@ -234,13 +251,13 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       }}
     >
       {/* 月份导航和Today按钮 */}
-      <div className="mb-3 md:mb-4 flex items-center justify-between">
+      <div className="mb-3 flex items-center justify-between md:mb-4">
         <button
           onClick={handlePrevMonth}
-          className="rounded-lg p-1.5 md:p-2 text-white transition-colors hover:bg-[#2DC3D9]/20"
+          className="rounded-lg p-1.5 text-white transition-colors hover:bg-[#2DC3D9]/20 md:p-2"
         >
           <svg
-            className="h-4 w-4 md:h-5 md:w-5"
+            className="size-4 md:size-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -253,22 +270,22 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             />
           </svg>
         </button>
-        <div className="text-sm md:text-base font-semibold text-white">
+        <div className="text-sm font-semibold text-white md:text-base">
           {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
         </div>
         <div className="flex items-center gap-1.5 md:gap-2">
           <button
             onClick={handleToday}
-            className="rounded-lg bg-[#2DC3D9]/20 px-2 md:px-3 py-1 md:py-1.5 text-[10px] md:text-xs font-medium text-[#2DC3D9] transition-colors hover:bg-[#2DC3D9]/30"
+            className="rounded-lg bg-[#2DC3D9]/20 px-2 py-1 text-[10px] font-medium text-[#2DC3D9] transition-colors hover:bg-[#2DC3D9]/30 md:px-3 md:py-1.5 md:text-xs"
           >
             Today
           </button>
           <button
             onClick={handleNextMonth}
-            className="rounded-lg p-1.5 md:p-2 text-white transition-colors hover:bg-[#2DC3D9]/20"
+            className="rounded-lg p-1.5 text-white transition-colors hover:bg-[#2DC3D9]/20 md:p-2"
           >
             <svg
-              className="h-4 w-4 md:h-5 md:w-5"
+              className="size-4 md:size-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -289,7 +306,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         {dayNames.map((day) => (
           <div
             key={day}
-            className="flex items-center justify-center py-1.5 md:py-2 text-[10px] md:text-xs font-medium text-gray-400"
+            className="flex items-center justify-center py-1.5 text-[10px] font-medium text-gray-400 md:py-2 md:text-xs"
           >
             {day}
           </div>
@@ -305,17 +322,21 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 
           const isTodayDate = isToday(day);
           const isSelectedDate = isSelected(day);
+          const isInRange = isDateInRange(day);
 
           return (
             <button
               key={index}
-              onClick={() => handleDateSelect(day)}
-              className={`h-8 md:h-10 rounded-lg text-xs md:text-sm font-medium transition-all ${
-                isSelectedDate
-                  ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
-                  : isTodayDate
-                    ? 'border border-[#2DC3D9] text-[#2DC3D9]'
-                    : 'text-white hover:bg-[#2DC3D9]/20'
+              onClick={() => isInRange && handleDateSelect(day)}
+              disabled={!isInRange}
+              className={`h-8 rounded-lg text-xs font-medium transition-all md:h-10 md:text-sm ${
+                !isInRange
+                  ? 'cursor-not-allowed text-gray-600 opacity-30'
+                  : isSelectedDate
+                    ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
+                    : isTodayDate
+                      ? 'border border-[#2DC3D9] text-[#2DC3D9]'
+                      : 'text-white hover:bg-[#2DC3D9]/20'
               }`}
             >
               {day}
@@ -335,17 +356,17 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        className="flex h-full w-full cursor-pointer items-center justify-between rounded-2xl border border-[#2DC3D9] bg-transparent px-4 py-3 transition-colors hover:border-[#2DC3D9] focus-within:border-[#2DC3D9]"
+        className="flex size-full cursor-pointer items-center justify-between rounded-2xl border border-[#2DC3D9] bg-transparent px-4 py-3 transition-colors focus-within:border-[#2DC3D9] hover:border-[#2DC3D9]"
       >
         <input
           type="text"
           readOnly
           value={formatDate(selectedDate)}
           placeholder={placeholder}
-          className="w-full bg-transparent text-base text-white placeholder-gray-500 outline-none"
+          className="w-full bg-transparent text-base text-white outline-none placeholder:text-gray-500"
         />
         <svg
-          className="h-5 w-5 text-[#2DC3D9]"
+          className="size-5 text-[#2DC3D9]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

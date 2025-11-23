@@ -304,7 +304,7 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
       {/* Potential Winnings - 显示预期收益，居中对齐 */}
       <td className="px-6 py-4 text-center">
         <span className="font-semibold text-white">
-          ${expectedPayout > 0 ? expectedPayout.toFixed(2) : '0.00'}
+          ${actualOutcome === 'Loss' ? '0.00' : expectedPayout > 0 ? expectedPayout.toFixed(2) : '0.00'}
         </span>
       </td>
 

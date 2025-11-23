@@ -11,7 +11,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
 
 import { goToStepAfterStableSameAnchor } from '@/utils/tutorial';
-
 import { queryTweetDetail } from '@/lib/api/services';
 import { useAuthStore } from '@/stores/authStore';
 import { ITone, ProfileData } from '@/utils/profileStorage';
