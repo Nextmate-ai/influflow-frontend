@@ -19,6 +19,7 @@ export function useTokenBalance() {
     data: balance,
     isLoading,
     error,
+    refetch,
   } = useReadContract({
     ...tokenContract,
     functionName: 'balanceOf',
@@ -32,5 +33,6 @@ export function useTokenBalance() {
     balance: balance ? BigInt(balance.toString()) : BigInt(0),
     isLoading,
     error,
+    refetch,
   };
 }

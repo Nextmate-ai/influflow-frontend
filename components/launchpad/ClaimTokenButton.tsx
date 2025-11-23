@@ -3,6 +3,7 @@
 import { usePrivy } from '@privy-io/react-auth';
 
 import { addToast } from '@/components/base/toast';
+import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { useTokenClaim } from '@/hooks/useTokenClaim';
 
 /**
@@ -12,6 +13,7 @@ import { useTokenClaim } from '@/hooks/useTokenClaim';
 export function ClaimTokenButton() {
   const { authenticated } = usePrivy();
   const { claim, isPending } = useTokenClaim();
+  const { refetch: refetchBalance } = useTokenBalance();
 
   // 如果钱包未连接，不显示按钮
   if (!authenticated) {
@@ -26,6 +28,8 @@ export function ClaimTokenButton() {
           description: '1000 Test tokens claimed successfully!',
           color: 'success',
         });
+        // 刷新余额显示
+        refetchBalance();
       },
       onError: (error) => {
         addToast({

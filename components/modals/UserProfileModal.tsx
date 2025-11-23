@@ -48,10 +48,17 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const displayAvatar = authInfo?.avatar;
 
   // 获取 Token 余额
-  const { balance: tokenBalance } = useTokenBalance();
+  const { balance: tokenBalance, refetch: refetchBalance } = useTokenBalance();
   const formattedTokenBalance = tokenBalance
     ? parseFloat(formatEther(tokenBalance)).toFixed(2)
     : '0.00';
+
+  // 每次打开弹窗时刷新余额
+  useEffect(() => {
+    if (isOpen) {
+      refetchBalance();
+    }
+  }, [isOpen, refetchBalance]);
 
   // 复制地址到剪贴板
   const handleCopyAddress = async () => {
@@ -130,19 +137,19 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       }}
     >
       <ModalContent
-        className="overflow-hidden rounded-none md:rounded-[12px] border border-[#2DC3D9] bg-transparent p-0 backdrop-blur-md !transition-none"
+        className="overflow-hidden rounded-none border border-[#2DC3D9] bg-transparent p-0 backdrop-blur-md !transition-none md:rounded-[12px]"
         style={{ height: '100vh' }}
       >
         {(onCloseModal: () => void) => (
           <div className="relative flex h-full flex-col overflow-hidden">
             {/* 移动端顶部关闭按钮区域 */}
-            <div className="md:hidden flex items-center justify-end h-14 px-4 border-b border-[#2DC3D9]/20 shrink-0">
+            <div className="flex h-14 shrink-0 items-center justify-end border-b border-[#2DC3D9]/20 px-4 md:hidden">
               <button
                 onClick={onCloseModal}
-                className="flex items-center justify-center w-10 h-10 text-white transition-colors hover:text-[#60A5FA]"
+                className="flex size-10 items-center justify-center text-white transition-colors hover:text-[#60A5FA]"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="size-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -157,11 +164,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               </button>
             </div>
             {/* Header - X 用户信息和关闭按钮（桌面端） */}
-            <div className="hidden md:flex relative items-center justify-between border-b border-[#2DC3D9]/20 px-6 py-4">
+            <div className="relative hidden items-center justify-between border-b border-[#2DC3D9]/20 px-6 py-4 md:flex">
               {authInfo && (authInfo.username || authInfo.avatar) ? (
                 <div className="flex items-center gap-3">
                   {authInfo.avatar && !avatarError ? (
-                    <div className="relative size-10 md:size-12 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30">
+                    <div className="relative size-10 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30 md:size-12">
                       <img
                         src={authInfo.avatar}
                         alt={authInfo.username || authInfo.name || 'User'}
@@ -170,9 +177,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       />
                     </div>
                   ) : (
-                    <div className="relative size-10 md:size-12 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30 bg-gradient-to-br from-purple-400 to-pink-400">
+                    <div className="relative size-10 overflow-hidden rounded-full bg-gradient-to-br from-purple-400 to-pink-400 shadow-lg shadow-[#60A5FA]/30 md:size-12">
                       <div className="flex size-full items-center justify-center">
-                        <span className="text-base md:text-lg font-semibold text-white">
+                        <span className="text-base font-semibold text-white md:text-lg">
                           {authInfo.username?.charAt(0).toUpperCase() || authInfo.name?.charAt(0).toUpperCase() || 'U'}
                         </span>
                       </div>
@@ -180,11 +187,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   )}
                   <div className="flex flex-col">
                     {authInfo.username ? (
-                      <span className="text-sm md:text-base font-semibold text-white">
+                      <span className="text-sm font-semibold text-white md:text-base">
                         @{authInfo.username}
                       </span>
                     ) : authInfo.name ? (
-                      <span className="text-sm md:text-base font-semibold text-white">
+                      <span className="text-sm font-semibold text-white md:text-base">
                         {authInfo.name}
                       </span>
                     ) : null}
@@ -192,15 +199,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
-                  <div className="relative size-10 md:size-12 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30 bg-gradient-to-br from-purple-400 to-pink-400">
+                  <div className="relative size-10 overflow-hidden rounded-full bg-gradient-to-br from-purple-400 to-pink-400 shadow-lg shadow-[#60A5FA]/30 md:size-12">
                     <div className="flex size-full items-center justify-center">
-                      <span className="text-base md:text-lg font-semibold text-white">
+                      <span className="text-base font-semibold text-white md:text-lg">
                         {displayName?.charAt(0).toUpperCase() || 'U'}
                       </span>
                     </div>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-sm md:text-base font-semibold text-white">
+                    <span className="text-sm font-semibold text-white md:text-base">
                       {displayName || 'User'}
                     </span>
                   </div>
@@ -209,7 +216,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               {/* 关闭按钮 */}
               <button
                 onClick={onCloseModal}
-                className="cursor-pointer text-[20px] md:text-[24px] font-light text-[#60A5FA] transition-colors hover:text-gray-300"
+                className="cursor-pointer text-[20px] font-light text-[#60A5FA] transition-colors hover:text-gray-300 md:text-[24px]"
               >
                 ✕
               </button>
@@ -217,13 +224,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
             <div className="flex h-full flex-col overflow-y-auto p-4 md:p-8">
               {/* 标题 */}
-              <h2 className="mb-6 md:mb-8 text-center text-xl md:text-2xl font-semibold text-white">
+              <h2 className="mb-6 text-center text-xl font-semibold text-white md:mb-8 md:text-2xl">
                 My Profile
               </h2>
 
               {/* 用户头像和钱包地址 */}
-              <div className="mb-6 md:mb-8 flex flex-col items-center">
-                <div className="relative mb-3 md:mb-4 size-16 md:size-20 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30">
+              <div className="mb-6 flex flex-col items-center md:mb-8">
+                <div className="relative mb-3 size-16 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30 md:mb-4 md:size-20">
                   {displayAvatar && !mainAvatarError ? (
                     // 优先显示 X/Twitter 头像
                     <img
@@ -235,7 +242,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   ) : authenticated && walletAddress ? (
                     // 如果没有 X/Twitter 头像，显示钱包头像（基于地址生成）
                     <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
-                      <span className="text-xl md:text-2xl font-semibold text-white">
+                      <span className="text-xl font-semibold text-white md:text-2xl">
                         {walletAddress.slice(2, 4).toUpperCase()}
                       </span>
                     </div>
@@ -250,7 +257,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   ) : (
                     // 默认头像
                     <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
-                      <span className="text-xl md:text-2xl font-semibold text-white">
+                      <span className="text-xl font-semibold text-white md:text-2xl">
                         {displayName?.charAt(0).toUpperCase() || user?.name?.charAt(0).toUpperCase() || 'U'}
                       </span>
                     </div>
@@ -261,13 +268,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   <div className="flex flex-col items-center gap-2">
                     {/* 显示 X/Twitter 用户名 */}
                     {authInfo?.username && (
-                      <h3 className="text-base md:text-lg font-semibold text-white">
+                      <h3 className="text-base font-semibold text-white md:text-lg">
                         @{authInfo.username}
                       </h3>
                     )}
                     {/* 钱包地址和复制按钮 */}
                     <div className="flex items-center gap-2">
-                      <span className="text-xs md:text-sm font-medium text-gray-400">
+                      <span className="text-xs font-medium text-gray-400 md:text-sm">
                         {formattedAddress}
                       </span>
                       <button
@@ -293,7 +300,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     </div>
                   </div>
                 ) : (
-                  <h3 className="text-base md:text-lg font-semibold text-white">
+                  <h3 className="text-base font-semibold text-white md:text-lg">
                     {displayName || user?.name || 'User'}
                   </h3>
                 )}
@@ -301,7 +308,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
               {/* My Wallet 部分 */}
               <div className="mb-6 md:mb-8">
-                <h3 className="mb-3 md:mb-4 text-sm md:text-base font-medium text-white">
+                <h3 className="mb-3 text-sm font-medium text-white md:mb-4 md:text-base">
                   My Wallet
                 </h3>
                 <div className="space-y-3">
@@ -309,27 +316,27 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   {authenticated && walletAddress && (
                     <div className="rounded-2xl border border-[#2DC3D9] bg-[#2DC3D9]/5 p-3 md:p-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs md:text-sm text-gray-400">
+                        <span className="text-xs text-gray-400 md:text-sm">
                           Token Balance
                         </span>
-                        <span className="text-base md:text-lg font-semibold text-white">
+                        <span className="text-base font-semibold text-white md:text-lg">
                           {formattedTokenBalance}
                         </span>
                       </div>
                     </div>
                   )}
                   {/* Actions Row - Faucet 和 Disconnect */}
-                  <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3">
+                  <div className="flex flex-col items-stretch gap-2 md:flex-row md:items-center md:gap-3">
                     <ClaimTokenButton />
                     {authenticated ? (
                       <button
                         onClick={logout}
-                        className="rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 text-xs md:text-sm font-semibold text-white transition-opacity hover:opacity-80"
+                        className="rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-80 md:text-sm"
                       >
                         Disconnect
                       </button>
                     ) : (
-                      <div className="rounded-lg border border-[#2DC3D9] bg-transparent px-4 py-2 text-center text-xs md:text-sm text-gray-400">
+                      <div className="rounded-lg border border-[#2DC3D9] bg-transparent px-4 py-2 text-center text-xs text-gray-400 md:text-sm">
                         Not connected
                       </div>
                     )}
@@ -339,14 +346,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
               {/* My History 部分 */}
               <div className="flex flex-1 flex-col">
-                <h3 className="mb-3 md:mb-4 text-sm md:text-base font-medium text-white">
+                <h3 className="mb-3 text-sm font-medium text-white md:mb-4 md:text-base">
                   My History
                 </h3>
                 <div className="flex-1 space-y-2 md:space-y-3">
                   {/* Participations 按钮 */}
                   <button
                     onClick={handleParticipations}
-                    className="flex w-full items-center gap-2 md:gap-3 rounded-2xl border border-[#2DC3D9] bg-transparent p-3 md:p-4 transition-all duration-200 hover:bg-[#2DC3D9]/10"
+                    className="flex w-full items-center gap-2 rounded-2xl border border-[#2DC3D9] bg-transparent p-3 transition-all duration-200 hover:bg-[#2DC3D9]/10 md:gap-3 md:p-4"
                   >
                     {/* 复选框+时钟图标 */}
                     <div className="relative flex size-6 items-center justify-center">
@@ -412,7 +419,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         />
                       </svg>
                     </div>
-                    <span className="text-sm md:text-base font-medium text-white">
+                    <span className="text-sm font-medium text-white md:text-base">
                       Participations
                     </span>
                   </button>
@@ -420,7 +427,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   {/* Creations 按钮 */}
                   <button
                     onClick={handleCreations}
-                    className="flex w-full items-center gap-2 md:gap-3 rounded-2xl border border-[#2DC3D9] bg-transparent p-3 md:p-4 transition-all duration-200 hover:bg-[#2DC3D9]/10"
+                    className="flex w-full items-center gap-2 rounded-2xl border border-[#2DC3D9] bg-transparent p-3 transition-all duration-200 hover:bg-[#2DC3D9]/10 md:gap-3 md:p-4"
                   >
                     {/* 文档图标 */}
                     <div className="flex size-6 items-center justify-center">
@@ -477,7 +484,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         />
                       </svg>
                     </div>
-                    <span className="text-sm md:text-base font-medium text-white">
+                    <span className="text-sm font-medium text-white md:text-base">
                       Creations
                     </span>
                   </button>

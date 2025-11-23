@@ -4,7 +4,8 @@
 
 import { PredictionCardData } from '@/components/launchpad/dashboard/PredictionCard';
 import { createClient } from '@/lib/supabase/client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useCreatorXInfo } from './useCreatorXInfo';
 
 /**
  * Supabase markets_readable 表的数据结构
@@ -34,7 +35,9 @@ export interface MarketReadableRow {
  * 从 Supabase 读取预测市场列表
  */
 export function usePredictionMarkets() {
-  const [predictions, setPredictions] = useState<PredictionCardData[]>([]);
+  const [basePredictions, setBasePredictions] = useState<PredictionCardData[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -60,7 +63,7 @@ export function usePredictionMarkets() {
       }
 
       if (!data || data.length === 0) {
-        setPredictions([]);
+        setBasePredictions([]);
         return;
       }
 
@@ -68,7 +71,7 @@ export function usePredictionMarkets() {
       const mappedPredictions = data.map((row: MarketReadableRow) =>
         mapMarketRowToPredictionCard(row),
       );
-      setPredictions(mappedPredictions);
+      setBasePredictions(mappedPredictions);
     } catch (err) {
       console.error('Failed to fetch prediction markets:', err);
       setError(
@@ -76,7 +79,7 @@ export function usePredictionMarkets() {
           ? err
           : new Error('Failed to fetch prediction markets'),
       );
-      setPredictions([]);
+      setBasePredictions([]);
     } finally {
       setIsLoading(false);
     }
@@ -86,6 +89,41 @@ export function usePredictionMarkets() {
     fetchMarkets();
   }, [refreshKey]);
 
+  // 提取所有 creator 地址
+  const creatorAddresses = useMemo(() => {
+    return basePredictions
+      .map((p) => p.rawData?.creator as string)
+      .filter(Boolean);
+  }, [basePredictions]);
+
+  // 批量获取 creator 的 X 信息
+  const {
+    data: creatorXInfoMap,
+    isLoading: isLoadingXInfo,
+  } = useCreatorXInfo(creatorAddresses);
+
+  // 合并 X 信息到预测数据
+  const predictions = useMemo(() => {
+    return basePredictions.map((prediction) => {
+      const creatorAddress = prediction.rawData?.creator as string;
+      if (!creatorAddress) {
+        return prediction;
+      }
+
+      const xInfo = creatorXInfoMap.get(creatorAddress);
+
+      return {
+        ...prediction,
+        creatorInfo: {
+          address: creatorAddress,
+          xUsername: xInfo?.username,
+          xName: xInfo?.name,
+          xAvatarUrl: xInfo?.avatarUrl,
+        },
+      };
+    });
+  }, [basePredictions, creatorXInfoMap]);
+
   // 提供刷新函数
   const refresh = () => {
     setRefreshKey((prev) => prev + 1);
@@ -93,7 +131,7 @@ export function usePredictionMarkets() {
 
   return {
     predictions,
-    isLoading,
+    isLoading: isLoading || isLoadingXInfo,
     error,
     refresh,
   };
@@ -167,8 +205,14 @@ function mapMarketRowToPredictionCard(
     row.totalVolume;
   const totalVolume = formatVolume(volumeValue);
 
-  // 计算剩余时间
-  const timeRemaining = calculateTimeRemaining(row.end_time);
+  // 计算剩余时间 - 对于 Resolved 或 Void 状态的市场，直接显示 "0"
+  const state = row.state;
+  let timeRemaining: string;
+  if (state === 1 || state === '1' || state === 'Resolved' || state === 2 || state === '2' || state === 'Void') {
+    timeRemaining = '0';
+  } else {
+    timeRemaining = calculateTimeRemaining(row.end_time);
+  }
 
   // 生成头像 URL（基于 creator 地址）
   const image = generateAvatarUrl(row.creator || marketId);
@@ -229,7 +273,7 @@ function calculateTimeRemaining(endTime: string | number | undefined): string {
   const remaining = endTimestamp - now;
 
   if (remaining <= 0) {
-    return 'Ended';
+    return '0';
   }
 
   const days = Math.floor(remaining / 86400);

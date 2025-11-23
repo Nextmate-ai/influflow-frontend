@@ -40,18 +40,18 @@ export default function LaunchPadDashboard() {
         )}
         {currentView === 'dashboard' ? (
           <div className="mx-auto max-w-[1440px] px-4 md:px-[64px]">
-            <div className="my-[12px] text-center text-lg md:text-2xl text-white">
+            <div className="my-[12px] text-center text-lg text-white md:text-2xl">
               Turn your opinions into earnings.
             </div>
             <DashboardContent />
           </div>
         ) : (
-          <div className="h-screen flex flex-col">
+          <div className="flex h-screen flex-col">
             {/* 移动端顶部返回按钮 */}
-            <div className="md:hidden flex items-center h-14 px-4 border-b border-[#60A5FA]/20 shrink-0">
+            <div className="flex h-14 shrink-0 items-center border-b border-[#60A5FA]/20 px-4 md:hidden">
               <button
                 onClick={handleBackClick}
-                className="flex items-center justify-center size-10 text-white transition-colors hover:text-[#60A5FA]"
+                className="flex size-10 items-center justify-center text-white transition-colors hover:text-[#60A5FA]"
               >
                 <img
                   src="/icons/back-arrow.png"
@@ -62,12 +62,12 @@ export default function LaunchPadDashboard() {
             </div>
 
             {/* 导航标签和返回按钮 */}
-            <div className="px-4 md:px-[64px] pt-4 md:pt-6 mb-4 md:mb-6 flex items-center justify-between">
+            <div className="mb-4 flex items-center justify-between px-4 pt-4 md:mb-6 md:px-[64px] md:pt-6">
               {/* 分段控制器样式的标签 */}
               <div className="flex items-center rounded-[30px] bg-[#31304A] p-1">
                 <button
                   onClick={() => setCurrentView('participations')}
-                  className={`px-4 py-2 w-[60vw] md:w-1/2 text-sm md:text-base font-semibold transition-all rounded-[30px] flex-1 ${
+                  className={`w-[60vw] flex-1 rounded-[30px] px-4 py-2 text-sm font-semibold transition-all md:w-1/2 md:text-base ${
                     currentView === 'participations'
                       ? 'bg-[#4A4966] text-white'
                       : 'bg-transparent text-gray-400'
@@ -77,7 +77,7 @@ export default function LaunchPadDashboard() {
                 </button>
                 <button
                   onClick={() => setCurrentView('creations')}
-                  className={`px-4 py-2 text-sm md:text-base font-semibold transition-all rounded-[30px] flex-1 ${
+                  className={`flex-1 rounded-[30px] px-4 py-2 text-sm font-semibold transition-all md:text-base ${
                     currentView === 'creations'
                       ? 'bg-[#4A4966] text-white'
                       : 'bg-transparent text-gray-400'
@@ -88,7 +88,7 @@ export default function LaunchPadDashboard() {
               </div>
               <button
                 onClick={handleBackClick}
-                className="hidden md:flex items-center gap-2 text-sm md:text-base text-white transition-colors hover:text-[#60A5FA]"
+                className="hidden items-center gap-2 text-sm text-white transition-colors hover:text-[#60A5FA] md:flex md:text-base"
               >
                 <svg
                   className="size-4 md:size-5"
@@ -108,7 +108,7 @@ export default function LaunchPadDashboard() {
             </div>
 
             {/* 内容区域 */}
-            <div className="flex-1 px-4 md:px-[64px] pb-4 md:pb-6 overflow-hidden">
+            <div className="flex-1 overflow-hidden px-4 pb-4 md:px-[64px] md:pb-6">
               <ParticipationsTable viewType={currentView} />
             </div>
           </div>
