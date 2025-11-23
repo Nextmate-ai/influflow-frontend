@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { LoginModal } from '@/components/auth/LoginModal';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
+import { getHighResTwitterAvatar } from '@/utils/avatar';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -37,9 +38,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
             session.user.user_metadata?.name ||
             'User',
           email: session.user.email || '',
-          avatar:
+          avatar: getHighResTwitterAvatar(
             session.user.user_metadata?.avatar_url ||
-            session.user.user_metadata?.picture,
+              session.user.user_metadata?.picture,
+          ),
         };
         // 传递token信息到缓存
         setSession(
@@ -65,9 +67,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
                   session.user.user_metadata?.name ||
                   'User',
                 email: session.user.email || '',
-                avatar:
+                avatar: getHighResTwitterAvatar(
                   session.user.user_metadata?.avatar_url ||
-                  session.user.user_metadata?.picture,
+                    session.user.user_metadata?.picture,
+                ),
               }
             : null;
 

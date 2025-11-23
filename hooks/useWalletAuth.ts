@@ -6,6 +6,8 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { useMemo } from 'react';
 
+import { getHighResTwitterAvatar } from '@/utils/avatar';
+
 interface WalletAuthInfo {
   name?: string;
   username?: string;
@@ -31,7 +33,9 @@ export function useWalletAuth() {
     if (user.twitter) {
       info.name = user.twitter.name || undefined;
       info.username = user.twitter.username || undefined;
-      info.avatar = user.twitter.profilePictureUrl || undefined;
+      info.avatar = getHighResTwitterAvatar(
+        user.twitter.profilePictureUrl || undefined,
+      );
     }
 
     // 如果有邮箱账号,也添加进来

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { type IApiErrorResponse, type IBaseResponse } from '@/types/api';
+import { getHighResTwitterAvatar } from '@/utils/avatar';
 
 const supabase = createClient();
 
@@ -75,9 +76,10 @@ export async function apiRequest<T>(
                 session.user.user_metadata?.name ||
                 'User',
               email: session.user.email || '',
-              avatar:
+              avatar: getHighResTwitterAvatar(
                 session.user.user_metadata?.avatar_url ||
-                session.user.user_metadata?.picture,
+                  session.user.user_metadata?.picture,
+              ),
             },
             session.access_token,
             session.expires_at ? session.expires_at * 1000 : undefined,

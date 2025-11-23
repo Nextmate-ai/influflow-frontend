@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { ITone } from '@/utils/profileStorage';
+import { getHighResTwitterAvatar } from '@/utils/avatar';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -208,9 +209,10 @@ export const useAuthStore = create<IAuthState>()(
               supabaseUser.user_metadata?.name ||
               'User',
             email: supabaseUser.email || '',
-            avatar:
+            avatar: getHighResTwitterAvatar(
               supabaseUser.user_metadata?.avatar_url ||
-              supabaseUser.user_metadata?.picture,
+                supabaseUser.user_metadata?.picture,
+            ),
           };
 
           set({

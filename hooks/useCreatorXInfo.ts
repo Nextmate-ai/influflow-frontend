@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 
+import { getHighResTwitterAvatar } from '@/utils/avatar';
+
 export interface CreatorXInfo {
   username?: string;
   name?: string;
@@ -55,7 +57,7 @@ export function useCreatorXInfo(addresses: string[]) {
           {
             username: result.twitter.username,
             name: result.twitter.name,
-            avatarUrl: result.twitter.avatarUrl,
+            avatarUrl: getHighResTwitterAvatar(result.twitter.avatarUrl),
           },
         ];
       } catch (err) {

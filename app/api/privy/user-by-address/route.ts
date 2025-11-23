@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrivyClient } from '@privy-io/server-auth';
 import { PRIVY_APP_ID, PRIVY_APP_SECRET } from '@/constants/env';
+import { getHighResTwitterAvatar } from '@/utils/avatar';
 
 const privy = new PrivyClient(PRIVY_APP_ID, PRIVY_APP_SECRET);
 
@@ -52,8 +53,9 @@ export async function GET(req: NextRequest) {
         username: twitterData.username,
         name: twitterData.name,
         subject: twitterData.subject, // X OAuth 的稳定 ID
-        avatarUrl:
+        avatarUrl: getHighResTwitterAvatar(
           twitterData.profilePictureUrl || twitterData.profile_picture_url,
+        ),
       },
     };
 
