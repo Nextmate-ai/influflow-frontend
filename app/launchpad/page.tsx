@@ -51,12 +51,12 @@ export default function LaunchPadDashboard() {
             <div className="md:hidden flex items-center h-14 px-4 border-b border-[#60A5FA]/20 shrink-0">
               <button
                 onClick={handleBackClick}
-                className="flex items-center justify-center w-10 h-10 text-white transition-colors hover:text-[#60A5FA]"
+                className="flex items-center justify-center size-10 text-white transition-colors hover:text-[#60A5FA]"
               >
                 <img
                   src="/icons/back-arrow.png"
                   alt="Back"
-                  className="w-6 h-6"
+                  className="size-6"
                 />
               </button>
             </div>
@@ -64,10 +64,10 @@ export default function LaunchPadDashboard() {
             {/* 导航标签和返回按钮 */}
             <div className="px-4 md:px-[64px] pt-4 md:pt-6 mb-4 md:mb-6 flex items-center justify-between">
               {/* 分段控制器样式的标签 */}
-              <div className="flex items-center rounded-lg bg-[#31304A] p-1 rounded-[30px]">
+              <div className="flex items-center rounded-[30px] bg-[#31304A] p-1">
                 <button
                   onClick={() => setCurrentView('participations')}
-                  className={`px-4 py-2 w-[50%] text-sm md:text-base w-[60vw] font-semibold transition-all rounded-[30px] flex-1 ${
+                  className={`px-4 py-2 w-[60vw] md:w-1/2 text-sm md:text-base font-semibold transition-all rounded-[30px] flex-1 ${
                     currentView === 'participations'
                       ? 'bg-[#4A4966] text-white'
                       : 'bg-transparent text-gray-400'

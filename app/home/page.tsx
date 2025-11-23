@@ -191,7 +191,7 @@ function HomeContent() {
 
     // 清理定时器
     return () => clearTimeout(timer);
-  }, [isAuthenticated, syncProfileFromSupabase, hasCheckedProfile]);
+  }, [isAuthenticated, syncProfileFromSupabase, hasCheckedProfile, user]);
 
   const handleTopicSubmit = (
     selectedContentFormat: IContentFormat,

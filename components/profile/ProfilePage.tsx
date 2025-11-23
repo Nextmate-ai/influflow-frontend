@@ -1,7 +1,5 @@
 'use client';
 
-import { goToStepAfterStableSameAnchor } from '@/utils/tutorial';
-
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { Button, cn, Input, Textarea, Tooltip } from '@heroui/react';
 import { driver } from 'driver.js';
@@ -11,6 +9,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
+
+import { goToStepAfterStableSameAnchor } from '@/utils/tutorial';
 
 import { queryTweetDetail } from '@/lib/api/services';
 import { useAuthStore } from '@/stores/authStore';

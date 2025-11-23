@@ -578,7 +578,7 @@ export const SubscriptionPage = ({ onBack }: SubscriptionPageProps) => {
           transition={{ delay: 1.0 }}
           className="absolute inset-x-0 bottom-0 flex items-center justify-between rounded-b-[12px] border-t border-black/10 bg-white px-[60px] py-6"
         >
-          <Image src={'/icons/influxy.svg'} width={84} height={24} />
+          <Image src={'/icons/influxy.svg'} width={84} height={24} alt="Influxy" />
           <button
             onClick={() => setIsHelpModalOpen(true)}
             className="text-[14px] text-gray-600 underline transition-colors hover:text-black hover:underline"

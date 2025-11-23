@@ -111,11 +111,12 @@ export function TwitterCard({ html, className = '' }: TwitterCardProps) {
       {/* 实际的Twitter内容 */}
       <div
         ref={containerRef}
-        className={`tweet-embed-container ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500 `}
+        className={`${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}
         style={{
           maxHeight: '520px',
           overflowY: 'scroll',
         }}
+        data-tweet-container
       ></div>
 
       {/* 移除twitter card */}
