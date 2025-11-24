@@ -4,7 +4,7 @@
 
 import { PredictionCardData } from '@/components/launchpad/dashboard/PredictionCard';
 import { createClient } from '@/lib/supabase/client';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useCreatorXInfo } from './useCreatorXInfo';
 
 /**
@@ -42,25 +42,39 @@ export function usePredictionMarkets() {
   const [error, setError] = useState<Error | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // 使用 ref 来跟踪请求状态，避免状态更新延迟导致的问题
+  const isFetchingRef = useRef(false);
+
   const fetchMarkets = async () => {
+    // 防止重复请求 - 使用 ref 而不是 state
+    if (isFetchingRef.current) {
+      console.log('Already fetching markets, skipping...');
+      return;
+    }
+
     try {
+      isFetchingRef.current = true;
       setIsLoading(true);
       setError(null);
 
       const supabase = createClient();
 
+      console.log('Fetching markets from Supabase...');
+
       // 从 nextmate schema 的 markets_readable 表读取数据
-      // 如果表在 nextmate schema 中，使用 .schema('nextmate')
-      // 如果表在 public schema 中，直接使用表名
       const { data, error: queryError } = await supabase
         .schema('nextmate')
         .from('markets_readable')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(100);
 
       if (queryError) {
+        console.error('Supabase query error:', queryError);
         throw new Error(`Supabase query error: ${queryError.message}`);
       }
+
+      console.log('Markets fetched successfully:', data?.length || 0);
 
       if (!data || data.length === 0) {
         setBasePredictions([]);
@@ -82,18 +96,36 @@ export function usePredictionMarkets() {
       setBasePredictions([]);
     } finally {
       setIsLoading(false);
+      isFetchingRef.current = false;
     }
   };
 
   useEffect(() => {
     fetchMarkets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshKey]);
 
-  // 提取所有 creator 地址
+  // 使用 ref 保存上一次的地址列表，避免不必要的重新计算
+  const prevAddressesRef = useRef<string[]>([]);
+
+  // 提取所有 creator 地址 - 使用深度比较优化
   const creatorAddresses = useMemo(() => {
-    return basePredictions
+    const newAddresses = basePredictions
       .map((p) => p.rawData?.creator as string)
       .filter(Boolean);
+
+    // 深度比较：只有当地址列表内容真正改变时才返回新数组
+    const prevAddresses = prevAddressesRef.current;
+    if (
+      newAddresses.length === prevAddresses.length &&
+      newAddresses.every((addr, index) => addr === prevAddresses[index])
+    ) {
+      return prevAddresses; // 返回旧引用，避免触发下游 useEffect
+    }
+
+    // 内容改变，更新 ref 并返回新数组
+    prevAddressesRef.current = newAddresses;
+    return newAddresses;
   }, [basePredictions]);
 
   // 批量获取 creator 的 X 信息
@@ -124,10 +156,10 @@ export function usePredictionMarkets() {
     });
   }, [basePredictions, creatorXInfoMap]);
 
-  // 提供刷新函数
-  const refresh = () => {
+  // 提供刷新函数 - 使用 useCallback 保持引用稳定
+  const refresh = useCallback(() => {
     setRefreshKey((prev) => prev + 1);
-  };
+  }, []);
 
   return {
     predictions,

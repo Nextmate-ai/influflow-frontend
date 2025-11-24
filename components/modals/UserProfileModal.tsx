@@ -31,7 +31,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const { authenticated, logout } = usePrivy();
   const { wallets } = useWallets();
   const { authInfo } = useWalletAuth(); // 获取 Privy 的 X/Twitter 用户信息
-  console.log('authInfo', authInfo);
+  // console.log('authInfo', authInfo);
   
   // 图片加载错误状态
   const [avatarError, setAvatarError] = useState(false);
@@ -98,7 +98,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   useEffect(() => {
     setAvatarError(false);
     setMainAvatarError(false);
-  }, [authInfo?.avatar, displayAvatar]);
+  }, [authInfo?.avatar]);
 
   return (
     <Modal

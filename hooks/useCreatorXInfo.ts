@@ -108,7 +108,8 @@ export function useCreatorXInfo(addresses: string[]) {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [addresses, fetchCreatorXInfo]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addresses]);
 
   return {
     data,

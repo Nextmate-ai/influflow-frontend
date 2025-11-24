@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrivyClient } from '@privy-io/server-auth';
+
 import { PRIVY_APP_ID, PRIVY_APP_SECRET } from '@/constants/env';
 import { getHighResTwitterAvatar } from '@/utils/avatar';
 

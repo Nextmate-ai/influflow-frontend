@@ -5,7 +5,6 @@ import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useReadContract } from 'wagmi';
-import { useRouter } from 'next/navigation';
 
 import { useBuyShares } from '@/hooks/useBuyShares';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
@@ -63,14 +62,13 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
   // 钱包和购买份额 hook
   const { authenticated } = usePrivy();
-  const router = useRouter();
   const { wallets } = useWallets();
   const walletAddress = wallets[0]?.address || '';
   const { buySharesWithApproval, isPending, currentStep, error } =
     useBuyShares();
   const { balance: tokenBalance } = useTokenBalance();
 
-  // 监听成功状态，自动关闭并跳转
+  // 监听成功状态，自动关闭
   useEffect(() => {
     if (currentStep === 'success') {
       addToast({
@@ -81,10 +79,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       onSuccess?.(); // 调用成功回调刷新数据
       setTimeout(() => {
         onClose();
-        router.push('/launchpad');
       }, 1500);
     }
-  }, [currentStep, onClose, router, onSuccess]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, onClose]);
 
   // 监听错误状态，使用toast提示
   useEffect(() => {

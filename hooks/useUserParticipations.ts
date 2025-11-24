@@ -105,7 +105,8 @@ export function useUserParticipations(viewType: ViewType = 'creations') {
             .from('markets_readable')
             .select('*')
             .eq('creator', normalizedAddress)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .limit(100);
 
           if (queryError) {
             throw new Error(`Supabase query error: ${queryError.message}`);
@@ -129,7 +130,8 @@ export function useUserParticipations(viewType: ViewType = 'creations') {
             .schema('nextmate')
             .from('positions_readable')
             .select('*')
-            .eq('user_address', normalizedAddress);
+            .eq('user_address', normalizedAddress)
+            .limit(100);
 
           if (positionsError) {
             throw new Error(
@@ -164,7 +166,8 @@ export function useUserParticipations(viewType: ViewType = 'creations') {
             .schema('nextmate')
             .from('markets_readable')
             .select('*')
-            .in('market_id', marketIds);
+            .in('market_id', marketIds)
+            .limit(100);
 
           if (marketsError) {
             throw new Error(

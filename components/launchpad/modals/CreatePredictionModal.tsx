@@ -3,7 +3,6 @@
 import { Input, Modal, ModalContent } from '@heroui/react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
-import { useRouter } from 'next/navigation';
 
 import { useMarketCreation } from '@/hooks/useMarketCreation';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
@@ -35,12 +34,11 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
   const [selectedSide, setSelectedSide] = useState<1 | 2>(1); // 1 = Yes, 2 = No
 
   const { authenticated } = usePrivy();
-  const router = useRouter();
   const { createMarketWithApproval, isPending, currentStep, error } =
     useMarketCreation();
   const { balance: tokenBalance } = useTokenBalance();
 
-  // 监听成功状态，自动关闭并跳转
+  // 监听成功状态，自动关闭
   useEffect(() => {
     if (currentStep === 'success') {
       addToast({
@@ -51,10 +49,10 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
       onSuccess?.(); // 调用成功回调刷新数据
       setTimeout(() => {
         onClose();
-        router.push('/launchpad');
       }, 1500);
     }
-  }, [currentStep, onClose, router, onSuccess]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, onClose]);
 
   // 监听错误状态，使用toast提示
   useEffect(() => {

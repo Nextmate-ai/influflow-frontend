@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { usePredictionMarkets } from '@/hooks/usePredictionMarkets';
 
@@ -86,6 +86,11 @@ export const DashboardContent: React.FC = () => {
   // 从 Supabase 读取市场数据
   const { predictions, isLoading, error, refresh } = usePredictionMarkets();
 
+  // 使用 useCallback 包装 refresh 回调，避免每次渲染都创建新函数
+  const handleSuccess = useCallback(() => {
+    refresh();
+  }, [refresh]);
+
   // 根据筛选状态过滤预测
   const filteredPredictions = predictions.filter((prediction) => {
     const state = prediction.rawData?.state;
@@ -132,9 +137,13 @@ export const DashboardContent: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleCreateClick = () => {
+  const handleCreateClick = useCallback(() => {
     setIsCreateModalOpen(true);
-  };
+  }, []);
+
+  const handleCreateModalClose = useCallback(() => {
+    setIsCreateModalOpen(false);
+  }, []);
 
   return (
     <div>
@@ -187,20 +196,14 @@ export const DashboardContent: React.FC = () => {
             setTimeout(() => setSelectedPrediction(null), 300);
           }}
           prediction={selectedPrediction}
-          onSuccess={() => {
-            // 下注成功后刷新数据
-            refresh();
-          }}
+          onSuccess={handleSuccess}
         />
       )}
 
       <CreatePredictionModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={() => {
-          // 创建成功后刷新数据
-          refresh();
-        }}
+        onClose={handleCreateModalClose}
+        onSuccess={handleSuccess}
       />
     </div>
   );
