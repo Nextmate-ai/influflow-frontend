@@ -65,7 +65,7 @@ export const GradientSlider: React.FC<GradientSliderProps> = ({
   return (
     <div className="w-full">
       {/* 价格标签 - 在进度条上方 */}
-      <div className="relative mb-2 h-6">
+      <div className="relative mb-1.5 h-6">
         {/* 左边数字 - 在左边进度条中心 */}
         <div
           className="absolute -translate-x-1/2"
@@ -73,7 +73,7 @@ export const GradientSlider: React.FC<GradientSliderProps> = ({
             left: `${leftPercentage / 2}%`,
           }}
         >
-          <span className="text-lg font-semibold text-[#00B2FF]">
+          <span className="text-[22px] font-normal leading-[27.5px] text-[#00B2FF]">
             {leftPrice !== undefined
               ? `${(leftPrice * 100).toFixed(1)}%`
               : `${Math.round(leftPercentage)}%`}
@@ -86,7 +86,7 @@ export const GradientSlider: React.FC<GradientSliderProps> = ({
             left: `${100 - rightPercentage / 2}%`,
           }}
         >
-          <span className="text-lg font-semibold text-[#FF2DDF]">
+          <span className="text-[22px] font-normal leading-[27.5px] text-[#FF2DDF]">
             {rightPrice !== undefined
               ? `${(rightPrice * 100).toFixed(1)}%`
               : `${Math.round(rightPercentage)}%`}

@@ -301,7 +301,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
       }}
     >
       <ModalContent 
-        className="h-full max-h-screen overflow-y-auto rounded-none bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl"
+        className="h-full max-h-screen overflow-y-auto rounded-none bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl md:border-2 md:border-[#07B6D4]"
         onClick={(e) => {
           // 如果点击的是日期选择器，不关闭 Modal
           const target = e.target as HTMLElement;
@@ -344,7 +344,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                     Title
                   </label>
                   <p className="mb-2 text-[10px] italic text-[#00D9F5] md:text-[12px]">
-                    Ask something we can predict: Will Tesla's stock go up next
+                    Start a debateable question: Will Tesla’s stock rise next
                     week?
                   </p>
                   <Input
@@ -377,7 +377,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                 {/* Options */}
                 <div>
                   <label className="mb-2 block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-sm font-medium text-transparent md:text-base">
-                    Options (Select your position)
+                    Your Position
                   </label>
                   <div className="flex gap-3 md:gap-4">
                     <button
@@ -385,7 +385,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                       onClick={() => setSelectedSide(1)}
                       className={`flex h-[44px] flex-1 items-center justify-center rounded-2xl text-sm font-medium text-white transition-all duration-200 md:h-[52px] md:w-[100px] md:flex-initial md:text-base ${
                         selectedSide === 1
-                          ? 'border-2 border-[#2DC3D9] bg-[#2DC3D9]'
+                          ? 'border-2 border-[#2DC3D9] bg-[#2DC3D9]/20 shadow-[0_0_15px_rgba(45,195,217,0.5)]'
                           : 'border border-[#2DC3D9] bg-transparent hover:bg-[#2DC3D9]/10'
                       }`}
                     >
@@ -396,7 +396,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                       onClick={() => setSelectedSide(2)}
                       className={`flex h-[44px] flex-1 items-center justify-center rounded-2xl text-sm font-medium text-white transition-all duration-200 md:h-[52px] md:w-[100px] md:flex-initial md:text-base ${
                         selectedSide === 2
-                          ? 'border-2 border-[#D602FF] bg-[#D602FF]'
+                          ? 'border-2 border-[#D602FF] bg-[#D602FF]/20 shadow-[0_0_15px_rgba(214,2,255,0.5)]'
                           : 'border border-[#D602FF] bg-transparent hover:bg-[#D602FF]/10'
                       }`}
                     >
