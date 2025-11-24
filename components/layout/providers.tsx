@@ -9,7 +9,16 @@ import PrivyProvider from '@/components/providers/PrivyProvider';
 import { SubscriptionSync } from '@/components/subscription/SubscriptionSync';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 3 * 60 * 1000, // 默认3分钟内数据保持新鲜
+      gcTime: 10 * 60 * 1000, // 10分钟后清除未使用的缓存
+      retry: 1, // 失败重试1次
+      refetchOnWindowFocus: false, // 窗口聚焦时不自动重新获取
+    },
+  },
+});
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter();
