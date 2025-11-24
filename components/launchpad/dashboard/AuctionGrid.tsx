@@ -22,6 +22,7 @@ interface AuctionGridProps {
     };
   }>;
   onPredictionClick?: (prediction: PredictionCardData) => void;
+  filterStatus?: 'live' | 'finished';
 }
 
 /**
@@ -30,11 +31,10 @@ interface AuctionGridProps {
 export const AuctionGrid: React.FC<AuctionGridProps> = ({
   predictions,
   onPredictionClick,
+  filterStatus,
 }) => {
   return (
-    <div
-      className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-x-[52px] md:gap-y-[42px]"
-    >
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-x-[24px] md:gap-y-[24px]">
       {predictions.map((prediction) => (
         <PredictionCard
           key={prediction.id}
@@ -48,6 +48,7 @@ export const AuctionGrid: React.FC<AuctionGridProps> = ({
           rawData={prediction.rawData}
           creatorInfo={prediction.creatorInfo}
           onCardClick={onPredictionClick}
+          filterStatus={filterStatus}
         />
       ))}
     </div>

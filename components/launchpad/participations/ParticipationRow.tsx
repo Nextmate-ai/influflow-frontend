@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 
-import { useClaimPayout } from '@/hooks/useClaimPayout';
 import { useClaimCreatorFees } from '@/hooks/useClaimCreatorFees';
+import { useClaimPayout } from '@/hooks/useClaimPayout';
 
 interface ParticipationRowProps {
   prediction: string;
@@ -155,9 +155,9 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
 
   if (viewType === 'creations') {
     return (
-      <tr className="border-b border-[#2DC3D9]/30 transition-colors hover:bg-[#2DC3D9]/5">
+      <tr className="h-[96px] border-b border-[#2f4460] transition-colors hover:bg-[#2DC3D9]/5">
         {/* Prediction - 最长为340像素，超过支持换行，居中对齐 */}
-        <td className="px-6 py-4 text-center">
+        <td className="h-[64px] w-[30%] px-6 py-0 text-center align-middle">
           <p
             className="break-words font-medium text-white"
             style={{ maxWidth: '340px', margin: '0 auto' }}
@@ -167,95 +167,143 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
         </td>
 
         {/* Total Volume - 正常展示，居中对齐 */}
-        <td className="px-6 py-4 text-center">
+        <td className="h-[64px] w-[10%] px-6 py-0 text-center align-middle">
           <span className="text-white">{totalVolume}</span>
         </td>
 
         {/* Rewards - 正常展示，居中对齐 */}
-        <td className="px-6 py-4 text-center">
+        <td className="h-[64px] w-[10%] px-6 py-0 text-center align-middle">
           <span className="font-semibold text-white">
             ${typeof rewards === 'number' ? rewards.toFixed(2) : '0.00'}
           </span>
         </td>
 
         {/* Time - 正常展示，居中对齐 */}
-        <td className="px-6 py-4 text-center">
+        <td className="h-[64px] w-[10%] px-6 py-0 text-center align-middle">
           <span className="text-gray-400">{time}</span>
         </td>
 
-        {/* Status - 如果是 ongoing，边框使用渐变，居中对齐 */}
-        <td className="px-6 py-4 text-center">
-          {status === 'Ongoing' ? (
-            <div
-              style={getStatusBorderStyle()}
-              className="inline-block rounded-full"
-            >
-              <span className="block rounded-full bg-[#0B041E] px-3 py-1 text-sm font-semibold text-white">
-                {status}
-              </span>
-            </div>
-          ) : (
-            <span className="rounded-full border border-[#86FDE8] bg-[#86FDE8]/10 px-3 py-1 text-sm font-semibold text-[#86FDE8]">
-              {status}
-            </span>
-          )}
-        </td>
-
         {/* Outcome - 使用 win 渐变色，居中对齐 */}
-        <td className="px-6 py-4 text-center">
+        <td className="h-[64px] w-[10%] px-6 py-0 text-center align-middle">
           <span className="font-semibold" style={getOutcomeStyle()}>
             {outcome || '-'}
           </span>
         </td>
 
-        {/* Claim Reward - Creator 领取奖励按钮，仅在 Resolved 状态下显示 */}
-        <td className="px-6 py-4 text-center">
-          {status === 'Resolved' ? (
-            creatorFeesClaimed ? (
-              <span className="rounded-full border border-green-400 bg-green-400/10 px-3 py-1 text-sm font-semibold text-green-400">
-                Claimed
-              </span>
-            ) : (
-              <button
-                onClick={handleClaimCreatorFeesClick}
-                disabled={isClaimCreatorFeesPending || !marketId}
-                className={`rounded-full border px-3 py-1 text-sm font-semibold transition-all ${
-                  isClaimCreatorFeesPending
-                    ? 'cursor-not-allowed border-gray-500 bg-gray-500/10 text-gray-500'
-                    : 'border-[#86FDE8] bg-[#86FDE8]/10 text-[#86FDE8] hover:bg-[#86FDE8]/20'
-                }`}
-              >
-                {isClaimCreatorFeesPending ? (
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="size-4 animate-spin"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    Claiming...
+        {/* Status - 根据 marketState 显示 */}
+        <td className="h-[64px] w-[10%] px-6 py-0 text-center align-middle">
+          <div className="flex items-center justify-center">
+            {(() => {
+              // 支持 "Active" | "Resolved" | "Void" 格式（首字母大写）
+              const stateStr = String(marketState || '');
+              const stateLower = stateStr.toLowerCase();
+
+              if (stateStr === 'Active' || stateLower === 'active') {
+                return (
+                  <span
+                    className="text-sm font-semibold"
+                    style={{
+                      background:
+                        'linear-gradient(to right, #BAC1FF 0%, #63FEFE 48%, #FF3EEC 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    Ongoing
                   </span>
-                ) : (
-                  'Claim'
-                )}
-              </button>
-            )
-          ) : (
-            <span className="text-gray-500">-</span>
-          )}
+                );
+              } else if (stateStr === 'Resolved' || stateLower === 'resolved') {
+                return (
+                  <div className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl">
+                    <span className="text-sm font-semibold text-white">
+                      Finished
+                    </span>
+                  </div>
+                );
+              } else if (
+                stateStr === 'Void' ||
+                stateLower === 'void' ||
+                stateLower === 'voided'
+              ) {
+                return (
+                  <div className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl">
+                    <span className="text-sm font-semibold text-white">
+                      Void
+                    </span>
+                  </div>
+                );
+              }
+              return (
+                <span className="text-sm font-semibold text-white">
+                  {status}
+                </span>
+              );
+            })()}
+          </div>
+        </td>
+
+        {/* Claim - 根据 creatorFeesClaimed 和 status 显示 */}
+        <td className="h-[64px] w-[10%] px-6 py-0 text-center align-middle">
+          <div className="flex items-center justify-center">
+            {(() => {
+              const stateLower = (marketState || '').toLowerCase();
+              if (stateLower === 'resolved') {
+                if (creatorFeesClaimed) {
+                  return (
+                    <div className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl border-2 border-[#495099]">
+                      <span className="text-sm font-semibold text-white">
+                        Claimed
+                      </span>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <button
+                      onClick={handleClaimCreatorFeesClick}
+                      disabled={isClaimCreatorFeesPending || !marketId}
+                      className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                      style={{
+                        background:
+                          'linear-gradient(to right, #1fa2ff 0%, #12d8fa 50%, #cb30e0 100%)',
+                        padding: '2px',
+                      }}
+                    >
+                      <span className="flex size-full items-center justify-center rounded-[14px] bg-[#0B041E] text-sm font-semibold text-white">
+                        {isClaimCreatorFeesPending ? (
+                          <span className="flex items-center gap-2">
+                            <svg
+                              className="size-4 animate-spin"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              />
+                            </svg>
+                            Claiming...
+                          </span>
+                        ) : (
+                          'Claim'
+                        )}
+                      </span>
+                    </button>
+                  );
+                }
+              }
+              return <span className="text-gray-500">-</span>;
+            })()}
+          </div>
         </td>
       </tr>
     );
@@ -263,9 +311,9 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
 
   // participations 视图
   return (
-    <tr className="border-b border-[#2DC3D9]/30 transition-colors hover:bg-[#2DC3D9]/5">
+    <tr className="h-[96px] border-b border-[#2f4460] transition-colors hover:bg-[#2DC3D9]/5">
       {/* Topic - 最长为340像素，超过支持换行，居中对齐 */}
-      <td className="px-6 py-4 text-center">
+      <td className="h-[64px] w-[30%] px-6 py-0 text-center align-middle">
         <p
           className="break-words font-medium text-white"
           style={{ maxWidth: '340px', margin: '0 auto' }}
@@ -275,19 +323,19 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
       </td>
 
       {/* Side - 显示用户选择的立场，居中对齐 */}
-      <td className="px-6 py-4 text-center">
+      <td className="h-[64px] w-[14%] px-6 py-0 text-center align-middle">
         <span className="text-white">{opinion || '-'}</span>
       </td>
 
       {/* Wager - 显示投注金额，居中对齐 */}
-      <td className="px-6 py-4 text-center">
+      <td className="h-[64px] w-[14%] px-6 py-0 text-center align-middle">
         <span className="font-semibold text-white">
           ${betAmount > 0 ? betAmount.toFixed(2) : '0.00'}
         </span>
       </td>
 
       {/* Result - Win/Loss/TBD，居中对齐 */}
-      <td className="px-6 py-4 text-center">
+      <td className="h-[64px] w-[14%] px-6 py-0 text-center align-middle">
         <span
           className={`font-semibold ${
             actualOutcome === 'Win'
@@ -302,62 +350,132 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
       </td>
 
       {/* Potential Winnings - 显示预期收益，居中对齐 */}
-      <td className="px-6 py-4 text-center">
+      <td className="h-[64px] w-[14%] px-6 py-0 text-center align-middle">
         <span className="font-semibold text-white">
-          ${actualOutcome === 'Loss' ? '0.00' : expectedPayout > 0 ? expectedPayout.toFixed(2) : '0.00'}
+          $
+          {actualOutcome === 'Loss'
+            ? '0.00'
+            : expectedPayout > 0
+              ? expectedPayout.toFixed(2)
+              : '0.00'}
         </span>
       </td>
 
-      {/* Status - Ongoing/Claimed/Claim，居中对齐 */}
-      <td className="px-6 py-4 text-center">
-        {displayStatus === 'Claim' ? (
-          <button
-            onClick={handleClaimClick}
-            disabled={isPending || !marketId}
-            className={`rounded-full border px-3 py-1 text-sm font-semibold transition-all ${
-              isPending
-                ? 'cursor-not-allowed border-gray-500 bg-gray-500/10 text-gray-500'
-                : 'border-[#86FDE8] bg-[#86FDE8]/10 text-[#86FDE8] hover:bg-[#86FDE8]/20'
-            }`}
-          >
-            {isPending ? (
-              <span className="flex items-center gap-2">
-                <svg
-                  className="size-4 animate-spin"
-                  viewBox="0 0 24 24"
-                  fill="none"
+      {/* Status - 根据 marketState 显示 */}
+      <td className="h-[64px] w-[11%] px-6 py-0 text-center align-middle">
+        <div className="flex items-center justify-center">
+          {(() => {
+            // 支持 "Active" | "Resolved" | "Void" 格式（首字母大写）
+            const stateStr = String(marketState || '');
+            const stateLower = stateStr.toLowerCase();
+
+            if (stateStr === 'Active' || stateLower === 'active') {
+              return (
+                <span
+                  className="text-sm font-semibold"
+                  style={{
+                    background:
+                      'linear-gradient(to right, #BAC1FF 0%, #63FEFE 48%, #FF3EEC 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
                 >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-                Claiming...
+                  Ongoing
+                </span>
+              );
+            } else if (stateStr === 'Resolved' || stateLower === 'resolved') {
+              return (
+                <div className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl ">
+                  <span className="text-sm font-semibold text-white">
+                    Finished
+                  </span>
+                </div>
+              );
+            } else if (
+              stateStr === 'Void' ||
+              stateLower === 'void' ||
+              stateLower === 'voided'
+            ) {
+              return (
+                <div className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl ">
+                  <span className="text-sm font-semibold text-white">Void</span>
+                </div>
+              );
+            }
+            return (
+              <span className="text-sm font-semibold text-white">
+                {displayStatus}
               </span>
-            ) : (
-              'Claim'
-            )}
-          </button>
-        ) : (
-          <span
-            className={`rounded-full border px-3 py-1 text-sm font-semibold ${
-              displayStatus === 'Claimed'
-                ? 'border-green-400 bg-green-400/10 text-green-400'
-                : 'border-[#CB30E0] bg-[#CB30E0]/10 text-[#CB30E0]'
-            }`}
-          >
-            {displayStatus}
-          </span>
-        )}
+            );
+          })()}
+        </div>
+      </td>
+
+      {/* Claim - 根据 claimed 和 status 显示 */}
+      <td className="h-[64px] w-[11%] px-6 py-0 text-center align-middle">
+        <div className="flex items-center justify-center">
+          {(() => {
+            // 支持 "Active" | "Resolved" | "Void" 格式（首字母大写）
+            const stateStr = String(marketState || '');
+            const stateLower = stateStr.toLowerCase();
+
+            if (stateStr === 'Resolved' || stateLower === 'resolved') {
+              if (claimed) {
+                return (
+                  <div className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl border-2 border-[#495099]">
+                    <span className="text-sm font-semibold text-white">
+                      Claimed
+                    </span>
+                  </div>
+                );
+              } else {
+                return (
+                  <button
+                    onClick={handleClaimClick}
+                    disabled={isPending || !marketId}
+                    className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{
+                      background:
+                        'linear-gradient(to right, #1fa2ff 0%, #12d8fa 50%, #cb30e0 100%)',
+                      padding: '2px',
+                    }}
+                  >
+                    <span className="flex size-full items-center justify-center rounded-[14px] bg-[#0B041E] text-sm font-semibold text-white">
+                      {isPending ? (
+                        <span className="flex items-center gap-2">
+                          <svg
+                            className="size-4 animate-spin"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                          </svg>
+                          Claiming...
+                        </span>
+                      ) : (
+                        'Claim'
+                      )}
+                    </span>
+                  </button>
+                );
+              }
+            }
+            return <span className="text-gray-500">-</span>;
+          })()}
+        </div>
       </td>
     </tr>
   );

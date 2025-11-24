@@ -48,7 +48,7 @@ export default function PrivyProvider({
         defaultChain: baseSepolia,
       }}
     >
-      <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
+        <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
     </BasePrivyProvider>
   );
 }

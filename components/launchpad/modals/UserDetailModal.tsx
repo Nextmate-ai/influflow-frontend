@@ -1,15 +1,15 @@
 'use client';
 
 import { Input, Modal, ModalContent } from '@heroui/react';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useReadContract } from 'wagmi';
 
+import { addToast } from '@/components/base/toast';
 import { useBuyShares } from '@/hooks/useBuyShares';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
-import { addToast } from '@/components/base/toast';
 
 import { StatCard } from '../shared/StatCard';
 
@@ -141,7 +141,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-
   // 计算合约调用参数（使用防抖后的金额）
   const debouncedAmountValue = parseFloat(debouncedAmount) || 0;
   const marketId = prediction.id ? BigInt(prediction.id) : BigInt(0);
@@ -157,9 +156,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const { data: payoutData, isPending: isPayoutPending } = useReadContract({
     ...predictionMarketContract,
     functionName: 'estimatePayout',
-    args: selectedOption !== null && amountInWei > BigInt(0)
-      ? [marketId, side, amountInWei]
-      : undefined,
+    args:
+      selectedOption !== null && amountInWei > BigInt(0)
+        ? [marketId, side, amountInWei]
+        : undefined,
     query: {
       enabled:
         isOpen &&
@@ -171,8 +171,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
   // 计算 payout 显示值（从 wei 转换为美元）
   // payoutData 现在是 [shares, payout] 数组
-  const shares = payoutData && Array.isArray(payoutData) ? payoutData[0] : BigInt(0);
-  const payout = payoutData && Array.isArray(payoutData) ? payoutData[1] : BigInt(0);
+  const shares =
+    payoutData && Array.isArray(payoutData) ? payoutData[0] : BigInt(0);
+  const payout =
+    payoutData && Array.isArray(payoutData) ? payoutData[1] : BigInt(0);
 
   // 判断是否正在加载或输入中
   const amountValue = parseFloat(amount) || 0;
@@ -189,7 +191,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
   // 从 rawData 中获取真实数据
   const rawData = prediction.rawData || {};
-  const rulesText = rawData.question_description || rawData.questionDescription || 'No description available.';
+  const rulesText =
+    rawData.question_description ||
+    rawData.questionDescription ||
+    'No description available.';
   const creator = rawData.creator || 'Unknown';
 
   // 获取显示的头像和名称
@@ -204,19 +209,32 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     (creatorInfo?.address
       ? `${creatorInfo.address.slice(0, 6)}...${creatorInfo.address.slice(-4)}`
       : creator !== 'Unknown'
-      ? `${creator.slice(0, 6)}...${creator.slice(-4)}`
-      : 'Unknown');
+        ? `${creator.slice(0, 6)}...${creator.slice(-4)}`
+        : 'Unknown');
 
   // 提取数据源
-  const yesInvestedRatio = rawData.yes_invested_ratio || rawData.yesInvestedRatio;
+  const yesInvestedRatio =
+    rawData.yes_invested_ratio || rawData.yesInvestedRatio;
   const noInvestedRatio = rawData.no_invested_ratio || rawData.noInvestedRatio;
   const yesPrice = rawData.yes_price || rawData.yesPrice;
   const noPrice = rawData.no_price || rawData.noPrice;
   const yesPoolUsd = parseFloat(
-    String(rawData.yes_pool_usd || rawData.yesPoolUsd || rawData.yes_pool_total || rawData.yesPoolTotal || 0)
+    String(
+      rawData.yes_pool_usd ||
+        rawData.yesPoolUsd ||
+        rawData.yes_pool_total ||
+        rawData.yesPoolTotal ||
+        0,
+    ),
   );
   const noPoolUsd = parseFloat(
-    String(rawData.no_pool_usd || rawData.noPoolUsd || rawData.no_pool_total || rawData.noPoolTotal || 0)
+    String(
+      rawData.no_pool_usd ||
+        rawData.noPoolUsd ||
+        rawData.no_pool_total ||
+        rawData.noPoolTotal ||
+        0,
+    ),
   );
   const poolTotal = yesPoolUsd + noPoolUsd;
 
@@ -225,7 +243,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     investedRatio: any,
     price: any,
     poolUsd: number,
-    fallback: number
+    fallback: number,
   ): number => {
     if (investedRatio !== undefined) {
       return parseFloat(String(investedRatio)) * 100;
@@ -255,8 +273,18 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     realNoPercentage = 100;
   } else {
     // 正常情况：使用数据源计算
-    realYesPercentage = calculatePercentage(yesInvestedRatio, yesPrice, yesPoolUsd, prediction.yesPercentage);
-    realNoPercentage = calculatePercentage(noInvestedRatio, noPrice, noPoolUsd, prediction.noPercentage);
+    realYesPercentage = calculatePercentage(
+      yesInvestedRatio,
+      yesPrice,
+      yesPoolUsd,
+      prediction.yesPercentage,
+    );
+    realNoPercentage = calculatePercentage(
+      noInvestedRatio,
+      noPrice,
+      noPoolUsd,
+      prediction.noPercentage,
+    );
   }
 
   // 当弹窗打开时，清除错误和成功消息
@@ -347,9 +375,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       classNames={{
         wrapper: 'md:p-4',
         base: 'md:max-w-[1200px] md:max-h-[90vh]',
+        backdrop: 'backdrop-blur-sm',
       }}
     >
-      <ModalContent className="h-full max-h-screen overflow-hidden rounded-none bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl">
+      <ModalContent className="h-full max-h-screen overflow-hidden rounded-none border-2 border-[#60A5FA] bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl">
         {(onClose) => (
           <div className="relative flex h-full flex-col">
             {/* 移动端顶部返回按钮区域 */}
@@ -366,9 +395,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 />
               </button>
             </div>
-            <div className="flex h-full flex-col overflow-hidden md:flex-row">
+            <div className="flex h-full max-h-[860px] flex-col overflow-hidden md:flex-row">
               {/* 左侧面板 - 预测详情 */}
-              <div className="modal-left-scrollbar flex-1 overflow-y-auto border-b border-[#60A5FA] p-4 md:border-b-0 md:border-r md:p-8">
+              <div className="modal-left-scrollbar flex-1 overflow-y-auto border-b border-[#60A5FA] p-4 md:border-b-0 md:p-[40px]">
                 {/* 用户头像和Name */}
                 <div className="mb-4 flex items-center gap-3 md:mb-6 md:gap-4">
                   <div className="relative size-12 shrink-0 overflow-hidden rounded-full md:size-16">
@@ -436,7 +465,11 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   <div className="relative h-8 w-full overflow-visible rounded-full md:h-10">
                     {/* 左侧渐变条 */}
                     <div
-                      className="absolute left-0 top-0 flex h-full items-center rounded-l-full bg-gradient-to-r from-[#00B2FF] to-[#00FFD0]"
+                      className={`absolute left-0 top-0 flex h-full items-center bg-gradient-to-r from-[#00B2FF] to-[#00FFD0] ${
+                        realYesPercentage === 100
+                          ? 'rounded-full'
+                          : 'rounded-l-full'
+                      }`}
                       style={{
                         width: `${realYesPercentage}%`,
                         zIndex: 1,
@@ -451,12 +484,17 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       >
                         {yesInvestedRatio !== undefined
                           ? `${realYesPercentage.toFixed(1)}%`
-                          : `${realYesPercentage}%`} Yes
+                          : `${realYesPercentage}%`}{' '}
+                        Yes
                       </span>
                     </div>
                     {realNoPercentage > 0 && (
                       <div
-                        className="absolute right-0 top-0 flex h-full items-center justify-end rounded-r-full bg-gradient-to-l from-[#870CD8] to-[#FF2DDF]"
+                        className={`absolute right-0 top-0 flex h-full items-center justify-end bg-gradient-to-l from-[#870CD8] to-[#FF2DDF] ${
+                          realNoPercentage === 100
+                            ? 'rounded-full'
+                            : 'rounded-r-full'
+                        }`}
                         style={{
                           width: `${realNoPercentage}%`,
                           zIndex: 1,
@@ -471,7 +509,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                         >
                           {noInvestedRatio !== undefined
                             ? `${realNoPercentage.toFixed(1)}%`
-                            : `${realNoPercentage}%`} No
+                            : `${realNoPercentage}%`}{' '}
+                          No
                         </span>
                       </div>
                     )}
@@ -513,11 +552,16 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 </div>
               </div>
 
+              {/* 中间分割线 */}
+              <div className="hidden my-10 w-px bg-[#60A5FA] md:block"></div>
+
               {/* 右侧面板 - My Bid */}
-              <div className="flex flex-1 flex-col overflow-hidden p-4 md:p-8">
+              <div className="flex flex-1 flex-col overflow-hidden p-4 md:p-[40px]">
                 {/* My Bid 标题和关闭按钮 */}
                 <div className="mb-6 flex items-center justify-between md:mb-8">
-                  <h3 className="text-xl font-semibold text-white md:text-2xl">My Bid</h3>
+                  <h3 className="text-xl font-semibold text-white md:text-2xl">
+                    My Bid
+                  </h3>
                   <button
                     onClick={onClose}
                     disabled={isPending}
@@ -529,7 +573,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* Vote for 选项 */}
                 <div className="mb-6 md:mb-8">
-                  <div className="mb-3 text-sm font-medium text-[#58C0CE] md:mb-4 md:text-base">
+                  <div className="mb-3 text-[18px] font-medium text-[#58C0CE] md:mb-4">
                     Vote for:
                   </div>
                   <div className="flex gap-3 md:gap-4">
@@ -574,7 +618,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
                 {/* Amount 输入 */}
                 <div className="mb-4 md:mb-6">
-                  <div className="mb-3 text-sm font-medium text-[#58C0CE] md:mb-4 md:text-base">
+                  <div className="mb-3 text-[18px] font-medium text-[#58C0CE] md:mb-4">
                     Amount
                   </div>
                   <div className="relative">
@@ -633,7 +677,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 {/* Join 按钮 */}
                 <div className="mt-auto flex flex-col items-stretch gap-2 pt-4 md:items-end md:pt-0">
                   <div
-                    className="h-[48px] w-full rounded-2xl p-[2px] md:h-[56px] md:w-[168px]"
+                    className="h-[48px] w-full rounded-2xl p-[2px] md:h-[48px]"
                     style={{
                       background:
                         'linear-gradient(to right, #1FA2FF, #12D8FA, #870CD8)',

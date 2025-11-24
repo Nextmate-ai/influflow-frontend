@@ -32,7 +32,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const { wallets } = useWallets();
   const { authInfo } = useWalletAuth(); // 获取 Privy 的 X/Twitter 用户信息
   // console.log('authInfo', authInfo);
-  
+
   // 图片加载错误状态
   const [avatarError, setAvatarError] = useState(false);
   const [mainAvatarError, setMainAvatarError] = useState(false);
@@ -110,8 +110,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       hideCloseButton
       isDismissable={false}
       classNames={{
-        wrapper: 'md:justify-end md:items-center !overflow-hidden !items-start md:!items-center !justify-start',
-        base: 'm-0 !w-[70%] md:!w-[400px] rounded-none md:rounded-[12px] !static !transition-none !h-full md:!h-auto !mr-auto',
+        wrapper:
+          'md:justify-end md:items-center !overflow-hidden !items-start md:!items-center !justify-start md:!justify-end',
+        base: 'm-0 !w-[70%] md:!w-[368px] rounded-none md:rounded-[12px] !static !transition-none !h-full md:!h-[85vh] !mr-auto md:!mr-[40px] md:!ml-auto',
         body: 'p-0',
         backdrop: 'md:hidden',
       }}
@@ -137,7 +138,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       }}
     >
       <ModalContent
-        className="overflow-hidden rounded-none border border-[#2DC3D9] bg-transparent p-0 backdrop-blur-md !transition-none md:rounded-[12px]"
+        className="overflow-hidden rounded-none border border-[#2DC3D9] bg-transparent p-0 backdrop-blur-md !transition-none md:rounded-[12px] md:h-[90vh] md:w-[368px]"
         style={{ height: '100vh' }}
       >
         {(onCloseModal: () => void) => (
@@ -180,7 +181,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     <div className="relative size-10 overflow-hidden rounded-full bg-gradient-to-br from-purple-400 to-pink-400 shadow-lg shadow-[#60A5FA]/30 md:size-12">
                       <div className="flex size-full items-center justify-center">
                         <span className="text-base font-semibold text-white md:text-lg">
-                          {authInfo.username?.charAt(0).toUpperCase() || authInfo.name?.charAt(0).toUpperCase() || 'U'}
+                          {authInfo.username?.charAt(0).toUpperCase() ||
+                            authInfo.name?.charAt(0).toUpperCase() ||
+                            'U'}
                         </span>
                       </div>
                     </div>
@@ -258,7 +261,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     // 默认头像
                     <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
                       <span className="text-xl font-semibold text-white md:text-2xl">
-                        {displayName?.charAt(0).toUpperCase() || user?.name?.charAt(0).toUpperCase() || 'U'}
+                        {displayName?.charAt(0).toUpperCase() ||
+                          user?.name?.charAt(0).toUpperCase() ||
+                          'U'}
                       </span>
                     </div>
                   )}

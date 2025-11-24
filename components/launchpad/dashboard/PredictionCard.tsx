@@ -22,6 +22,7 @@ interface PredictionCardProps {
     xName?: string;
     xAvatarUrl?: string;
   };
+  filterStatus?: 'live' | 'finished';
 }
 
 export interface PredictionCardData {
@@ -60,6 +61,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
   rawData,
   onCardClick,
   creatorInfo,
+  filterStatus,
 }) => {
   const [isHovering, setIsHovering] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
@@ -107,20 +109,28 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
   // 获取市场状态
   const getMarketStatus = () => {
     const state = rawData?.state;
-    if (state === 0 || state === '0' || state === 'Active') {
-      return { label: 'Active', color: 'text-green-400', isActive: true };
-    } else if (state === 1 || state === '1' || state === 'Resolved') {
+    const stateStr = String(state || '').toLowerCase();
+    
+    // 如果是 live 视图，不显示 active 状态
+    if (filterStatus === 'live') {
+      return { label: null, color: '', isActive: true };
+    }
+    
+    // finished 视图：显示 finished 或 void
+    if (state === 1 || state === '1' || stateStr === 'resolved') {
       // 对于 Resolved 状态，尝试获取 outcome 结果
       const outcomeText = getOutcomeText(rawData?.outcome);
       if (outcomeText) {
-        const label = `Resolved: ${outcomeText}`;
+        const label = `Finished: ${outcomeText}`;
         return { label, color: 'text-blue-400', isActive: false };
       }
-      return { label: 'Resolved', color: 'text-blue-400', isActive: false };
-    } else if (state === 2 || state === '2' || state === 'Void') {
+      return { label: 'Finished', color: 'text-blue-400', isActive: false };
+    } else if (state === 2 || state === '2' || stateStr === 'void' || stateStr === 'voided') {
       return { label: 'Void', color: 'text-gray-400', isActive: false };
     }
-    return { label: 'Active', color: 'text-green-400', isActive: true }; // 默认
+    
+    // 默认情况（不应该出现在 finished 视图中）
+    return { label: null, color: '', isActive: false };
   };
 
   const marketStatus = getMarketStatus();
@@ -128,9 +138,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
 
   // 如果有 invested_ratio，使用它们来计算进度条宽度，否则使用传入的百分比
   const displayYesPercentage =
-    yesInvestedRatio !== undefined
-      ? yesInvestedRatio * 100
-      : yesPercentage;
+    yesInvestedRatio !== undefined ? yesInvestedRatio * 100 : yesPercentage;
   const displayNoPercentage =
     noInvestedRatio !== undefined ? noInvestedRatio * 100 : noPercentage;
 
@@ -209,7 +217,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`group relative flex cursor-pointer flex-col rounded-2xl border border-[#60A5FA] p-4 pb-[16px] pt-[24px] transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/20 md:p-6 md:pb-[20px] md:pt-[32px]`}
+      className={`group relative flex cursor-pointer flex-col rounded-2xl border border-[#60A5FA] p-4 pb-[16px] pt-[24px] transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/20 md:p-6 md:pb-[16px] md:pt-[24px]`}
     >
       {/* 用户信息和头像 */}
       <div className="mb-4 flex items-start gap-3 md:mb-[20px] md:gap-4">
@@ -232,12 +240,16 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="line-clamp-2 text-sm leading-[24px] text-white md:text-base md:leading-[32px]">
+            <h3 className="line-clamp-2 text-[18px] leading-[24px] text-white md:leading-[32px]">
               {title}
             </h3>
-            <span className={`shrink-0 text-[10px] font-medium md:text-xs ${marketStatus.color}`}>
-              {marketStatus.label}
-            </span>
+            {marketStatus.label && (
+              <span
+                className={`shrink-0 text-[10px] font-medium md:text-xs ${marketStatus.color}`}
+              >
+                {marketStatus.label}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -262,7 +274,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
           <div className="mb-4 flex items-center justify-around gap-2 text-xs text-white md:mb-[24px] md:gap-0 md:text-sm">
             <div
               onClick={handleYesClick}
-              className={`flex h-[36px] w-[100px] items-center justify-center rounded-[12px] border-2 border-[#07B6D4] transition-colors md:h-[40px] md:w-[140px] md:rounded-[16px] ${
+              className={`flex h-[36px] w-[100px] items-center justify-center rounded-[12px] border-2 border-[#07B6D4] transition-colors md:h-[32px] md:w-[108px] md:rounded-[10px] ${
                 isMarketActive
                   ? 'cursor-pointer hover:bg-[#07B6D4]/10'
                   : 'cursor-not-allowed opacity-50'
@@ -272,7 +284,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
             </div>
             <div
               onClick={handleNoClick}
-              className={`flex h-[36px] w-[100px] items-center justify-center rounded-[12px] border-2 border-[#CB30E0] transition-colors md:h-[40px] md:w-[140px] md:rounded-[16px] ${
+              className={`flex h-[36px] w-[100px] items-center justify-center rounded-[12px] border-2 border-[#CB30E0] transition-colors md:h-[32px] md:w-[108px] md:rounded-[10px] ${
                 isMarketActive
                   ? 'cursor-pointer hover:bg-[#CB30E0]/10'
                   : 'cursor-not-allowed opacity-50'

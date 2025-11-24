@@ -76,7 +76,7 @@ export const SharedHeader = ({
     <>
       <div
         className={cn(
-          'relative z-10 my-[30px] flex w-full items-center justify-between bg-transparent px-4 md:px-[64px]',
+          'relative z-10 my-[30px] flex w-full items-center justify-between bg-transparent px-4 md:px-[40px]',
           className,
         )}
       >
@@ -121,9 +121,10 @@ export const SharedHeader = ({
                     ) : (
                       <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
                         <span className="text-lg font-semibold text-white">
-                          {authInfo?.username?.charAt(0).toUpperCase() || 
-                           authInfo?.name?.charAt(0).toUpperCase() || 
-                           user.name?.charAt(0).toUpperCase() || 'U'}
+                          {authInfo?.username?.charAt(0).toUpperCase() ||
+                            authInfo?.name?.charAt(0).toUpperCase() ||
+                            user.name?.charAt(0).toUpperCase() ||
+                            'U'}
                         </span>
                       </div>
                     )}
@@ -131,7 +132,9 @@ export const SharedHeader = ({
                   {/* 用户信息 - 优先显示 X/Twitter username */}
                   <div className="hidden flex-col items-start md:flex">
                     <span className="text-sm font-medium text-white">
-                      {authInfo?.username ? `@${authInfo.username}` : authInfo?.name || user.name || 'User'}
+                      {authInfo?.username
+                        ? `@${authInfo.username}`
+                        : authInfo?.name || user.name || 'User'}
                     </span>
                     <span className="text-xs text-[#86FDE8]">
                       {user.email || ''}

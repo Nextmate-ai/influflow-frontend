@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { usePredictionMarkets } from '@/hooks/usePredictionMarkets';
 
@@ -112,18 +112,25 @@ export const DashboardContent: React.FC = () => {
   // 根据筛选状态过滤预测
   const filteredPredictions = predictions.filter((prediction) => {
     const state = prediction.rawData?.state;
+    const stateStr = String(state || '').toLowerCase();
+    
     if (filterStatus === 'live') {
       // Live: 显示 Active 状态
-      return state === 0 || state === '0' || state === 'Active';
+      return (
+        state === 0 ||
+        state === '0' ||
+        stateStr === 'active'
+      );
     } else if (filterStatus === 'finished') {
       // Finished: 显示 Resolved 或 Void 状态
       return (
         state === 1 ||
         state === '1' ||
-        state === 'Resolved' ||
+        stateStr === 'resolved' ||
         state === 2 ||
         state === '2' ||
-        state === 'Void'
+        stateStr === 'void' ||
+        stateStr === 'voided'
       );
     }
     return true;
@@ -165,13 +172,13 @@ export const DashboardContent: React.FC = () => {
 
   return (
     <div>
-      <div className="mb-4 flex flex-col items-stretch justify-between gap-3 md:mb-[20px] md:flex-row md:items-center md:gap-0">
+      <div className="mb-4 flex flex-col items-stretch justify-between gap-3 md:mb-[40px] md:flex-row md:items-center md:gap-0">
         <div className="flex items-center gap-2 md:gap-4">
           {/* Radio 切换按钮 */}
-          <div className="flex h-[48px] flex-1 items-center gap-1 rounded-[10px] bg-[#0B041E] p-1 md:h-[56px] md:flex-initial md:gap-2">
+          <div className="flex h-[48px] items-center gap-1 rounded-[10px] bg-[#0B041E] p-1 md:gap-2">
             <button
               onClick={() => setFilterStatus('live')}
-              className={`flex h-full flex-1 items-center justify-center rounded-lg px-3 text-sm font-semibold transition-all duration-200 md:flex-initial md:px-6 md:text-base ${
+              className={`flex h-full w-[150px] items-center justify-center rounded-lg text-sm font-semibold transition-all duration-200 md:text-base ${
                 filterStatus === 'live'
                   ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
                   : 'bg-transparent text-gray-400 hover:text-white'
@@ -181,7 +188,7 @@ export const DashboardContent: React.FC = () => {
             </button>
             <button
               onClick={() => setFilterStatus('finished')}
-              className={`flex h-full flex-1 items-center justify-center rounded-lg px-3 text-sm font-semibold transition-all duration-200 md:flex-initial md:px-6 md:text-base ${
+              className={`flex h-full w-[150px] items-center justify-center rounded-lg text-sm font-semibold transition-all duration-200 md:text-base ${
                 filterStatus === 'finished'
                   ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
                   : 'bg-transparent text-gray-400 hover:text-white'
@@ -193,7 +200,7 @@ export const DashboardContent: React.FC = () => {
         </div>
         <button
           onClick={handleCreateClick}
-          className="h-[48px] w-full rounded-[10px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] p-[2px] transition-all hover:shadow-lg hover:shadow-cyan-500/50 md:h-[56px] md:w-auto"
+          className="h-[48px] w-[150px] rounded-[10px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] p-[2px] transition-all hover:shadow-lg hover:shadow-cyan-500/50"
         >
           <div className="flex size-full items-center justify-center rounded-[8px] bg-[#0B041E] px-4 text-sm font-semibold text-white md:px-[24px] md:text-base">
             Create
@@ -204,6 +211,7 @@ export const DashboardContent: React.FC = () => {
       <AuctionGrid
         predictions={filteredPredictions}
         onPredictionClick={handlePredictionClick}
+        filterStatus={filterStatus}
       />
 
       {selectedPrediction && (

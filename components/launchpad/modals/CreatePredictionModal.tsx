@@ -298,10 +298,11 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
       classNames={{
         wrapper: 'md:p-4 !p-0',
         base: 'md:max-w-[800px] md:max-h-[90vh] !m-0 !h-full md:!h-auto',
+        backdrop: 'backdrop-blur-sm',
       }}
     >
       <ModalContent 
-        className="h-full max-h-screen overflow-y-auto rounded-none bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl"
+        className="h-full max-h-screen overflow-y-auto rounded-none border-2 border-[#60A5FA] bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl"
         onClick={(e) => {
           // 如果点击的是日期选择器，不关闭 Modal
           const target = e.target as HTMLElement;

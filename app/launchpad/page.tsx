@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 
 import { DashboardContent } from '@/components/launchpad/dashboard/DashboardContent';
@@ -29,90 +30,73 @@ export default function LaunchPadDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B041E] pb-[32px] text-white">
-        {currentView === 'dashboard' && (
-          <SharedHeader
-            className="my-0 py-[30px]"
-            onProfileModalOpenChange={setIsProfileModalOpen}
-            onParticipationsClick={handleParticipationsClick}
-            onCreationsClick={handleCreationsClick}
-          />
-        )}
-        {currentView === 'dashboard' ? (
-          <div className="mx-auto max-w-[1440px] px-4 md:px-[64px]">
-            <div className="my-[12px] text-center text-lg text-white md:text-2xl">
-              Turn your opinions into earnings.
-            </div>
-            <DashboardContent />
+    <div className="flex min-h-screen flex-col bg-[#0B041E] text-white">
+      <SharedHeader
+        className="my-0 shrink-0 pb-0 pt-[24px]"
+        onProfileModalOpenChange={setIsProfileModalOpen}
+        onParticipationsClick={handleParticipationsClick}
+        onCreationsClick={handleCreationsClick}
+      />
+      {currentView === 'dashboard' ? (
+        <div className="mx-auto w-full max-w-[1440px] flex-1 px-[20px] md:px-[40px]">
+          <div className="my-[80px] text-center text-[24px] text-white md:text-[36px]">
+            Turn your opinions into earnings.
           </div>
-        ) : (
-          <div className="flex h-screen flex-col">
-            {/* 移动端顶部返回按钮 */}
-            <div className="flex h-14 shrink-0 items-center border-b border-[#60A5FA]/20 px-4 md:hidden">
+          <DashboardContent />
+        </div>
+      ) : (
+        <div className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col px-[20px] md:px-[40px]">
+          {/* 标题 */}
+          <div className="my-[80px] shrink-0 text-center text-[24px] text-white md:text-[36px]">
+            Turn your opinions into earnings.
+          </div>
+
+          {/* 导航标签和返回按钮 */}
+          <div className="mb-4 flex shrink-0 items-center justify-between md:mb-6">
+            {/* 移动端：分段控制器样式，PC端：简单文本按钮 */}
+            <div className="flex items-center gap-6 rounded-[30px] bg-[#31304A] p-1 md:bg-transparent md:p-0">
               <button
-                onClick={handleBackClick}
-                className="flex size-10 items-center justify-center text-white transition-colors hover:text-[#60A5FA]"
+                onClick={() => setCurrentView('participations')}
+                className={`w-[60vw] flex-1 rounded-[30px] px-4 py-2 text-sm font-semibold transition-all md:w-auto md:flex-initial md:rounded-none md:p-0 md:text-base ${
+                  currentView === 'participations'
+                    ? 'bg-[#4A4966] text-white md:bg-transparent md:text-white'
+                    : 'bg-transparent text-gray-400 md:text-gray-400'
+                }`}
               >
-                <img
-                  src="/icons/back-arrow.png"
-                  alt="Back"
-                  className="size-6"
-                />
+                Participation
+              </button>
+              <button
+                onClick={() => setCurrentView('creations')}
+                className={`flex-1 rounded-[30px] px-4 py-2 text-sm font-semibold transition-all md:w-auto md:flex-initial md:rounded-none md:p-0 md:text-base ${
+                  currentView === 'creations'
+                    ? 'bg-[#4A4966] text-white md:bg-transparent md:text-white'
+                    : 'bg-transparent text-gray-400 md:text-gray-400'
+                }`}
+              >
+                Creations
               </button>
             </div>
-
-            {/* 导航标签和返回按钮 */}
-            <div className="mb-4 flex items-center justify-between px-4 pt-4 md:mb-6 md:px-[64px] md:pt-6">
-              {/* 分段控制器样式的标签 */}
-              <div className="flex items-center rounded-[30px] bg-[#31304A] p-1">
-                <button
-                  onClick={() => setCurrentView('participations')}
-                  className={`w-[60vw] flex-1 rounded-[30px] px-4 py-2 text-sm font-semibold transition-all md:w-1/2 md:text-base ${
-                    currentView === 'participations'
-                      ? 'bg-[#4A4966] text-white'
-                      : 'bg-transparent text-gray-400'
-                  }`}
-                >
-                  Participation
-                </button>
-                <button
-                  onClick={() => setCurrentView('creations')}
-                  className={`flex-1 rounded-[30px] px-4 py-2 text-sm font-semibold transition-all md:text-base ${
-                    currentView === 'creations'
-                      ? 'bg-[#4A4966] text-white'
-                      : 'bg-transparent text-gray-400'
-                  }`}
-                >
-                  Creations
-                </button>
-              </div>
-              <button
-                onClick={handleBackClick}
-                className="hidden items-center gap-2 text-sm text-white transition-colors hover:text-[#60A5FA] md:flex md:text-base"
-              >
-                <svg
-                  className="size-4 md:size-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                <span>Back</span>
-              </button>
-            </div>
-
-            {/* 内容区域 */}
-            <div className="flex-1 overflow-hidden px-4 pb-4 md:px-[64px] md:pb-6">
-              <ParticipationsTable viewType={currentView} />
-            </div>
+            <button
+              onClick={handleBackClick}
+              className="hidden items-center gap-2 text-sm text-white transition-colors hover:text-[#60A5FA] md:flex md:text-base"
+            >
+              <Image
+                src="/images/back.png"
+                alt="Back"
+                width={20}
+                height={20}
+                className="size-4 md:size-5"
+              />
+              <span>Back</span>
+            </button>
           </div>
-        )}
-      </div>
+
+          {/* 内容区域 */}
+          <div className="mb-[80px] flex min-h-0 flex-1 overflow-hidden rounded-2xl border-[3px] border-[#075985]">
+            <ParticipationsTable viewType={currentView} />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
