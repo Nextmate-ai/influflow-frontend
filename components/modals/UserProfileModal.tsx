@@ -108,11 +108,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       backdrop="transparent"
       className="dark"
       hideCloseButton
-      isDismissable={true}
+      isDismissable={false}
       classNames={{
-        wrapper: 'md:!flex md:!justify-end md:!items-center !overflow-hidden md:!pr-8 md:!py-4',
-        base: '!m-0 !w-[70%] md:!w-[368px] !transition-none h-full md:!h-[calc(100vh-32px)]',
+        wrapper: 'md:justify-end md:items-center !overflow-hidden !items-start md:!items-center !justify-start',
+        base: 'm-0 !w-[70%] md:!w-[400px] rounded-none md:rounded-[12px] !static !transition-none !h-full md:!h-auto !mr-auto',
         body: 'p-0',
+        backdrop: 'md:hidden',
+      }}
+      style={{
+        height: '100vh',
+        maxHeight: '100vh',
       }}
       motionProps={{
         variants: {
@@ -132,23 +137,19 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       }}
     >
       <ModalContent
-        className="overflow-hidden rounded-none md:rounded-[16px] border-[3px] border-[#075985] bg-[rgba(11,4,30,0.90)] p-0 backdrop-blur-[0px] !transition-none h-screen md:h-full"
+        className="overflow-hidden rounded-none border border-[#2DC3D9] bg-transparent p-0 backdrop-blur-md !transition-none md:rounded-[12px]"
+        style={{ height: '100vh' }}
       >
         {(onCloseModal: () => void) => (
-          <div 
-            className="relative flex flex-col overflow-hidden h-full" 
-            style={{ 
-              fontFamily: 'Quicksand, sans-serif'
-            }}
-          >
-            <div className="relative flex h-full flex-col overflow-y-auto px-[27px] py-[24px]">
-              {/* 关闭按钮 - 仅移动端 */}
+          <div className="relative flex h-full flex-col overflow-hidden">
+            {/* 移动端顶部关闭按钮区域 */}
+            <div className="flex h-14 shrink-0 items-center justify-end border-b border-[#2DC3D9]/20 px-4 md:hidden">
               <button
                 onClick={onCloseModal}
-                className="absolute right-4 top-4 z-10 flex size-8 items-center justify-center text-white transition-colors hover:text-[#60A5FA] md:hidden"
+                className="flex size-10 items-center justify-center text-white transition-colors hover:text-[#60A5FA]"
               >
                 <svg
-                  className="size-5"
+                  className="size-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -161,115 +162,204 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   />
                 </svg>
               </button>
-              {/* My Profile 标题 */}
-              <h2 className="mb-[20px] text-center text-[28px] font-[700] leading-[36px] text-white">
+            </div>
+            {/* Header - X 用户信息和关闭按钮（桌面端） */}
+            <div className="relative hidden items-center justify-between border-b border-[#2DC3D9]/20 px-6 py-4 md:flex">
+              {authInfo && (authInfo.username || authInfo.avatar) ? (
+                <div className="flex items-center gap-3">
+                  {authInfo.avatar && !avatarError ? (
+                    <div className="relative size-10 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30 md:size-12">
+                      <img
+                        src={authInfo.avatar}
+                        alt={authInfo.username || authInfo.name || 'User'}
+                        className="size-full object-cover"
+                        onError={() => setAvatarError(true)}
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative size-10 overflow-hidden rounded-full bg-gradient-to-br from-purple-400 to-pink-400 shadow-lg shadow-[#60A5FA]/30 md:size-12">
+                      <div className="flex size-full items-center justify-center">
+                        <span className="text-base font-semibold text-white md:text-lg">
+                          {authInfo.username?.charAt(0).toUpperCase() || authInfo.name?.charAt(0).toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    {authInfo.username ? (
+                      <span className="text-sm font-semibold text-white md:text-base">
+                        @{authInfo.username}
+                      </span>
+                    ) : authInfo.name ? (
+                      <span className="text-sm font-semibold text-white md:text-base">
+                        {authInfo.name}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="relative size-10 overflow-hidden rounded-full bg-gradient-to-br from-purple-400 to-pink-400 shadow-lg shadow-[#60A5FA]/30 md:size-12">
+                    <div className="flex size-full items-center justify-center">
+                      <span className="text-base font-semibold text-white md:text-lg">
+                        {displayName?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-white md:text-base">
+                      {displayName || 'User'}
+                    </span>
+                  </div>
+                </div>
+              )}
+              {/* 关闭按钮 */}
+              <button
+                onClick={onCloseModal}
+                className="cursor-pointer text-[20px] font-light text-[#60A5FA] transition-colors hover:text-gray-300 md:text-[24px]"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex h-full flex-col overflow-y-auto p-4 md:p-8">
+              {/* 标题 */}
+              <h2 className="mb-6 text-center text-xl font-semibold text-white md:mb-8 md:text-2xl">
                 My Profile
               </h2>
 
-              {/* 用户头像 */}
-              <div className="mb-[24px] flex flex-col items-center">
-                <div className="relative mb-4">
-                  {/* 外层蓝色边框 */}
-                  <div className="absolute left-1/2 top-1/2 size-[120px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[2px] border-[#3461FF]" />
-                  {/* 头像 */}
-                  <div className="relative size-[104px] overflow-hidden rounded-full">
-                    {displayAvatar && !mainAvatarError ? (
-                      <img
-                        src={displayAvatar}
-                        alt={displayName || 'User'}
-                        className="size-full object-cover"
-                        onError={() => setMainAvatarError(true)}
-                      />
-                    ) : authenticated && walletAddress ? (
-                      <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
-                        <span className="text-2xl font-semibold text-white">
-                          {walletAddress.slice(2, 4).toUpperCase()}
-                        </span>
-                      </div>
-                    ) : user?.avatar && !mainAvatarError ? (
-                      <img
-                        src={user.avatar}
-                        alt={user.name || 'User'}
-                        className="size-full object-cover"
-                        onError={() => setMainAvatarError(true)}
-                      />
-                    ) : (
-                      <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
-                        <span className="text-2xl font-semibold text-white">
-                          {displayName?.charAt(0).toUpperCase() || user?.name?.charAt(0).toUpperCase() || 'U'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+              {/* 用户头像和钱包地址 */}
+              <div className="mb-6 flex flex-col items-center md:mb-8">
+                <div className="relative mb-3 size-16 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30 md:mb-4 md:size-20">
+                  {displayAvatar && !mainAvatarError ? (
+                    // 优先显示 X/Twitter 头像
+                    <img
+                      src={displayAvatar}
+                      alt={displayName || 'User'}
+                      className="size-full object-cover"
+                      onError={() => setMainAvatarError(true)}
+                    />
+                  ) : authenticated && walletAddress ? (
+                    // 如果没有 X/Twitter 头像，显示钱包头像（基于地址生成）
+                    <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
+                      <span className="text-xl font-semibold text-white md:text-2xl">
+                        {walletAddress.slice(2, 4).toUpperCase()}
+                      </span>
+                    </div>
+                  ) : user?.avatar && !mainAvatarError ? (
+                    // 如果没有钱包但有用户头像，显示用户头像
+                    <img
+                      src={user.avatar}
+                      alt={user.name || 'User'}
+                      className="size-full object-cover"
+                      onError={() => setMainAvatarError(true)}
+                    />
+                  ) : (
+                    // 默认头像
+                    <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
+                      <span className="text-xl font-semibold text-white md:text-2xl">
+                        {displayName?.charAt(0).toUpperCase() || user?.name?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                
-                {/* 用户名 */}
-                <h3 className="mb-[20px] text-center text-[24px] font-[600] leading-[32px] text-white">
-                  {displayName || user?.name || 'Musfiqur Rahman'}
-                </h3>
+                {/* 显示名称和钱包地址 */}
+                {authenticated && walletAddress ? (
+                  <div className="flex flex-col items-center gap-2">
+                    {/* 显示 X/Twitter 用户名 */}
+                    {authInfo?.username && (
+                      <h3 className="text-base font-semibold text-white md:text-lg">
+                        @{authInfo.username}
+                      </h3>
+                    )}
+                    {/* 钱包地址和复制按钮 */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-gray-400 md:text-sm">
+                        {formattedAddress}
+                      </span>
+                      <button
+                        onClick={handleCopyAddress}
+                        className="cursor-pointer text-[#86FDE8] transition-colors hover:text-[#60A5FA]"
+                        title="Copy address"
+                      >
+                        <svg
+                          className="size-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <h3 className="text-base font-semibold text-white md:text-lg">
+                    {displayName || user?.name || 'User'}
+                  </h3>
+                )}
               </div>
 
               {/* My Wallet 部分 */}
-              <div className="mb-4">
-                <h3 className="mb-[12px] text-[20px] font-[700] leading-[28px] text-white">
+              <div className="mb-6 md:mb-8">
+                <h3 className="mb-3 text-sm font-medium text-white md:mb-4 md:text-base">
                   My Wallet
                 </h3>
-                
-                {/* 钱包卡片 */}
-                {authenticated && walletAddress && (
-                  <div className="flex h-[64px] w-[320px] items-center rounded-[16px] border-[2px] border-[#495099] bg-[#0B041E] px-4 backdrop-blur-[5px]">
-                    {/* 图标 */}
-                    <div className="flex size-[32px] items-center justify-center overflow-hidden rounded-full bg-gradient-to-b from-[#00FFD0] to-[#60A5FA]">
-                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                        <path d="M9.78 17.49h6.04v8.65h-6.04z" fill="white"/>
-                        <path d="M15.82 17.49h5.96v8.73h-5.96z" fill="#075985"/>
-                        <path d="M15.78 14.91h3.6v4.96h-3.6z" fill="#075985"/>
-                        <path d="M9.78 6.22h6v10.2h-6z" fill="white"/>
-                        <path d="M15.78 6.22h6v10.12h-6z" fill="#075985"/>
-                        <path d="M12.18 14.91h3.6v4.96h-3.6z" fill="white"/>
-                      </svg>
-                    </div>
-                    
-                    {/* 金额显示 */}
-                    <div className="ml-3 flex flex-col items-center justify-center text-center text-[20px] font-[700] leading-[28px] text-white">
-                      {formattedTokenBalance} USD
-                    </div>
-                  </div>
-                )}
-                
-                {/* Actions Row - Faucet 和 Disconnect */}
-                <div className="mt-3 flex flex-col items-stretch gap-2 md:flex-row md:items-center md:gap-3">
-                  <ClaimTokenButton />
-                  {authenticated ? (
-                    <button
-                      onClick={logout}
-                      className="rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-80 md:text-sm"
-                    >
-                      Disconnect
-                    </button>
-                  ) : (
-                    <div className="rounded-lg border border-[#2DC3D9] bg-transparent px-4 py-2 text-center text-xs text-gray-400 md:text-sm">
-                      Not connected
+                <div className="space-y-3">
+                  {/* Token Balance Display - 显示 Token 余额 */}
+                  {authenticated && walletAddress && (
+                    <div className="rounded-2xl border border-[#2DC3D9] bg-[#2DC3D9]/5 p-3 md:p-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-400 md:text-sm">
+                          Token Balance
+                        </span>
+                        <span className="text-base font-semibold text-white md:text-lg">
+                          {formattedTokenBalance}
+                        </span>
+                      </div>
                     </div>
                   )}
+                  {/* Actions Row - Faucet 和 Disconnect */}
+                  <div className="flex flex-col items-stretch gap-2 md:flex-row md:items-center md:gap-3">
+                    <ClaimTokenButton />
+                    {authenticated ? (
+                      <button
+                        onClick={logout}
+                        className="rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-80 md:text-sm"
+                      >
+                        Disconnect
+                      </button>
+                    ) : (
+                      <div className="rounded-lg border border-[#2DC3D9] bg-transparent px-4 py-2 text-center text-xs text-gray-400 md:text-sm">
+                        Not connected
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* My History 部分 */}
               <div className="flex flex-1 flex-col">
-                <h3 className="mb-3 text-[20px] font-[700] leading-[28px] text-white">
+                <h3 className="mb-3 text-sm font-medium text-white md:mb-4 md:text-base">
                   My History
                 </h3>
-                <div className="flex-1 space-y-3">
+                <div className="flex-1 space-y-2 md:space-y-3">
                   {/* Participations 按钮 */}
                   <button
                     onClick={handleParticipations}
-                    className="flex w-full items-center gap-3 rounded-[16px] border-[2px] border-[#495099] bg-[#0B041E] p-4 transition-all duration-200 hover:bg-[#495099]/10 backdrop-blur-[5px]"
+                    className="flex w-full items-center gap-2 rounded-2xl border border-[#2DC3D9] bg-transparent p-3 transition-all duration-200 hover:bg-[#2DC3D9]/10 md:gap-3 md:p-4"
                   >
-                    <div className="relative flex size-8 items-center justify-center">
+                    {/* 复选框+时钟图标 */}
+                    <div className="relative flex size-6 items-center justify-center">
                       <svg
-                        className="size-8"
-                        viewBox="0 0 32 32"
+                        className="size-6"
+                        viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
                       >
@@ -283,34 +373,53 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                           >
                             <stop
                               offset="0%"
-                              style={{ stopColor: '#00FFD0', stopOpacity: 1 }}
+                              style={{ stopColor: '#86FDE8', stopOpacity: 1 }}
                             />
                             <stop
                               offset="100%"
-                              style={{ stopColor: '#60A5FA', stopOpacity: 1 }}
+                              style={{ stopColor: '#2DC3D9', stopOpacity: 1 }}
                             />
                           </linearGradient>
                         </defs>
+                        {/* 复选框外框 */}
                         <rect
-                          x="4.5"
-                          y="4.5"
-                          width="23"
-                          height="23"
-                          rx="5"
+                          x="4"
+                          y="4"
+                          width="12"
+                          height="12"
+                          rx="2"
                           stroke="url(#participationsGradient)"
-                          strokeWidth="2"
+                          strokeWidth="1.5"
                           fill="none"
                         />
+                        {/* 复选框勾选 */}
                         <path
-                          d="M10.5 16.5L14.5 20.5L21.5 11.5"
+                          d="M7 12L9.5 14.5L17 7"
                           stroke="url(#participationsGradient)"
-                          strokeWidth="2.5"
+                          strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
+                        {/* 时钟背景（在复选框下方） */}
+                        <circle
+                          cx="10"
+                          cy="18"
+                          r="4"
+                          stroke="url(#participationsGradient)"
+                          strokeWidth="1.5"
+                          fill="none"
+                          opacity="0.6"
+                        />
+                        <path
+                          d="M10 15V18H13"
+                          stroke="url(#participationsGradient)"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          opacity="0.6"
+                        />
                       </svg>
                     </div>
-                    <span className="text-[18px] font-[600] text-white">
+                    <span className="text-sm font-medium text-white md:text-base">
                       Participations
                     </span>
                   </button>
@@ -318,12 +427,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   {/* Creations 按钮 */}
                   <button
                     onClick={handleCreations}
-                    className="flex w-full items-center gap-3 rounded-[16px] border-[2px] border-[#495099] bg-[#0B041E] p-4 transition-all duration-200 hover:bg-[#495099]/10 backdrop-blur-[5px]"
+                    className="flex w-full items-center gap-2 rounded-2xl border border-[#2DC3D9] bg-transparent p-3 transition-all duration-200 hover:bg-[#2DC3D9]/10 md:gap-3 md:p-4"
                   >
-                    <div className="flex size-8 items-center justify-center">
+                    {/* 文档图标 */}
+                    <div className="flex size-6 items-center justify-center">
                       <svg
-                        className="size-8"
-                        viewBox="0 0 32 32"
+                        className="size-6"
+                        viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
                       >
@@ -337,44 +447,44 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                           >
                             <stop
                               offset="0%"
-                              style={{ stopColor: '#00FFD0', stopOpacity: 1 }}
+                              style={{ stopColor: '#86FDE8', stopOpacity: 1 }}
                             />
                             <stop
                               offset="100%"
-                              style={{ stopColor: '#60A5FA', stopOpacity: 1 }}
+                              style={{ stopColor: '#2DC3D9', stopOpacity: 1 }}
                             />
                           </linearGradient>
                         </defs>
                         <path
-                          d="M18.67 2.67H8C7.29276 2.67 6.61448 2.95119 6.11438 3.45129C5.61428 3.95138 5.33309 4.62967 5.33309 5.33691V26.6703C5.33309 27.3775 5.61428 28.0558 6.11438 28.5559C6.61448 29.056 7.29276 29.3372 8 29.3372H24C24.7072 29.3372 25.3855 29.056 25.8856 28.5559C26.3857 28.0558 26.6669 27.3775 26.6669 26.6703V10.6703L18.67 2.67Z"
+                          d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
                           stroke="url(#creationsGradient)"
-                          strokeWidth="2.5"
+                          strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           fill="none"
                         />
                         <path
-                          d="M18.6669 2.66699V10.667H26.6669"
+                          d="M14 2V8H20"
                           stroke="url(#creationsGradient)"
-                          strokeWidth="2.5"
+                          strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
                         <path
-                          d="M10.6669 17.333H21.3335"
+                          d="M8 13H16"
                           stroke="url(#creationsGradient)"
-                          strokeWidth="2"
+                          strokeWidth="1.5"
                           strokeLinecap="round"
                         />
                         <path
-                          d="M10.6669 22.667H21.3335"
+                          d="M8 17H16"
                           stroke="url(#creationsGradient)"
-                          strokeWidth="2"
+                          strokeWidth="1.5"
                           strokeLinecap="round"
                         />
                       </svg>
                     </div>
-                    <span className="text-[18px] font-[600] text-white">
+                    <span className="text-sm font-medium text-white md:text-base">
                       Creations
                     </span>
                   </button>

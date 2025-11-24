@@ -207,6 +207,58 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       ? `${creator.slice(0, 6)}...${creator.slice(-4)}`
       : 'Unknown');
 
+  // 提取数据源
+  const yesInvestedRatio = rawData.yes_invested_ratio || rawData.yesInvestedRatio;
+  const noInvestedRatio = rawData.no_invested_ratio || rawData.noInvestedRatio;
+  const yesPrice = rawData.yes_price || rawData.yesPrice;
+  const noPrice = rawData.no_price || rawData.noPrice;
+  const yesPoolUsd = parseFloat(
+    String(rawData.yes_pool_usd || rawData.yesPoolUsd || rawData.yes_pool_total || rawData.yesPoolTotal || 0)
+  );
+  const noPoolUsd = parseFloat(
+    String(rawData.no_pool_usd || rawData.noPoolUsd || rawData.no_pool_total || rawData.noPoolTotal || 0)
+  );
+  const poolTotal = yesPoolUsd + noPoolUsd;
+
+  // 计算百分比的辅助函数
+  const calculatePercentage = (
+    investedRatio: any,
+    price: any,
+    poolUsd: number,
+    fallback: number
+  ): number => {
+    if (investedRatio !== undefined) {
+      return parseFloat(String(investedRatio)) * 100;
+    }
+    if (price !== undefined) {
+      return Math.round(parseFloat(String(price)) * 100);
+    }
+    if (poolTotal > 0) {
+      return Math.round((poolUsd / poolTotal) * 100);
+    }
+    return fallback;
+  };
+
+  // 计算显示的百分比
+  let realYesPercentage: number;
+  let realNoPercentage: number;
+
+  // 优先处理边界情况
+  if (yesPoolUsd === 0 && noPoolUsd === 0) {
+    realYesPercentage = 0;
+    realNoPercentage = 0;
+  } else if (noPoolUsd === 0) {
+    realYesPercentage = 100;
+    realNoPercentage = 0;
+  } else if (yesPoolUsd === 0) {
+    realYesPercentage = 0;
+    realNoPercentage = 100;
+  } else {
+    // 正常情况：使用数据源计算
+    realYesPercentage = calculatePercentage(yesInvestedRatio, yesPrice, yesPoolUsd, prediction.yesPercentage);
+    realNoPercentage = calculatePercentage(noInvestedRatio, noPrice, noPoolUsd, prediction.noPercentage);
+  }
+
   // 当弹窗打开时，清除错误和成功消息
   useEffect(() => {
     if (isOpen) {
@@ -297,7 +349,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
         base: 'md:max-w-[1200px] md:max-h-[90vh]',
       }}
     >
-      <ModalContent className="h-full max-h-screen overflow-hidden rounded-none bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl md:border-2 md:border-[#07B6D4]">
+      <ModalContent className="h-full max-h-screen overflow-hidden rounded-none bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl">
         {(onClose) => (
           <div className="relative flex h-full flex-col">
             {/* 移动端顶部返回按钮区域 */}
@@ -342,11 +394,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 </div>
 
                 {/* 预测问题 */}
-                <div className="mb-4 h-[80px] overflow-y-auto md:mb-6 modal-left-scrollbar">
-                  <h2 className="text-lg font-semibold leading-tight text-white md:text-2xl">
-                    {prediction.title}
-                  </h2>
-                </div>
+                <h2 className="mb-4 text-lg font-semibold leading-tight text-white md:mb-6 md:text-2xl">
+                  {prediction.title}
+                </h2>
 
                 {/* 交易量和剩余时间 - 使用 StatCard */}
                 <div className="mb-6 flex items-center gap-3 md:mb-8 md:gap-4">
@@ -378,12 +428,86 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   />
                 </div>
 
+                {/* 投票状态 */}
+                <div className="mb-6 md:mb-8">
+                  <div className="mb-3 text-sm font-medium text-white md:mb-4 md:text-base">
+                    Voting Status:
+                  </div>
+                  <div className="relative h-8 w-full overflow-visible rounded-full md:h-10">
+                    {/* 左侧渐变条 */}
+                    <div
+                      className="absolute left-0 top-0 flex h-full items-center rounded-l-full bg-gradient-to-r from-[#00B2FF] to-[#00FFD0]"
+                      style={{
+                        width: `${realYesPercentage}%`,
+                        zIndex: 1,
+                      }}
+                    >
+                      <span
+                        className="whitespace-nowrap text-xs font-medium text-white md:text-sm"
+                        style={{
+                          paddingLeft: '8px',
+                          paddingRight: realYesPercentage < 20 ? '4px' : '8px',
+                        }}
+                      >
+                        {yesInvestedRatio !== undefined
+                          ? `${realYesPercentage.toFixed(1)}%`
+                          : `${realYesPercentage}%`} Yes
+                      </span>
+                    </div>
+                    {realNoPercentage > 0 && (
+                      <div
+                        className="absolute right-0 top-0 flex h-full items-center justify-end rounded-r-full bg-gradient-to-l from-[#870CD8] to-[#FF2DDF]"
+                        style={{
+                          width: `${realNoPercentage}%`,
+                          zIndex: 1,
+                        }}
+                      >
+                        <span
+                          className="whitespace-nowrap text-xs font-medium text-white md:text-sm"
+                          style={{
+                            paddingLeft: realNoPercentage < 20 ? '4px' : '8px',
+                            paddingRight: '8px',
+                          }}
+                        >
+                          {noInvestedRatio !== undefined
+                            ? `${realNoPercentage.toFixed(1)}%`
+                            : `${realNoPercentage}%`} No
+                        </span>
+                      </div>
+                    )}
+                    {realNoPercentage === 0 && (
+                      <div className="absolute right-0 top-0 flex h-full items-center justify-end pr-2 md:pr-3">
+                        <span className="whitespace-nowrap text-xs font-medium text-white md:text-sm">
+                          0% No
+                        </span>
+                      </div>
+                    )}
+                    {/* 闪电图标 - 在分割线中间 */}
+                    <div
+                      className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+                      style={{
+                        left: `${realYesPercentage}%`,
+                        top: '50%',
+                        zIndex: 3,
+                      }}
+                    >
+                      <Image
+                        src="/images/lightning.png"
+                        alt="divider"
+                        width={24}
+                        height={24}
+                        className="h-6 w-auto md:h-10"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 {/* 规则部分 */}
-                <div className="flex-1">
+                <div>
                   <div className="mb-3 text-sm font-medium text-white md:mb-4 md:text-base">
                     Rules:
                   </div>
-                  <div className="h-[200px] overflow-y-auto pr-2 text-xs leading-relaxed text-gray-400 md:text-sm modal-left-scrollbar">
+                  <div className="pr-2 text-xs leading-relaxed text-gray-400 md:text-sm">
                     {rulesText}
                   </div>
                 </div>
@@ -413,9 +537,17 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       onClick={() => setSelectedOption('yes')}
                       className={`h-10 w-[102px] rounded-2xl text-sm font-semibold transition-all duration-200 md:h-12 md:text-base ${
                         selectedOption === 'yes'
-                          ? 'border-2 border-[#07B6D4] bg-[#07B6D4]/20 text-white shadow-[0_0_15px_rgba(7,182,212,0.5)]'
+                          ? 'border-2 border-[#07B6D4] text-white'
                           : 'border-2 border-gray-600 bg-transparent text-gray-400 hover:border-gray-500'
                       }`}
+                      style={{
+                        ...(selectedOption === 'yes'
+                          ? {
+                              background:
+                                'linear-gradient(to right, #040E1E, #268DA4)',
+                            }
+                          : {}),
+                      }}
                     >
                       Yes
                     </button>
@@ -423,9 +555,17 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       onClick={() => setSelectedOption('no')}
                       className={`h-10 w-[102px] rounded-2xl text-sm font-semibold transition-all duration-200 md:h-12 md:text-base ${
                         selectedOption === 'no'
-                          ? 'border-2 border-[#CB30E0] bg-[#CB30E0]/20 text-white shadow-[0_0_15px_rgba(203,48,224,0.5)]'
+                          ? 'border-2 border-[#CB30E0] text-white'
                           : 'border-2 border-gray-600 bg-transparent text-gray-400 hover:border-gray-500'
                       }`}
+                      style={{
+                        ...(selectedOption === 'no'
+                          ? {
+                              background:
+                                'linear-gradient(to right, #D245C3 0%, #5731AC 100%)',
+                            }
+                          : {}),
+                      }}
                     >
                       No
                     </button>

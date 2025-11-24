@@ -30,21 +30,21 @@ export default function LaunchPadDashboard() {
 
   return (
     <div className="min-h-screen bg-[#0B041E] pb-[32px] text-white">
+        {currentView === 'dashboard' && (
+          <SharedHeader
+            className="my-0 py-[30px]"
+            onProfileModalOpenChange={setIsProfileModalOpen}
+            onParticipationsClick={handleParticipationsClick}
+            onCreationsClick={handleCreationsClick}
+          />
+        )}
         {currentView === 'dashboard' ? (
-          <>
-            <SharedHeader
-              className="my-0 py-[30px]"
-              onProfileModalOpenChange={setIsProfileModalOpen}
-              onParticipationsClick={handleParticipationsClick}
-              onCreationsClick={handleCreationsClick}
-            />
-            <div className="mx-auto max-w-[1920px] px-4 md:px-[64px]">
-              <div className="my-[12px] text-center text-lg text-white md:text-2xl">
-                Turn your opinions into earnings.
-              </div>
-              <DashboardContent />
+          <div className="mx-auto max-w-[1440px] px-4 md:px-[64px]">
+            <div className="my-[12px] text-center text-lg text-white md:text-2xl">
+              Turn your opinions into earnings.
             </div>
-          </>
+            <DashboardContent />
+          </div>
         ) : (
           <div className="flex h-screen flex-col">
             {/* 移动端顶部返回按钮 */}

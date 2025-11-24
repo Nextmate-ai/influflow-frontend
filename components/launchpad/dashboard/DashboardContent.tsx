@@ -165,29 +165,31 @@ export const DashboardContent: React.FC = () => {
 
   return (
     <div>
-      <div className="mb-4 flex flex-col items-stretch justify-between gap-3 md:mb-[42px] md:flex-row md:items-center md:gap-0">
-        {/* Radio 切换按钮 */}
-        <div className="flex h-[48px] flex-1 items-center gap-1 rounded-[10px] bg-[#0B041E] p-1 md:h-[56px] md:flex-initial md:gap-2">
-          <button
-            onClick={() => setFilterStatus('live')}
-            className={`flex h-full flex-1 items-center justify-center rounded-lg px-3 text-sm font-semibold transition-all duration-200 md:flex-initial md:px-6 md:text-base ${
-              filterStatus === 'live'
-                ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
-                : 'bg-transparent text-gray-400 hover:text-white'
-            }`}
-          >
-            Live
-          </button>
-          <button
-            onClick={() => setFilterStatus('finished')}
-            className={`flex h-full flex-1 items-center justify-center rounded-lg px-3 text-sm font-semibold transition-all duration-200 md:flex-initial md:px-6 md:text-base ${
-              filterStatus === 'finished'
-                ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
-                : 'bg-transparent text-gray-400 hover:text-white'
-            }`}
-          >
-            Finished
-          </button>
+      <div className="mb-4 flex flex-col items-stretch justify-between gap-3 md:mb-[20px] md:flex-row md:items-center md:gap-0">
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Radio 切换按钮 */}
+          <div className="flex h-[48px] flex-1 items-center gap-1 rounded-[10px] bg-[#0B041E] p-1 md:h-[56px] md:flex-initial md:gap-2">
+            <button
+              onClick={() => setFilterStatus('live')}
+              className={`flex h-full flex-1 items-center justify-center rounded-lg px-3 text-sm font-semibold transition-all duration-200 md:flex-initial md:px-6 md:text-base ${
+                filterStatus === 'live'
+                  ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
+                  : 'bg-transparent text-gray-400 hover:text-white'
+              }`}
+            >
+              Live
+            </button>
+            <button
+              onClick={() => setFilterStatus('finished')}
+              className={`flex h-full flex-1 items-center justify-center rounded-lg px-3 text-sm font-semibold transition-all duration-200 md:flex-initial md:px-6 md:text-base ${
+                filterStatus === 'finished'
+                  ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
+                  : 'bg-transparent text-gray-400 hover:text-white'
+              }`}
+            >
+              Finished
+            </button>
+          </div>
         </div>
         <button
           onClick={handleCreateClick}

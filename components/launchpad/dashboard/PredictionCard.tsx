@@ -209,52 +209,47 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`group relative flex cursor-pointer flex-col rounded-[23px] border border-[#60A5FA] p-4 pb-[16px] pt-[24px] transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/20 md:px-6 md:pb-6 md:pt-8`}
+      className={`group relative flex cursor-pointer flex-col rounded-2xl border border-[#60A5FA] p-4 pb-[16px] pt-[24px] transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/20 md:p-6 md:pb-[20px] md:pt-[32px]`}
     >
-      {/* 主布局：左边是头像+用户名，右边是标题+进度条+按钮 */}
-      <div className="mb-4 flex items-start gap-2 md:mb-6 md:gap-4">
-        {/* 左侧：头像和用户名 */}
-        <div className="flex shrink-0 flex-col items-center gap-1.5 md:gap-2">
-          {/* 头像 */}
-          <div className="relative size-10 overflow-hidden rounded-full transition-colors group-hover:border-cyan-400 md:size-[64px]">
-            {creatorInfo?.xAvatarUrl && !avatarError ? (
-              <img
-                src={creatorInfo.xAvatarUrl}
-                alt={displayName}
-                className="size-full object-cover"
-                onError={() => setAvatarError(true)}
-              />
-            ) : (
-              <Image
-                src={displayAvatar}
-                alt={displayName}
-                fill
-                className="object-cover"
-              />
-            )}
-          </div>
-          {/* 用户名 */}
-          <div className="w-full max-w-[64px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-center text-[10px] text-transparent md:max-w-[80px] md:text-[14px] md:leading-[20px]">
-            {displayName}
-          </div>
+      {/* 用户信息和头像 */}
+      <div className="mb-4 flex items-start gap-3 md:mb-[20px] md:gap-4">
+        <div className="relative size-12 shrink-0 overflow-hidden rounded-full transition-colors group-hover:border-cyan-400 md:size-16">
+          {creatorInfo?.xAvatarUrl && !avatarError ? (
+            <img
+              src={creatorInfo.xAvatarUrl}
+              alt={displayName}
+              className="size-full object-cover"
+              onError={() => setAvatarError(true)}
+            />
+          ) : (
+            <Image
+              src={displayAvatar}
+              alt={displayName}
+              fill
+              className="object-cover"
+            />
+          )}
         </div>
-
-        {/* 右侧：标题、进度条和按钮 */}
         <div className="min-w-0 flex-1">
-          {/* 标题 */}
-          <div className="mb-3 flex items-center gap-2 md:mb-6">
-            <h3 className="line-clamp-2 min-h-[40px] text-xs leading-[20px] text-white md:min-h-[48px] md:text-lg md:leading-6">
+          <div className="flex items-center gap-2">
+            <h3 className="line-clamp-2 text-sm leading-[24px] text-white md:text-base md:leading-[32px]">
               {title}
             </h3>
-            {!marketStatus.isActive && (
-              <span className={`shrink-0 text-[10px] font-medium md:text-xs ${marketStatus.color}`}>
-                {marketStatus.label}
-              </span>
-            )}
+            <span className={`shrink-0 text-[10px] font-medium md:text-xs ${marketStatus.color}`}>
+              {marketStatus.label}
+            </span>
           </div>
+        </div>
+      </div>
 
+      <div className="flex items-start justify-start gap-3 md:gap-[20px]">
+        <div className="max-w-[80px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-xs text-transparent md:max-w-[100px] md:text-sm">
+          {displayName}
+        </div>
+
+        <div className="flex-1 flex-col">
           {/* 投票比例 */}
-          <div className="mb-2 md:mb-[12px]">
+          <div className="mb-3 mt-[-16px] md:mb-[16px] md:mt-[-20px]">
             <GradientSlider
               leftPercentage={displayYesPercentage}
               rightPercentage={displayNoPercentage}
@@ -263,11 +258,11 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
             />
           </div>
 
-          {/* Yes/No 按钮 */}
-          <div className="mb-4 flex items-center justify-around gap-2 text-xs text-white md:mb-0 md:gap-16 md:text-[17px] md:font-bold md:leading-[25px]">
+          {/* 投票比例数字 */}
+          <div className="mb-4 flex items-center justify-around gap-2 text-xs text-white md:mb-[24px] md:gap-0 md:text-sm">
             <div
               onClick={handleYesClick}
-              className={`flex h-[36px] w-[100px] items-center justify-center rounded-[12px] border-2 border-[#07B6D4] transition-colors md:h-10 md:w-[140px] md:rounded-[12px] ${
+              className={`flex h-[36px] w-[100px] items-center justify-center rounded-[12px] border-2 border-[#07B6D4] transition-colors md:h-[40px] md:w-[140px] md:rounded-[16px] ${
                 isMarketActive
                   ? 'cursor-pointer hover:bg-[#07B6D4]/10'
                   : 'cursor-not-allowed opacity-50'
@@ -277,7 +272,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
             </div>
             <div
               onClick={handleNoClick}
-              className={`flex h-[36px] w-[100px] items-center justify-center rounded-[12px] border-2 border-[#CB30E0] transition-colors md:h-10 md:w-[140px] md:rounded-[12px] ${
+              className={`flex h-[36px] w-[100px] items-center justify-center rounded-[12px] border-2 border-[#CB30E0] transition-colors md:h-[40px] md:w-[140px] md:rounded-[16px] ${
                 isMarketActive
                   ? 'cursor-pointer hover:bg-[#CB30E0]/10'
                   : 'cursor-not-allowed opacity-50'
@@ -295,9 +290,9 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
           <Image
             src="/images/twitter_card.png"
             alt="avatar"
-            width={16}
-            height={16}
-            className="md:size-4"
+            width={20}
+            height={20}
+            className="md:size-6"
           />
         </div>
 

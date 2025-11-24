@@ -19,9 +19,9 @@ export const StatCard: React.FC<StatCardProps> = ({
   tooltip,
 }) => {
   const content = (
-    <div className="flex items-center gap-3 text-white">
+    <div className="flex items-center gap-[12px] text-sm text-white">
       {icon}
-      <span className="text-lg font-semibold leading-7">{value}</span>
+      <span className="font-white text-base">{value}</span>
     </div>
   );
 
