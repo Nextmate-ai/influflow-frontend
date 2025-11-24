@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 
 import { usePredictionMarkets } from '@/hooks/usePredictionMarkets';
 
@@ -83,12 +83,30 @@ export const DashboardContent: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('live');
 
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+        refreshTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
   // 从 Supabase 读取市场数据
   const { predictions, isLoading, error, refresh } = usePredictionMarkets();
 
   // 使用 useCallback 包装 refresh 回调，避免每次渲染都创建新函数
   const handleSuccess = useCallback(() => {
     refresh();
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+    }
+    refreshTimeoutRef.current = setTimeout(() => {
+      refresh();
+      refreshTimeoutRef.current = null;
+    }, 5000);
   }, [refresh]);
 
   // 根据筛选状态过滤预测

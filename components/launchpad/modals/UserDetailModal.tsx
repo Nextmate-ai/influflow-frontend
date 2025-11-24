@@ -2,7 +2,7 @@
 
 import { Input, Modal, ModalContent } from '@heroui/react';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useReadContract } from 'wagmi';
 
@@ -68,9 +68,17 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     useBuyShares();
   const { balance: tokenBalance } = useTokenBalance();
 
-  // 监听成功状态，自动关闭
+  const successHandledRef = useRef(false);
+  const errorHandledRef = useRef(false);
+
+  // 监听成功状态，自动关闭。通过 ref 确保每次成功只处理一次，避免无限循环
   useEffect(() => {
     if (currentStep === 'success') {
+      if (successHandledRef.current) {
+        return;
+      }
+      successHandledRef.current = true;
+
       addToast({
         title: 'Success',
         description: 'Successfully purchased shares!',
@@ -80,18 +88,26 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       setTimeout(() => {
         onClose();
       }, 1500);
+    } else if (successHandledRef.current) {
+      successHandledRef.current = false;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentStep, onClose]);
+  }, [currentStep, onClose, onSuccess]);
 
   // 监听错误状态，使用toast提示
   useEffect(() => {
     if (error && currentStep === 'error') {
+      if (errorHandledRef.current) {
+        return;
+      }
+      errorHandledRef.current = true;
+
       addToast({
         title: 'Error',
         description: error.message || 'Failed to buy shares',
         color: 'danger',
       });
+    } else if (errorHandledRef.current && currentStep !== 'error') {
+      errorHandledRef.current = false;
     }
   }, [error, currentStep]);
 
