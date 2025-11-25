@@ -328,10 +328,12 @@ function mapPositionToParticipation(
   // 转换 outcome (市场结果)
   const marketOutcome = convertOutcome(market.outcome);
 
-  // 计算投注金额
+  // 计算投注金额（investment_usd是扣除手续费后的金额，需要除以0.97得到原始下注量）
   const yesInvestment = parseFloat(String(position.yes_investment_usd || 0));
   const noInvestment = parseFloat(String(position.no_investment_usd || 0));
-  const betAmount = opinion === 'Yes' ? yesInvestment : noInvestment;
+  const investmentAfterFee = opinion === 'Yes' ? yesInvestment : noInvestment;
+  // 手续费是3%，所以原始金额 = 扣除手续费后的金额 / 0.97
+  const betAmount = investmentAfterFee > 0 ? investmentAfterFee / 0.97 : 0;
 
   // 获取预期收益
   const expectedPayout = parseFloat(String(position.expected_payout_usd || 0));
