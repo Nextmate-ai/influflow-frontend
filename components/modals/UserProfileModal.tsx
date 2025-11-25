@@ -354,17 +354,17 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <h3 className="mb-3 text-sm font-medium text-white md:mb-4 md:text-base">
                   My History
                 </h3>
-                <div className="flex-1 space-y-2 md:space-y-3">
+                <div className="flex flex-col gap-3 md:gap-4">
                   {/* Participations 按钮 */}
                   <button
                     onClick={handleParticipations}
-                    className="flex w-full items-center gap-2 rounded-2xl border border-[#2DC3D9] bg-transparent p-3 transition-all duration-200 hover:bg-[#2DC3D9]/10 md:gap-3 md:p-4"
+                    className="flex w-full items-center gap-3 rounded-2xl border-2 border-[#2DC3D9] bg-transparent px-4 py-3.5 transition-all duration-200 hover:bg-[#2DC3D9]/10 md:gap-4 md:px-5 md:py-4"
                   >
-                    {/* 复选框+时钟图标 */}
-                    <div className="relative flex size-6 items-center justify-center">
+                    {/* 复选框图标 */}
+                    <div className="relative flex size-6 shrink-0 items-center justify-center md:size-7">
                       <svg
-                        className="size-6"
-                        viewBox="0 0 24 24"
+                        className="size-full"
+                        viewBox="0 0 20 20"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
                       >
@@ -388,10 +388,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         </defs>
                         {/* 复选框外框 */}
                         <rect
-                          x="4"
-                          y="4"
-                          width="12"
-                          height="12"
+                          x="3"
+                          y="3"
+                          width="14"
+                          height="14"
                           rx="2"
                           stroke="url(#participationsGradient)"
                           strokeWidth="1.5"
@@ -399,32 +399,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         />
                         {/* 复选框勾选 */}
                         <path
-                          d="M7 12L9.5 14.5L17 7"
+                          d="M6 10L9 13L14 6"
                           stroke="url(#participationsGradient)"
                           strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
-                        {/* 时钟背景（在复选框下方） */}
-                        <circle
-                          cx="10"
-                          cy="18"
-                          r="4"
-                          stroke="url(#participationsGradient)"
-                          strokeWidth="1.5"
-                          fill="none"
-                          opacity="0.6"
-                        />
-                        <path
-                          d="M10 15V18H13"
-                          stroke="url(#participationsGradient)"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          opacity="0.6"
-                        />
                       </svg>
                     </div>
-                    <span className="text-sm font-medium text-white md:text-base">
+                    <span className="text-base font-medium text-white md:text-lg">
                       Participations
                     </span>
                   </button>
@@ -432,12 +415,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   {/* Creations 按钮 */}
                   <button
                     onClick={handleCreations}
-                    className="flex w-full items-center gap-2 rounded-2xl border border-[#2DC3D9] bg-transparent p-3 transition-all duration-200 hover:bg-[#2DC3D9]/10 md:gap-3 md:p-4"
+                    className="flex w-full items-center gap-3 rounded-2xl border-2 border-[#2DC3D9] bg-transparent px-4 py-3.5 transition-all duration-200 hover:bg-[#2DC3D9]/10 md:gap-4 md:px-5 md:py-4"
                   >
                     {/* 文档图标 */}
-                    <div className="flex size-6 items-center justify-center">
+                    <div className="flex size-5 shrink-0 items-center justify-center md:size-6">
                       <svg
-                        className="size-6"
+                        className="size-full"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -489,7 +472,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         />
                       </svg>
                     </div>
-                    <span className="text-sm font-medium text-white md:text-base">
+                    <span className="text-base font-medium text-white md:text-lg">
                       Creations
                     </span>
                   </button>
