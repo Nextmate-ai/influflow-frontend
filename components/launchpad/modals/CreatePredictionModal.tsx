@@ -345,8 +345,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                     Title
                   </label>
                   <p className="mb-2 text-[10px] italic text-[#00D9F5] md:text-[12px]">
-                    Ask something we can predict: Will Tesla's stock go up next
-                    week?
+                    Start a debateable question: Will Tesla’s stock rise next week?
                   </p>
                   <Input
                     value={title}
@@ -358,7 +357,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                       inputWrapper:
                         'bg-transparent border border-[#2DC3D9] rounded-2xl hover:border-[#2DC3D9] focus-within:border-[#2DC3D9] h-12 md:h-auto',
                     }}
-                    placeholder="Enter your prediction question"
+                    placeholder="Enter your question"
                   />
                 </div>
 
@@ -371,14 +370,14 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                     value={rules}
                     onChange={(e) => setRules(e.target.value)}
                     className="h-20 w-full resize-none rounded-2xl border border-[#2DC3D9] bg-transparent p-3 text-sm text-white transition-colors placeholder:text-gray-500 focus:border-[#2DC3D9] focus:outline-none md:h-20 md:text-base"
-                    placeholder="Define the rules for this prediction..."
+                    placeholder="Define clear resolution rules. Example: If Tesla's stock closes above $250 on Friday market close, resolved to Yes. Otherwise, resolved to No."
                   />
                 </div>
 
                 {/* Options */}
                 <div>
                   <label className="mb-2 block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-sm font-medium text-transparent md:text-base">
-                    Options (Select your position)
+                    Your Position
                   </label>
                   <div className="flex gap-3 md:gap-4">
                     <button
