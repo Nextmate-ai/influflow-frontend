@@ -400,26 +400,62 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
               <div className="modal-left-scrollbar flex-1 overflow-y-auto border-b border-[#60A5FA] p-4 md:border-b-0 md:p-[40px]">
                 {/* 用户头像和Name */}
                 <div className="mb-4 flex items-center gap-3 md:mb-6 md:gap-4">
-                  <div className="relative size-12 shrink-0 overflow-hidden rounded-full md:size-16">
-                    {creatorInfo?.xAvatarUrl && !avatarError ? (
-                      <img
-                        src={creatorInfo.xAvatarUrl}
-                        alt={displayName}
-                        className="size-full object-cover"
-                        onError={() => setAvatarError(true)}
-                      />
-                    ) : (
-                      <Image
-                        src={displayAvatar}
-                        alt={displayName}
-                        fill
-                        className="object-cover"
-                      />
-                    )}
-                  </div>
-                  <div className="max-w-[200px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-sm font-medium text-transparent md:text-base">
-                    {displayName}
-                  </div>
+                  {creatorInfo?.xUsername ? (
+                    <a
+                      href={`https://x.com/${creatorInfo.xUsername.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative size-12 shrink-0 overflow-hidden rounded-full transition-opacity hover:opacity-80 md:size-16 cursor-pointer"
+                    >
+                      {creatorInfo?.xAvatarUrl && !avatarError ? (
+                        <img
+                          src={creatorInfo.xAvatarUrl}
+                          alt={displayName}
+                          className="size-full object-cover"
+                          onError={() => setAvatarError(true)}
+                        />
+                      ) : (
+                        <Image
+                          src={displayAvatar}
+                          alt={displayName}
+                          fill
+                          className="object-cover"
+                        />
+                      )}
+                    </a>
+                  ) : (
+                    <div className="relative size-12 shrink-0 overflow-hidden rounded-full md:size-16">
+                      {creatorInfo?.xAvatarUrl && !avatarError ? (
+                        <img
+                          src={creatorInfo.xAvatarUrl}
+                          alt={displayName}
+                          className="size-full object-cover"
+                          onError={() => setAvatarError(true)}
+                        />
+                      ) : (
+                        <Image
+                          src={displayAvatar}
+                          alt={displayName}
+                          fill
+                          className="object-cover"
+                        />
+                      )}
+                    </div>
+                  )}
+                  {creatorInfo?.xUsername ? (
+                    <a
+                      href={`https://x.com/${creatorInfo.xUsername.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="max-w-[200px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-sm font-medium text-transparent transition-opacity hover:opacity-80 md:text-base cursor-pointer"
+                    >
+                      {displayName}
+                    </a>
+                  ) : (
+                    <div className="max-w-[200px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-sm font-medium text-transparent md:text-base">
+                      {displayName}
+                    </div>
+                  )}
                 </div>
 
                 {/* 预测问题 */}

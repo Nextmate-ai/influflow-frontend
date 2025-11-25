@@ -221,23 +221,49 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
     >
       {/* 用户信息和头像 */}
       <div className="mb-4 flex items-start gap-3 md:mb-[20px] md:gap-4">
-        <div className="relative size-12 shrink-0 overflow-hidden rounded-full transition-colors group-hover:border-cyan-400 md:size-16">
-          {creatorInfo?.xAvatarUrl && !avatarError ? (
-            <img
-              src={creatorInfo.xAvatarUrl}
-              alt={displayName}
-              className="size-full object-cover"
-              onError={() => setAvatarError(true)}
-            />
-          ) : (
-            <Image
-              src={displayAvatar}
-              alt={displayName}
-              fill
-              className="object-cover"
-            />
-          )}
-        </div>
+        {creatorInfo?.xUsername ? (
+          <a
+            href={`https://x.com/${creatorInfo.xUsername.replace('@', '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="relative size-12 shrink-0 overflow-hidden rounded-full transition-colors group-hover:border-cyan-400 md:size-16 cursor-pointer hover:opacity-80"
+          >
+            {creatorInfo?.xAvatarUrl && !avatarError ? (
+              <img
+                src={creatorInfo.xAvatarUrl}
+                alt={displayName}
+                className="size-full object-cover"
+                onError={() => setAvatarError(true)}
+              />
+            ) : (
+              <Image
+                src={displayAvatar}
+                alt={displayName}
+                fill
+                className="object-cover"
+              />
+            )}
+          </a>
+        ) : (
+          <div className="relative size-12 shrink-0 overflow-hidden rounded-full transition-colors group-hover:border-cyan-400 md:size-16">
+            {creatorInfo?.xAvatarUrl && !avatarError ? (
+              <img
+                src={creatorInfo.xAvatarUrl}
+                alt={displayName}
+                className="size-full object-cover"
+                onError={() => setAvatarError(true)}
+              />
+            ) : (
+              <Image
+                src={displayAvatar}
+                alt={displayName}
+                fill
+                className="object-cover"
+              />
+            )}
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h3 className="line-clamp-2 text-[18px] leading-[24px] text-white md:leading-[32px]">
@@ -255,9 +281,21 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
       </div>
 
       <div className="flex items-start justify-start gap-3 md:gap-[20px]">
-        <div className="max-w-[80px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-xs text-transparent md:max-w-[100px] md:text-sm">
-          {displayName}
-        </div>
+        {creatorInfo?.xUsername ? (
+          <a
+            href={`https://x.com/${creatorInfo.xUsername.replace('@', '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-[80px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-xs text-transparent transition-opacity hover:opacity-80 md:max-w-[100px] md:text-sm cursor-pointer"
+          >
+            {displayName}
+          </a>
+        ) : (
+          <div className="max-w-[80px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-xs text-transparent md:max-w-[100px] md:text-sm">
+            {displayName}
+          </div>
+        )}
 
         <div className="flex-1 flex-col">
           {/* 投票比例 */}
@@ -299,13 +337,31 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
       {/* 统计信息 */}
       <div className="mt-auto flex items-center justify-between space-x-2 text-xs">
         <div className="line-clamp-2 text-sm leading-[24px] text-white md:text-base md:leading-[32px]">
-          <Image
-            src="/images/twitter_card.png"
-            alt="avatar"
-            width={20}
-            height={20}
-            className="md:size-6"
-          />
+          {creatorInfo?.xUsername ? (
+            <a
+              href={`https://x.com/${creatorInfo.xUsername.replace('@', '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-block transition-opacity hover:opacity-80"
+            >
+              <Image
+                src="/images/twitter_card.png"
+                alt="Twitter"
+                width={20}
+                height={20}
+                className="md:size-6 cursor-pointer"
+              />
+            </a>
+          ) : (
+            <Image
+              src="/images/twitter_card.png"
+              alt="Twitter"
+              width={20}
+              height={20}
+              className="md:size-6"
+            />
+          )}
         </div>
 
         <div className="flex items-center gap-3 md:gap-[24px]">
