@@ -370,9 +370,10 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
               <Image
                 src="/images/volume.png"
                 alt="avatar"
-                width={10}
-                height={10}
-                className="md:size-3"
+                width={26}
+                height={40}
+                className="h-3 w-auto md:h-4"
+                style={{ objectFit: 'contain' }}
               />
             }
             label=""
@@ -384,9 +385,10 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
               <Image
                 src="/images/timer.png"
                 alt="avatar"
-                width={10}
-                height={10}
-                className="md:size-3"
+                width={24}
+                height={40}
+                className="h-3 w-auto md:h-4"
+                style={{ objectFit: 'contain' }}
               />
             }
             label=""
