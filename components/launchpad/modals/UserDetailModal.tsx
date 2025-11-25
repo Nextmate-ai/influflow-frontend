@@ -61,7 +61,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const [avatarError, setAvatarError] = useState(false);
 
   // 钱包和购买份额 hook
-  const { authenticated } = usePrivy();
+  const { authenticated, login } = usePrivy();
   const { wallets } = useWallets();
   const walletAddress = wallets[0]?.address || '';
   const { buySharesWithApproval, isPending, currentStep, error } =
@@ -298,11 +298,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   // 使用批量交易：一次性完成 approve 和 buyShares
   const handleBuyShares = async () => {
     if (!authenticated) {
-      addToast({
-        title: 'Error',
-        description: 'Please connect your wallet first',
-        color: 'danger',
-      });
+      onClose(); // 先关闭模态框，避免遮挡 Privy 登录界面
+      login();
       return;
     }
 
@@ -714,10 +711,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     <button
                       onClick={handleBuyShares}
                       disabled={
-                        !authenticated ||
                         isPending ||
-                        !selectedOption ||
-                        parseFloat(amount) <= 0
+                        (authenticated && (!selectedOption || parseFloat(amount) <= 0))
                       }
                       className="size-full rounded-2xl bg-[#0B041E] text-base font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50 md:text-lg"
                     >
@@ -727,7 +722,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                           : currentStep === 'buying'
                             ? 'Buying...'
                             : 'Processing...'
-                        : 'Join'}
+                        : authenticated
+                          ? 'Join'
+                          : 'Connect'}
                     </button>
                   </div>
                   {!authenticated && (

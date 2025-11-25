@@ -33,7 +33,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
   const [bidAmount, setBidAmount] = useState('');
   const [selectedSide, setSelectedSide] = useState<1 | 2>(1); // 1 = Yes, 2 = No
 
-  const { authenticated } = usePrivy();
+  const { authenticated, login } = usePrivy();
   const { createMarketWithApproval, isPending, currentStep, error } =
     useMarketCreation();
   const { balance: tokenBalance } = useTokenBalance();
@@ -170,11 +170,8 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
 
   const handleCreate = async () => {
     if (!authenticated) {
-      addToast({
-        title: 'Error',
-        description: 'Please connect your wallet first',
-        color: 'danger',
-      });
+      onClose(); // 先关闭模态框，避免遮挡 Privy 登录界面
+      login();
       return;
     }
 
@@ -489,7 +486,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                   >
                     <button
                       onClick={handleCreate}
-                      disabled={isPending || !authenticated || !isFormValid}
+                      disabled={isPending || (authenticated && !isFormValid)}
                       className="size-full rounded-2xl bg-[#0B041E] text-base font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50 md:text-lg"
                     >
                       {isPending
@@ -500,7 +497,9 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                             : currentStep === 'creating'
                               ? 'Creating...'
                               : 'Processing...'
-                        : 'Create'}
+                        : authenticated
+                          ? 'Create'
+                          : 'Connect'}
                     </button>
                   </div>
                 </div>
