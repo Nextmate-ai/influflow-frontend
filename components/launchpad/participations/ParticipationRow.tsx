@@ -57,7 +57,7 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
     try {
       await claimPayout({ marketId: BigInt(marketId) });
       setIsClaimSuccess(true);
-      // 调用成功回调，刷新数据
+      // 立即调用回调，父组件会处理乐观更新和延迟刷新
       onClaimSuccess?.();
     } catch (error) {
       console.error('Claim failed:', error);
@@ -71,7 +71,7 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
 
     try {
       await claimCreatorFees({ marketId: BigInt(marketId) });
-      // 调用成功回调，刷新数据
+      // 立即调用回调，父组件会处理乐观更新和延迟刷新
       onClaimSuccess?.();
     } catch (error) {
       console.error('Claim creator fees failed:', error);

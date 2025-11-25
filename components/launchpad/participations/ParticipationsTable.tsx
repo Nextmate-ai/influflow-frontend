@@ -27,7 +27,21 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
   const { claimCreatorFees, isPending: isClaimCreatorFeesPending } =
     useClaimCreatorFees();
 
-  const displayData = participations;
+  // 本地状态跟踪已 claim 的记录（乐观更新）
+  const [claimedRecords, setClaimedRecords] = React.useState<Set<string>>(
+    new Set(),
+  );
+
+  // 合并本地 claimed 状态和服务器数据
+  const displayData = React.useMemo(() => {
+    return participations.map((item) => {
+      const recordKey = `${item.marketId}-${item.opinion || 'all'}`;
+      return {
+        ...item,
+        claimed: item.claimed || claimedRecords.has(recordKey),
+      };
+    });
+  }, [participations, claimedRecords]);
 
   // 计算总收益
   const totalEarnings = React.useMemo(() => {
@@ -52,7 +66,10 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
     }
   }, [displayData, viewType]);
 
-  const handleMobileClaim = async (marketId?: string) => {
+  const handleMobileClaim = async (
+    marketId?: string,
+    opinion?: 'Yes' | 'No' | null,
+  ) => {
     if (!marketId) return;
     try {
       if (viewType === 'participations') {
@@ -60,11 +77,24 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
       } else {
         await claimCreatorFees({ marketId: BigInt(marketId) });
       }
-      refetch();
+      // 立即更新本地状态（乐观更新）
+      const recordKey = `${marketId}-${opinion || 'all'}`;
+      setClaimedRecords((prev) => new Set(prev).add(recordKey));
     } catch (error) {
       console.error('Claim failed:', error);
     }
   };
+
+  // 处理 claim 成功回调，更新本地状态
+  const handleClaimSuccess = React.useCallback(
+    (marketId?: string, opinion?: 'Yes' | 'No' | null) => {
+      if (!marketId) return;
+      // 立即更新本地状态（乐观更新）
+      const recordKey = `${marketId}-${opinion || 'all'}`;
+      setClaimedRecords((prev) => new Set(prev).add(recordKey));
+    },
+    [],
+  );
 
   return (
     <div className="flex size-full flex-col overflow-hidden bg-[#0B041E] p-[48px]">
@@ -168,7 +198,9 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
                               </span>
                             ) : (
                               <button
-                                onClick={() => handleMobileClaim(item.marketId)}
+                                onClick={() =>
+                                  handleMobileClaim(item.marketId, item.opinion)
+                                }
                                 disabled={isClaimPending || !item.marketId}
                                 className="rounded-full border border-[#86FDE8] bg-[#86FDE8]/10 px-3 py-1 text-xs font-semibold text-[#86FDE8] disabled:opacity-50"
                               >
@@ -391,7 +423,9 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
                         marketId={marketId}
                         creatorFeesClaimed={creatorFeesClaimed}
                         viewType={viewType}
-                        onClaimSuccess={refetch}
+                        onClaimSuccess={() =>
+                          handleClaimSuccess(item.marketId, item.opinion)
+                        }
                       />
                     );
                   })
