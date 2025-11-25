@@ -652,14 +652,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       ${payoutIfWin}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400 md:text-sm">
-                      Service Fee (3%)
-                    </span>
-                    <span className="text-xs text-gray-400 md:text-sm">
-                      ${((parseFloat(amount) || 0) * 0.03).toFixed(2)}
-                    </span>
-                  </div>
                 </div>
 
                 {/* 状态提示 */}
