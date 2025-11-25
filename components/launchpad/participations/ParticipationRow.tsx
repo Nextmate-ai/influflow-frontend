@@ -194,11 +194,10 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
         <td className="h-[64px] w-[10%] px-6 py-0 text-center align-middle">
           <div className="flex items-center justify-center">
             {(() => {
-              // 支持 "Active" | "Resolved" | "Void" 格式（首字母大写）
+              // market state 只有三类: "Active" | "Resolved" | "Voided"
               const stateStr = String(marketState || '');
-              const stateLower = stateStr.toLowerCase();
 
-              if (stateStr === 'Active' || stateLower === 'active') {
+              if (stateStr === 'Active') {
                 return (
                   <span
                     className="text-sm font-semibold"
@@ -213,7 +212,7 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
                     Ongoing
                   </span>
                 );
-              } else if (stateStr === 'Resolved' || stateLower === 'resolved') {
+              } else if (stateStr === 'Resolved') {
                 return (
                   <div className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl">
                     <span className="text-sm font-semibold text-white">
@@ -221,11 +220,7 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
                     </span>
                   </div>
                 );
-              } else if (
-                stateStr === 'Void' ||
-                stateLower === 'void' ||
-                stateLower === 'voided'
-              ) {
+              } else if (stateStr === 'Voided') {
                 return (
                   <div className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl">
                     <span className="text-sm font-semibold text-white">
@@ -247,8 +242,10 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
         <td className="h-[64px] w-[10%] px-6 py-0 text-center align-middle">
           <div className="flex items-center justify-center">
             {(() => {
-              const stateLower = (marketState || '').toLowerCase();
-              if (stateLower === 'resolved') {
+              // market state 只有三类: "Active" | "Resolved" | "Voided"
+              const stateStr = String(marketState || '');
+              // 只有 Resolved 状态可以 claim creator fees，Voided 不可以
+              if (stateStr === 'Resolved') {
                 if (creatorFeesClaimed) {
                   return (
                     <div className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl border-2 border-[#495099]">
@@ -365,11 +362,10 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
       <td className="h-[64px] w-[11%] px-6 py-0 text-center align-middle">
         <div className="flex items-center justify-center">
           {(() => {
-            // 支持 "Active" | "Resolved" | "Void" 格式（首字母大写）
+            // market state 只有三类: "Active" | "Resolved" | "Voided"
             const stateStr = String(marketState || '');
-            const stateLower = stateStr.toLowerCase();
 
-            if (stateStr === 'Active' || stateLower === 'active') {
+            if (stateStr === 'Active') {
               return (
                 <span
                   className="text-sm font-semibold"
@@ -384,7 +380,7 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
                   Ongoing
                 </span>
               );
-            } else if (stateStr === 'Resolved' || stateLower === 'resolved') {
+            } else if (stateStr === 'Resolved') {
               return (
                 <div className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl ">
                   <span className="text-sm font-semibold text-white">
@@ -392,11 +388,7 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
                   </span>
                 </div>
               );
-            } else if (
-              stateStr === 'Void' ||
-              stateLower === 'void' ||
-              stateLower === 'voided'
-            ) {
+            } else if (stateStr === 'Voided') {
               return (
                 <div className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl ">
                   <span className="text-sm font-semibold text-white">Void</span>
@@ -416,11 +408,11 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
       <td className="h-[64px] w-[11%] px-6 py-0 text-center align-middle">
         <div className="flex items-center justify-center">
           {(() => {
-            // 支持 "Active" | "Resolved" | "Void" 格式（首字母大写）
+            // market state 只有三类: "Active" | "Resolved" | "Voided"
             const stateStr = String(marketState || '');
-            const stateLower = stateStr.toLowerCase();
 
-            if (stateStr === 'Resolved' || stateLower === 'resolved') {
+            // Resolved 或 Voided 状态都可以 claim
+            if (stateStr === 'Resolved' || stateStr === 'Voided') {
               if (claimed) {
                 return (
                   <div className="flex h-[48px] w-[108px] items-center justify-center rounded-2xl border-2 border-[#495099]">
