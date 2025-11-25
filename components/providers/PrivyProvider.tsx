@@ -29,9 +29,8 @@ export default function PrivyProvider({
 
         // 外观配置
         appearance: {
-          theme: 'light',
-          accentColor: '#676FFF',
-          showWalletLoginFirst: false,
+          theme: '#13152F', // 使用稍亮的深紫色，Privy 会自动生成匹配的前景色和背景色，与页面背景更融合
+          accentColor: '#2DC3D9', // 使用与页面一致的青色
         },
 
         // 嵌入式钱包配置
