@@ -88,74 +88,19 @@ export const SharedHeader = ({
           alt="Influxy Logo"
         />
 
-        <div className="flex items-center gap-2 md:gap-4">
-          {/* Launchpad 页面显示钱包连接按钮 */}
-          {isLaunchPadPage ? (
+        {/* 只在 Launchpad 页面显示钱包连接按钮 */}
+        {isLaunchPadPage && (
+          <div className="flex items-center gap-2 md:gap-4">
             <WalletConnect
               onParticipationsClick={onParticipationsClick}
               onCreationsClick={onCreationsClick}
             />
-          ) : (
-            <>
-              {isAuthenticated && user ? (
-                <button
-                  onClick={handleUserClick}
-                  className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-80"
-                >
-                  {/* 用户头像 - 优先显示 X/Twitter 头像 */}
-                  <div className="relative size-10 overflow-hidden rounded-full shadow-lg shadow-[#60A5FA]/30 md:size-12">
-                    {authInfo?.avatar && !avatarError ? (
-                      <img
-                        src={authInfo.avatar}
-                        alt={authInfo.username || authInfo.name || 'User'}
-                        className="size-full object-cover"
-                        onError={() => setAvatarError(true)}
-                      />
-                    ) : user.avatar ? (
-                      <Image
-                        src={user.avatar}
-                        alt={user.name || 'User'}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
-                        <span className="text-lg font-semibold text-white">
-                          {authInfo?.username?.charAt(0).toUpperCase() ||
-                            authInfo?.name?.charAt(0).toUpperCase() ||
-                            user.name?.charAt(0).toUpperCase() ||
-                            'U'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  {/* 用户信息 - 优先显示 X/Twitter username */}
-                  <div className="hidden flex-col items-start md:flex">
-                    <span className="text-sm font-medium text-white">
-                      {authInfo?.username
-                        ? `@${authInfo.username}`
-                        : authInfo?.name || user.name || 'User'}
-                    </span>
-                    <span className="text-xs text-[#86FDE8]">
-                      {user.email || ''}
-                    </span>
-                  </div>
-                </button>
-              ) : (
-                <button
-                  className="mr-0 h-[36px] w-[80px] rounded-[5px] bg-[#252525] text-sm text-white md:mr-3 md:h-[40px] md:w-[96px] md:text-base"
-                  onClick={() => openLoginModal()}
-                >
-                  Login
-                </button>
-              )}
-            </>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* 用户详情弹窗 */}
-      {isAuthenticated && (
+      {/* 用户详情弹窗 - 只在 Launchpad 页面显示 */}
+      {isAuthenticated && isLaunchPadPage && (
         <UserProfileModal
           isOpen={isProfileModalOpen}
           onClose={() => handleModalOpenChange(false)}
