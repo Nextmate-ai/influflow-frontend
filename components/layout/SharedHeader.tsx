@@ -2,6 +2,7 @@
 
 import { cn } from '@heroui/react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -80,13 +81,15 @@ export const SharedHeader = ({
           className,
         )}
       >
-        <Image
-          className="ml-0 h-[20px] w-auto md:ml-3 md:h-[24px]"
-          src="/images/logo_white.png"
-          width={159}
-          height={30}
-          alt="Influxy Logo"
-        />
+        <Link href="/">
+          <Image
+            className="ml-0 h-[20px] w-auto md:ml-3 md:h-[24px]"
+            src="/images/logo_white.png"
+            width={159}
+            height={30}
+            alt="Influxy Logo"
+          />
+        </Link>
 
         {/* 只在 Launchpad 页面显示钱包连接按钮 */}
         {isLaunchPadPage && (
