@@ -319,8 +319,8 @@ export function NewTrendingTopicTweets({
   return (
     <div className="w-full shadow-sm">
       {/* 标题 宽度和父级一致*/}
-      <div className="flex flex-col w-full">
-        <span className="mb-[12px] text-[#828282] text-[16px]">Topic</span>
+      <div className="flex w-full flex-col">
+        <span className="mb-[12px] text-[16px] text-[#828282]">Topic</span>
 
         <div id="suggested-topics" className="mb-[24px] space-y-3">
           <button
@@ -340,7 +340,7 @@ export function NewTrendingTopicTweets({
               backgroundBlendMode: 'multiply',
             }}
           >
-            <span className="text-[16px] font-medium leading-[27px] block">
+            <span className="block text-[16px] font-medium leading-[27px]">
               {suggested}
             </span>
             <Image

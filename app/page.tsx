@@ -1,13 +1,15 @@
 'use client';
 
-import { PageBackground } from '@/components/ui/page-background';
-import { useAuthStore } from '@/stores/authStore';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
+import { SharedHeader } from '@/components/layout/SharedHeader';
+import { PageBackground } from '@/components/ui/page-background';
+import { useAuthStore } from '@/stores/authStore';
+
 export default function HomePage() {
-  const { isAuthenticated, openLoginModal, logout } = useAuthStore();
+  const { isAuthenticated, openLoginModal } = useAuthStore();
 
   return (
     <div className="relative flex min-h-screen flex-col bg-transparent text-white">
@@ -15,46 +17,16 @@ export default function HomePage() {
       <PageBackground containerClassName="z-0" />
 
       {/* 顶部导航栏 */}
-      <div className="relative z-10 flex w-full items-center justify-between bg-transparent my-[30px] px-[64px]">
-        <img
-          className="ml-3 h-[24px] w-auto"
-          src={'/images/logo_white.png'}
-          width={159}
-          height={30}
-        />
-
-        <div className="flex text-white justify-center">
-          <button
-            className="mr-3 h-[40px] w-[96px] rounded-[5px] bg-[#252525] text-white "
-            onClick={() => {
-              if (isAuthenticated) {
-                logout();
-              } else {
-                openLoginModal();
-              }
-            }}
-          >
-            {isAuthenticated ? 'Log Out' : 'Login'}
-          </button>
-
-          {/* <div className="flex h-[55px] gap-[50px] leading-[55px]">
-            <div className="cursor-pointer">About Us</div>
-
-            <div className="cursor-pointer">Register</div>
-
-            <div className="cursor-pointer">Contact</div>
-          </div> */}
-        </div>
-      </div>
+      <SharedHeader />
 
       {/* 主体内容 */}
       <main className="relative z-10 mx-3 min-h-screen flex-1 rounded-[12px] bg-transparent text-[white]">
-        <section className="relative px-[15%] py-[15%] text-center z-10">
+        <section className="relative z-10 p-[15%] text-center">
           {/* <BackgroundGradientAnimation
             containerClassName="absolute inset-0 -z-10 h-full w-full"
             interactive={true}
           /> */}
-          <p className="text-[65px] h-[100px] leading-[80px]">
+          <p className="h-[100px] text-[65px] leading-[80px]">
             Turn opinions into assets
             {/* <br className="hidden md:block" /> In Your Own Voice */}
           </p>
@@ -65,11 +37,14 @@ export default function HomePage() {
           <div className="mt-10 flex justify-center">
             {isAuthenticated ? (
               <div className="flex flex-col items-center">
-                <div className="rounded-[16px] mr-[12px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90">
-                  Coming Soon
-                </div>
                 <Link
-                  className="rounded-[16px] h-[24px] mt-[20px] px-4 py-1 text-[12px] font-medium text-[#0000EE] hover:opacity-90"
+                  href="/launchpad"
+                  className="mr-[12px] rounded-[16px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90"
+                >
+                  Launch app
+                </Link>
+                <Link
+                  className="mt-[20px] h-[24px] rounded-[16px] px-4 py-1 text-[12px] font-medium text-[#0000EE] hover:opacity-90"
                   href="/home"
                 >
                   Go to Influxy
@@ -77,16 +52,19 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="flex items-center">
-                <div className="rounded-[16px] mr-[12px] p-[2px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] shadow-sm hover:opacity-90">
+                <Link
+                  href="/launchpad"
+                  className="mr-[12px] rounded-[16px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90"
+                >
                   <div className="rounded-[14px] bg-[#161A42] px-8 py-3">
                     <span className="bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] bg-clip-text text-[16px] font-medium text-transparent">
-                      Coming Soon
+                      Launch app
                     </span>
                   </div>
-                </div>
+                </Link>
                 <div
-                  className="rounded-[16px] mr-[12px] bg-[#161A42] px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90 cursor-pointer"
-                  onClick={() => openLoginModal()}
+                  className="mr-[12px] cursor-pointer rounded-[16px] bg-[#161A42] px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90"
+                  onClick={() => openLoginModal(undefined, true)}
                 >
                   Go to Influxy
                 </div>
@@ -143,19 +121,19 @@ export default function HomePage() {
 
         <section className="mx-auto px-[15%] py-16 pb-[120px] pt-[72px] text-center">
           <p className="text-[40px] font-semibold italic">Our Vision</p>
-          <p className="mx-auto mt-20 text-center text-[20px] w-[780px]">
+          <p className="mx-auto mt-20 w-[780px] text-center text-[20px]">
             We’re redefining how creators earn.Instead of relying on ads or
             agencies, creators can now turn their opinions into real value — by
             launching prediction events where fans engage, stake, and share
             rewards.
           </p>
-          <p className="mx-auto mt-10 text-center text-[20px] w-[840px]">
+          <p className="mx-auto mt-10 w-[840px] text-center text-[20px]">
             A new era of socialized prediction markets, where expression itself
             becomes an asset.
           </p>
         </section>
 
-        <section className="mx-auto px-[15%] pb-6 min-h-[722px]">
+        <section className="mx-auto min-h-[722px] px-[15%] pb-6">
           <p className="py-[80px] text-center text-[40px] font-semibold italic">
             FAQ
           </p>
@@ -197,7 +175,7 @@ export default function HomePage() {
             Team Background
           </p>
           <div className="relative mx-auto w-full max-w-3xl">
-            <div className="w-full h-[150px] flex items-center justify-center">
+            <div className="flex h-[150px] w-full items-center justify-center">
               <Image
                 src="/home/bing.png"
                 alt="Team Background"
@@ -207,7 +185,7 @@ export default function HomePage() {
               />
             </div>
 
-            <div className="w-full h-[150px] flex items-center justify-center">
+            <div className="flex h-[150px] w-full items-center justify-center">
               <Image
                 src="/home/romeo.png"
                 alt="Team Background"
@@ -310,7 +288,7 @@ function FAQ({ q, children }: FAQProps) {
     <div
       className={`rounded-[20px] transition-all duration-300 ${
         isOpen
-          ? 'border-0 p-[2px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB]'
+          ? 'border-0 bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px]'
           : 'border border-[#252525]'
       }`}
       onMouseEnter={() => setIsOpen(true)}
@@ -318,25 +296,24 @@ function FAQ({ q, children }: FAQProps) {
     >
       <details
         className="
-        group relative rounded-[18px]
-        bg-[#161A42] hover:shadow-sm
-        transition-all duration-300 overflow-hidden
+        group relative overflow-hidden
+        rounded-[18px] bg-[#161A42]
+        transition-all duration-300 hover:shadow-sm
       "
         open={isOpen}
       >
         <summary
           className="
-        flex items-center cursor-default list-none justify-between
-        pt-10 pb-10 group-open:pb-6 transition-[padding] duration-300
-        pr-[56px]
+        flex cursor-default list-none items-center justify-between
+        py-10 pr-[56px] transition-[padding] duration-300 group-open:pb-6
       "
           onClick={(e) => {
             // 阻止默认的点击切换行为
             e.preventDefault();
           }}
         >
-          <span className="text-[20px] font-medium pl-[80px] italic">Q:</span>
-          <span className="text-[20px] font-medium mr-auto pl-10">{q}</span>
+          <span className="pl-[80px] text-[20px] font-medium italic">Q:</span>
+          <span className="mr-auto pl-10 text-[20px] font-medium">{q}</span>
         </summary>
 
         {/* 关键：箭头相对 details 垂直居中 */}
@@ -345,16 +322,16 @@ function FAQ({ q, children }: FAQProps) {
           width={16}
           height={16}
           className="
-        absolute right-[40px] top-1/2 -translate-y-1/2
-        rotate-[-90deg] group-open:rotate-0
+        pointer-events-none absolute right-[40px] top-1/2
+        -translate-y-1/2 -rotate-90
         transition-transform
-        pointer-events-none 
+        group-open:rotate-0 
       "
         />
 
-        <div className="text-sm leading-7 md:text-base flex items-baseline mb-10 w-[820px]">
-          <span className="text-[20px] font-medium pl-[80px] italic">A:</span>
-          <div className="text-[20px] font-medium mr-auto pl-10 leading-8">
+        <div className="mb-10 flex w-[820px] items-baseline text-sm leading-7 md:text-base">
+          <span className="pl-[80px] text-[20px] font-medium italic">A:</span>
+          <div className="mr-auto pl-10 text-[20px] font-medium leading-8">
             {children}
           </div>
         </div>

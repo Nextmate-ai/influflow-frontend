@@ -53,6 +53,14 @@ export async function GET(
   }
 
   try {
+    console.log('Referral callback URL params:', {
+      code: code ? 'present' : 'missing',
+      origin,
+      next,
+      referralCode,
+      fullUrl: request.url,
+    });
+
     const supabase = await createClient();
 
     const { data: sessionData, error: exchangeError } =
@@ -151,8 +159,10 @@ export async function GET(
       }
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin;
-    return NextResponse.redirect(`${siteUrl}${next}`);
+    // 直接使用请求的 origin，确保跳转到正确的域名
+    const redirectUrl = `${origin}${next}`;
+    console.log('Referral callback redirecting to:', redirectUrl);
+    return NextResponse.redirect(redirectUrl);
   } catch (error) {
     console.error('Unexpected error in referral callback:', error);
     return redirect(

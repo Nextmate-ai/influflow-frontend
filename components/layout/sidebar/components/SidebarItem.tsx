@@ -1,8 +1,5 @@
 // 简化版 SidebarItem 组件 - 轻量优雅的列表项展示
 
-import { addToast } from '@/components/base/toast';
-import { createClient } from '@/lib/supabase/client';
-import { useArticleStore } from '@/stores/articleStore';
 import {
   DocumentTextIcon,
   EllipsisHorizontalIcon,
@@ -18,6 +15,11 @@ import {
   ModalHeader,
 } from '@heroui/react';
 import React, { useEffect, useRef, useState } from 'react';
+
+import { addToast } from '@/components/base/toast';
+import { createClient } from '@/lib/supabase/client';
+import { useArticleStore } from '@/stores/articleStore';
+
 import { SidebarItemProps } from '../types/sidebar.types';
 
 export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
@@ -273,7 +275,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
                   onBlur={handleRenameSubmit}
                   disabled={isSaving}
                   className={`w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm font-medium text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ${
-                    isSaving ? 'opacity-50 cursor-not-allowed' : ''
+                    isSaving ? 'cursor-not-allowed opacity-50' : ''
                   }`}
                   placeholder={isSaving ? '保存中...' : '输入新标题'}
                 />
@@ -315,7 +317,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
               <button
                 onClick={handleDropdownToggle}
                 className={`
-                  flex size-6 items-center justify-center rounded transition-colors duration-200 opacity-0 group-hover:opacity-100 hover:bg-[#D7D7D7]
+                  flex size-6 items-center justify-center rounded opacity-0 transition-colors duration-200 hover:bg-[#D7D7D7] group-hover:opacity-100
                 `}
                 aria-label="更多操作"
               >
@@ -357,7 +359,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
 
           {/* 删除Loading遮罩 */}
           {isDeleting && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[8px] bg-[#E8E8E8] opacity-[0.9]">
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[8px] bg-[#E8E8E8] opacity-90">
               <div className="flex items-center">
                 <Image
                   src="/icons/loading.gif"
@@ -439,7 +441,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = React.memo(
                     }}
                     isLoading={isDeleting}
                     disabled={isDeleting}
-                    className="h-10 px-6 font-normal bg-[#E33629]"
+                    className="h-10 bg-[#E33629] px-6 font-normal"
                     style={{ fontFamily: 'Poppins' }}
                   >
                     {isDeleting ? 'Deleting...' : 'Delete'}

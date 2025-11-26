@@ -191,7 +191,7 @@ function HomeContent() {
 
     // 清理定时器
     return () => clearTimeout(timer);
-  }, [isAuthenticated, syncProfileFromSupabase, hasCheckedProfile]);
+  }, [isAuthenticated, syncProfileFromSupabase, hasCheckedProfile, user]);
 
   const handleTopicSubmit = (
     selectedContentFormat: IContentFormat,
@@ -452,7 +452,7 @@ function HomeContent() {
         >
           <CreditBanner />
 
-          <div className="flex-1 flex h-full overflow-hidden relative">
+          <div className="relative flex h-full flex-1 overflow-hidden">
             <AnimatePresence>
               <AppSidebar
                 ref={sidebarRef}

@@ -40,6 +40,10 @@ export const ProfileDropdown = ({ collapsed }: ProfileDropdownProps) => {
     router.push('/profile');
   };
 
+  const handleLaunchPad = () => {
+    router.push('/launchpad');
+  };
+
   if (collapsed) {
     return null;
   }
@@ -138,6 +142,20 @@ export const ProfileDropdown = ({ collapsed }: ProfileDropdownProps) => {
             />
             <span className="font-poppins text-[14px] text-black">
               Customize My Style
+            </span>
+          </div>
+        </DropdownItem>
+
+        <DropdownItem
+          key="launchpad"
+          onClick={handleLaunchPad}
+          className="data-[hover=true]:bg-gray-100"
+          textValue="Launch Pad"
+        >
+          <div className="flex items-center gap-[8px] px-[12px] py-[6px]">
+            <Image src="/icons/profile.svg" width={16} height={16} />
+            <span className="font-poppins text-[14px] text-black">
+              Launch Pad
             </span>
           </div>
         </DropdownItem>

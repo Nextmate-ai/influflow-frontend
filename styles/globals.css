@@ -26,3 +26,80 @@ body {
   -ms-overflow-style: none; /* IE, Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* 自定义滚动条样式 */
+.rules-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.rules-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.rules-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #2dc3d9;
+  border-radius: 3px;
+}
+.rules-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #2dc3d9;
+}
+
+.table-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #2dc3d9 transparent;
+}
+.table-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.table-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.table-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #2dc3d9;
+  border-radius: 3px;
+}
+.table-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #2dc3d9;
+}
+
+/* 左侧面板滚动条样式 - 无背景，优化样式 */
+.modal-left-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #60a5fa transparent;
+}
+.modal-left-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.modal-left-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border: none;
+  margin: 0;
+}
+.modal-left-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #60a5fa;
+  border-radius: 2px;
+  border: none;
+}
+.modal-left-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #3b82f6;
+}
+
+/* 修复 date 输入框的中文显示问题 */
+input[type="date"]::-webkit-datetime-edit-text {
+  color: white;
+}
+input[type="date"]::-webkit-datetime-edit-month-field {
+  color: white;
+}
+input[type="date"]::-webkit-datetime-edit-day-field {
+  color: white;
+}
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: white;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(1);
+  opacity: 0.8;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}

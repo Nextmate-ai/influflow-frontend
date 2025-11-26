@@ -26,7 +26,7 @@ export const StreamMessage: React.FC<AIMessageProps> = ({
           <div className="space-y-4">
             {/* 流式标题 - 始终显示在顶部，使用不同样式 */}
             {message.streamingTitle && (
-              <div className="text-[16px] rounded-md py-2 font-medium text-gray-700 text-center">
+              <div className="rounded-md py-2 text-center text-[16px] font-medium text-gray-700">
                 <StreamingTypewriter
                   streamingContent={message.streamingTitle}
                   isStreaming={true}
@@ -56,7 +56,7 @@ export const StreamMessage: React.FC<AIMessageProps> = ({
           <div className="space-y-4">
             {/* 完成状态 - 如果有标题和内容，分开显示 */}
             {message.streamingTitle && (
-              <div className="rounded-md py-2 text-sm font-medium text-gray-700 text-center">
+              <div className="rounded-md py-2 text-center text-sm font-medium text-gray-700">
                 {message.streamingTitle}
               </div>
             )}

@@ -53,7 +53,7 @@ export default function SubscriptionTerms({
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-      className="z-50 h-[500px] overflow-y-scroll flex flex-col overflow-hidden rounded-[24px] bg-white"
+      className="z-50 flex h-[500px] flex-col overflow-hidden overflow-y-scroll rounded-[24px] bg-white"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
@@ -73,8 +73,8 @@ export default function SubscriptionTerms({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-8 py-8">
-        <div className="space-y-[16px] text-black font-poppins">
+      <div className="flex-1 overflow-y-auto p-8">
+        <div className="font-poppins space-y-[16px] text-black">
           {SUBSCRIPTION_TERMS.map((term, index) => (
             <section key={index}>
               <h3 className="mb-[6px] text-[14px] font-medium">{term.title}</h3>

@@ -11,10 +11,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/base';
 import { useTopicTypes, useTrendingTopics } from '@/lib/api/services';
-import {
-  type ITrendingTopic,
-  type ITrendsRecommendTweet,
-} from '@/types/api';
+import { type ITrendingTopic, type ITrendsRecommendTweet } from '@/types/api';
 
 import { SearchModal } from './SearchModal';
 import {
@@ -563,20 +560,23 @@ export function NewTrendingTopicsPage({
   }));
 
   // 手动展开特定话题
-  const expandTopic = (index: number) => {
+  const expandTopic = useCallback((index: number) => {
     setExpandedTopicIndex(index);
-  };
+  }, []);
 
   // 手动收起特定话题
-  const collapseTopic = (index: number) => {
-    if (expandedTopicIndex === index) {
-      setExpandedTopicIndex(null);
-      // 如果收起的是第一条话题，标记用户主动关闭
-      if (index === 0) {
-        setHasUserCollapsedFirst(true);
+  const collapseTopic = useCallback((index: number) => {
+    setExpandedTopicIndex((currentIndex) => {
+      if (currentIndex === index) {
+        // 如果收起的是第一条话题，标记用户主动关闭
+        if (index === 0) {
+          setHasUserCollapsedFirst(true);
+        }
+        return null;
       }
-    }
-  };
+      return currentIndex;
+    });
+  }, []);
 
   // 处理话题展开/收起的逻辑，使用布尔值控制
   const handleTopicToggle = (index: number, isOpen: boolean) => {
@@ -608,7 +608,7 @@ export function NewTrendingTopicsPage({
     } else {
       collapseTopic(0);
     }
-  }, [hasCompletedOnboarding]);
+  }, [hasCompletedOnboarding, expandTopic, collapseTopic]);
 
   // // 当数据加载完成且已完成onboarding时，确保第一条默认展开（但只在用户没有主动关闭过的情况下）
   // useEffect(() => {
@@ -653,7 +653,6 @@ export function NewTrendingTopicsPage({
     },
     [],
   );
-
 
   // 取消写了不用的玻璃效果
   return (
@@ -719,7 +718,7 @@ export function NewTrendingTopicsPage({
                 ) : (
                   trendingTopics.map((topic: ITrendingTopic, index: number) => (
                     <NewTrendingTopicItem
-                      onTopicSelect={onTopicSelect}  
+                      onTopicSelect={onTopicSelect}
                       key={`${topic.title}-${index}`}
                       topic={topic}
                       index={index}

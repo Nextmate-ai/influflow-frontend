@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { LoginModal } from '@/components/auth/LoginModal';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
+import { getHighResTwitterAvatar } from '@/utils/avatar';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -37,9 +38,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
             session.user.user_metadata?.name ||
             'User',
           email: session.user.email || '',
-          avatar:
+          avatar: getHighResTwitterAvatar(
             session.user.user_metadata?.avatar_url ||
-            session.user.user_metadata?.picture,
+              session.user.user_metadata?.picture,
+          ),
         };
         // 传递token信息到缓存
         setSession(
@@ -47,6 +49,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           session.access_token,
           session.expires_at ? session.expires_at * 1000 : undefined,
         );
+        // 如果已经有 session，清除可能残留的 sessionStorage
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('redirectToHomeAfterLogin');
+        }
         await syncProfileFromSupabase();
       }
 
@@ -61,9 +67,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
                   session.user.user_metadata?.name ||
                   'User',
                 email: session.user.email || '',
-                avatar:
+                avatar: getHighResTwitterAvatar(
                   session.user.user_metadata?.avatar_url ||
-                  session.user.user_metadata?.picture,
+                    session.user.user_metadata?.picture,
+                ),
               }
             : null;
 
@@ -82,6 +89,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
               session.access_token,
               session.expires_at ? session.expires_at * 1000 : undefined,
             );
+            // 登录成功后清除 sessionStorage 中的重定向标记
+            if (typeof window !== 'undefined') {
+              sessionStorage.removeItem('redirectToHomeAfterLogin');
+            }
             // Fetch profile if not already authenticated
             if (!isAuthenticated) {
               try {

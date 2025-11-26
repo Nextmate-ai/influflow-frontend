@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { ITone } from '@/utils/profileStorage';
+import { getHighResTwitterAvatar } from '@/utils/avatar';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -23,6 +24,7 @@ interface IAuthState {
   isAuthenticated: boolean;
   isLoginModalOpen: boolean;
   authError: string | null;
+  redirectToHomeAfterLogin: boolean; // 登录后是否跳转到 /home
 
   // Actions
   setSession: (
@@ -33,7 +35,7 @@ interface IAuthState {
   updateUser: (userData: Partial<IUser>) => void;
   syncProfileFromSupabase: () => Promise<void>;
   logout: () => Promise<void>;
-  openLoginModal: (error?: string) => void;
+  openLoginModal: (error?: string, redirectToHome?: boolean) => void;
   closeLoginModal: () => void;
   checkAuthStatus: () => Promise<void>;
   getAccessToken: () => Promise<string | null>;
@@ -60,6 +62,7 @@ export const useAuthStore = create<IAuthState>()(
       isAuthenticated: false,
       isLoginModalOpen: false,
       authError: null,
+      redirectToHomeAfterLogin: false,
 
       setSession: (user, accessToken, expiresAt) => {
         // 更新内存中的token缓存
@@ -156,17 +159,29 @@ export const useAuthStore = create<IAuthState>()(
         }
       },
 
-      openLoginModal: (error?: string) =>
-        set({
+      openLoginModal: (error?: string, redirectToHome?: boolean) => {
+        // 同时保存到 sessionStorage，确保 OAuth 回调后仍能访问
+        if (typeof window !== 'undefined' && redirectToHome) {
+          sessionStorage.setItem('redirectToHomeAfterLogin', 'true');
+        }
+        return set({
           isLoginModalOpen: true,
           authError: error || null,
-        }),
+          redirectToHomeAfterLogin: redirectToHome ?? false,
+        });
+      },
 
-      closeLoginModal: () =>
-        set({
+      closeLoginModal: () => {
+        // 清除 sessionStorage
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('redirectToHomeAfterLogin');
+        }
+        return set({
           isLoginModalOpen: false,
           authError: null,
-        }),
+          redirectToHomeAfterLogin: false,
+        });
+      },
 
       setAuthError: (error: string | null) =>
         set({
@@ -194,9 +209,10 @@ export const useAuthStore = create<IAuthState>()(
               supabaseUser.user_metadata?.name ||
               'User',
             email: supabaseUser.email || '',
-            avatar:
+            avatar: getHighResTwitterAvatar(
               supabaseUser.user_metadata?.avatar_url ||
-              supabaseUser.user_metadata?.picture,
+                supabaseUser.user_metadata?.picture,
+            ),
           };
 
           set({

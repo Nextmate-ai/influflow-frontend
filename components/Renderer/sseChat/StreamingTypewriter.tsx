@@ -86,10 +86,17 @@ export const StreamingTypewriter: React.FC<StreamingTypewriterProps> = ({
       if (segment === '\n') {
         return <br key={index} />;
       } else if (segment === '\n\n') {
-        return <React.Fragment key={index}><br /><br /></React.Fragment>;
+        return (
+          <React.Fragment key={index}>
+            <br />
+            <br />
+          </React.Fragment>
+        );
       } else if (segment.match(/^\n+$/)) {
         // 处理多个连续的换行符
-        const breaks = segment.split('').map((_, i) => <br key={`${index}-${i}`} />);
+        const breaks = segment
+          .split('')
+          .map((_, i) => <br key={`${index}-${i}`} />);
         return <React.Fragment key={index}>{breaks}</React.Fragment>;
       }
       return segment;

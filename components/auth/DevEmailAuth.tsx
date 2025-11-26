@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 
 import { showEmailAuth } from '@/constants/env';
 import { createClient } from '@/lib/supabase/client';
+import { useAuthStore } from '@/stores/authStore';
 
 interface DevEmailAuthProps {
   mode: 'login' | 'register';
@@ -16,6 +17,16 @@ export function DevEmailAuth({ mode, referralCode }: DevEmailAuthProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>('');
   const [info, setInfo] = useState<string>('');
+  const storeRedirectToHome = useAuthStore(
+    (state) => state.redirectToHomeAfterLogin,
+  );
+
+  // 优先从 sessionStorage 读取，确保 OAuth 回调后仍能访问
+  const redirectToHomeAfterLogin =
+    typeof window !== 'undefined'
+      ? sessionStorage.getItem('redirectToHomeAfterLogin') === 'true' ||
+        storeRedirectToHome
+      : storeRedirectToHome;
 
   const origin = useMemo(() => {
     if (typeof window !== 'undefined') return window.location.origin;
@@ -23,13 +34,14 @@ export function DevEmailAuth({ mode, referralCode }: DevEmailAuthProps) {
   }, []);
 
   const callbackUrl = useMemo(() => {
-    const next = encodeURIComponent('/home');
+    const next = redirectToHomeAfterLogin ? '/home' : '/';
+    const encodedNext = encodeURIComponent(next);
     if (referralCode) {
       const code = encodeURIComponent(referralCode);
-      return `${origin}/api/auth/referral/callback/${code}?next=${next}`;
+      return `${origin}/api/auth/referral/callback/${code}?next=${encodedNext}`;
     }
-    return `${origin}/api/auth/callback?next=${next}`;
-  }, [referralCode, origin]);
+    return `${origin}/api/auth/callback?next=${encodedNext}`;
+  }, [referralCode, origin, redirectToHomeAfterLogin]);
 
   if (!showEmailAuth) return null; // 生产环境不显示
 
