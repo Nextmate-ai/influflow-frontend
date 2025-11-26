@@ -37,9 +37,12 @@ export default function HomePage() {
           <div className="mt-10 flex justify-center">
             {isAuthenticated ? (
               <div className="flex flex-col items-center">
-                <div className="mr-[12px] rounded-[16px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90">
-                  Coming Soon
-                </div>
+                <Link
+                  href="/launchpad"
+                  className="mr-[12px] rounded-[16px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90"
+                >
+                  Launch app
+                </Link>
                 <Link
                   className="mt-[20px] h-[24px] rounded-[16px] px-4 py-1 text-[12px] font-medium text-[#0000EE] hover:opacity-90"
                   href="/home"
@@ -49,13 +52,16 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="flex items-center">
-                <div className="mr-[12px] rounded-[16px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90">
+                <Link
+                  href="/launchpad"
+                  className="mr-[12px] rounded-[16px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90"
+                >
                   <div className="rounded-[14px] bg-[#161A42] px-8 py-3">
                     <span className="bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] bg-clip-text text-[16px] font-medium text-transparent">
-                      Coming Soon
+                      Launch app
                     </span>
                   </div>
-                </div>
+                </Link>
                 <div
                   className="mr-[12px] cursor-pointer rounded-[16px] bg-[#161A42] px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90"
                   onClick={() => openLoginModal(undefined, true)}
