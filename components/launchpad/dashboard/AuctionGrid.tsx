@@ -34,7 +34,7 @@ export const AuctionGrid: React.FC<AuctionGridProps> = ({
   filterStatus,
 }) => {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-x-[24px] md:gap-y-[24px]">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-[24px]">
       {predictions.map((prediction) => (
         <PredictionCard
           key={prediction.id}

@@ -3,12 +3,13 @@
 import { Input, Modal, ModalContent } from '@heroui/react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
+import { addDays, parse, isValid, format } from 'date-fns';
 
 import { useMarketCreation } from '@/hooks/useMarketCreation';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { addToast } from '@/components/base/toast';
 
-import { CustomDatePicker } from '../shared/CustomDatePicker';
+import { CustomDateTimePicker } from '../shared/CustomDateTimePicker';
 
 interface CreatePredictionModalProps {
   isOpen: boolean;
@@ -29,7 +30,10 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
   const [rules, setRules] = useState('');
   const [option1, setOption1] = useState('Yes');
   const [option2, setOption2] = useState('No');
-  const [closingDate, setClosingDate] = useState('');
+  // 默认为当前日期和时间（用户本地时区）
+  const [closingDate, setClosingDate] = useState(() =>
+    format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+  );
   const [bidAmount, setBidAmount] = useState('');
   const [selectedSide, setSelectedSide] = useState<1 | 2>(1); // 1 = Yes, 2 = No
 
@@ -65,20 +69,19 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
     }
   }, [error, currentStep]);
 
-  // 将日期字符串转换为 Unix 时间戳（秒）
-  // 使用日期当天的 23:59:59 作为结束时间
+  // 将日期时间字符串转换为 Unix 时间戳（秒）
+  // 使用用户选择的完整时间（精确到秒）
   const endTime = useMemo(() => {
     try {
       if (!closingDate) {
         return BigInt(0);
       }
-      // 支持 date 格式 (YYYY-MM-DD)，设置为当天的 23:59:59
-      const date = new Date(closingDate);
-      if (isNaN(date.getTime())) {
+      // 使用 date-fns 解析 "YYYY-MM-DD HH:mm:ss" 格式
+      const date = parse(closingDate, 'yyyy-MM-dd HH:mm:ss', new Date());
+      if (!isValid(date)) {
         return BigInt(0);
       }
-      // 设置为当天的 23:59:59
-      date.setHours(23, 59, 59, 999);
+      // 直接使用用户选择的完整时间（不再硬编码 23:59:59）
       return BigInt(Math.floor(date.getTime() / 1000));
     } catch {
       return BigInt(0);
@@ -150,12 +153,17 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
     // 3. 检查余额是否充足
     if (tokenBalance < creatorBet) return false;
 
-    // 4. 检查日期是否有效（必须是未来时间且在7天内）
+    // 4. 检查日期时间是否有效（方案 A：168小时限制）
     if (endTime === BigInt(0)) return false;
     const now = Date.now();
     const selectedTime = Number(endTime) * 1000;
-    const sevenDaysLater = now + 7 * 24 * 60 * 60 * 1000;
-    if (selectedTime <= now || selectedTime > sevenDaysLater) return false;
+    const maxTime = now + 7 * 24 * 60 * 60 * 1000; // 168小时
+
+    // 必须严格大于当前时间（精确到秒）
+    if (selectedTime <= now) return false;
+
+    // 必须在 168 小时内
+    if (selectedTime > maxTime) return false;
 
     return true;
   }, [
@@ -245,6 +253,8 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
       console.log('=== 创建市场参数 ===');
       console.log('questionTitle:', marketParams.questionTitle);
       console.log('questionDescription:', marketParams.questionDescription);
+      console.log('questionDescription (包含换行符):', JSON.stringify(marketParams.questionDescription));
+      console.log('questionDescription (换行符数量):', (marketParams.questionDescription.match(/\n/g) || []).length);
       console.log('endTime:', marketParams.endTime.toString());
       console.log(
         'endTime (date):',
@@ -407,23 +417,25 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                   <label className="mb-1 block bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-sm font-medium text-transparent md:text-base">
                     Prediction pool closing time
                   </label>
-                  <CustomDatePicker
+                  <CustomDateTimePicker
                     value={closingDate}
                     onChange={setClosingDate}
-                    placeholder="Select closing date"
+                    placeholder="Select closing date and time"
+                    minDateTime={new Date()}
+                    maxDateTime={addDays(new Date(), 7)}
                   />
                   <p className="mt-1 text-xs text-slate-400">
-                    Select a date within the next 7 days
+                    Select a date and time within the next 7 days (168 hours from now)
                     {closingDate && endTime > BigInt(0) && (
                       <>
                         {Number(endTime) * 1000 <= Date.now() && (
                           <span className="ml-2 text-red-400">
-                            (Date must be in the future)
+                            (Time must be in the future)
                           </span>
                         )}
                         {Number(endTime) * 1000 > Date.now() + 7 * 24 * 60 * 60 * 1000 && (
                           <span className="ml-2 text-red-400">
-                            (Date must be within 7 days)
+                            (Time must be within 168 hours)
                           </span>
                         )}
                       </>

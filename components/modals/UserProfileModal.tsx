@@ -138,7 +138,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       }}
     >
       <ModalContent
-        className="overflow-hidden rounded-none border border-[#2DC3D9] bg-transparent p-0 backdrop-blur-md !transition-none md:rounded-[12px] md:h-[90vh] md:w-[368px]"
+        className="overflow-hidden rounded-none border border-[#2DC3D9] bg-transparent p-0 backdrop-blur-md !transition-none md:h-[90vh] md:w-[368px] md:rounded-[12px]"
         style={{ height: '100vh' }}
       >
         {(onCloseModal: () => void) => (

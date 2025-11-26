@@ -402,7 +402,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       href={`https://x.com/${creatorInfo.xUsername.replace('@', '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="relative size-12 shrink-0 overflow-hidden rounded-full transition-opacity hover:opacity-80 md:size-16 cursor-pointer"
+                      className="relative size-12 shrink-0 cursor-pointer overflow-hidden rounded-full transition-opacity hover:opacity-80 md:size-16"
                     >
                       {creatorInfo?.xAvatarUrl && !avatarError ? (
                         <img
@@ -444,7 +444,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       href={`https://x.com/${creatorInfo.xUsername.replace('@', '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="max-w-[200px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-sm font-medium text-transparent transition-opacity hover:opacity-80 md:text-base cursor-pointer"
+                      className="max-w-[200px] cursor-pointer truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-sm font-medium text-transparent transition-opacity hover:opacity-80 md:text-base"
                     >
                       {displayName}
                     </a>
@@ -581,14 +581,14 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   <div className="mb-3 text-sm font-medium text-white md:mb-4 md:text-base">
                     Rules:
                   </div>
-                  <div className="pr-2 text-xs leading-relaxed text-gray-400 md:text-sm">
+                  <div className="whitespace-pre-wrap break-words pr-2 text-xs leading-relaxed text-gray-400 md:text-sm">
                     {rulesText}
                   </div>
                 </div>
               </div>
 
               {/* 中间分割线 */}
-              <div className="hidden my-10 w-px bg-[#60A5FA] md:block"></div>
+              <div className="my-10 hidden w-px bg-[#60A5FA] md:block"></div>
 
               {/* 右侧面板 - My Bid */}
               <div className="flex flex-1 flex-col overflow-hidden p-4 md:p-[40px]">

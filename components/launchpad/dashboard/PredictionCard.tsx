@@ -227,7 +227,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="relative size-12 shrink-0 overflow-hidden rounded-full transition-colors group-hover:border-cyan-400 md:size-16 cursor-pointer hover:opacity-80"
+            className="relative size-12 shrink-0 cursor-pointer overflow-hidden rounded-full transition-colors hover:opacity-80 group-hover:border-cyan-400 md:size-16"
           >
             {creatorInfo?.xAvatarUrl && !avatarError ? (
               <img
@@ -287,7 +287,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="max-w-[80px] truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-xs text-transparent transition-opacity hover:opacity-80 md:max-w-[100px] md:text-sm cursor-pointer"
+            className="max-w-[80px] cursor-pointer truncate bg-gradient-to-r from-[#ACB6E5] to-[#86FDE8] bg-clip-text text-xs text-transparent transition-opacity hover:opacity-80 md:max-w-[100px] md:text-sm"
           >
             {displayName}
           </a>
@@ -350,7 +350,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
                 alt="Twitter"
                 width={20}
                 height={20}
-                className="md:size-6 cursor-pointer"
+                className="cursor-pointer md:size-6"
               />
             </a>
           ) : (
