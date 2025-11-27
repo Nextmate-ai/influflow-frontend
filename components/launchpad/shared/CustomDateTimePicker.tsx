@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { format, parse, isValid } from 'date-fns';
 
 interface CustomDateTimePickerProps {
@@ -15,6 +14,7 @@ interface CustomDateTimePickerProps {
 
 /**
  * TimeUnit 组件 - 单个时间单位（小时/分钟/秒）的输入控件
+ * 受控组件版本：确保值的同步和输入功能正常
  */
 const TimeUnit: React.FC<{
   value: number;
@@ -22,56 +22,97 @@ const TimeUnit: React.FC<{
   max: number;
   label: string;
 }> = ({ value, onChange, max, label }) => {
-  const handleIncrement = () => {
-    onChange(value >= max ? 0 : value + 1);
-  };
+  const [localValue, setLocalValue] = useState(value.toString().padStart(2, '0'));
+  const [isEditing, setIsEditing] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleDecrement = () => {
-    onChange(value <= 0 ? max : value - 1);
-  };
+  // 同步外部 value 变化（仅在非编辑状态时）
+  useEffect(() => {
+    if (!isEditing) {
+      setLocalValue(value.toString().padStart(2, '0'));
+    }
+  }, [value, isEditing]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    if (inputValue === '') {
-      onChange(0);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+
+    // 允许空值和数字
+    if (val !== '' && !/^\d+$/.test(val)) {
       return;
     }
-    const num = parseInt(inputValue);
-    if (!isNaN(num) && num >= 0 && num <= max) {
-      onChange(num);
-    }
+
+    // 只更新本地值，不立即提交
+    setLocalValue(val);
+  };
+
+  const handleBlur = () => {
+    setIsEditing(false);
+    // 失焦时验证和格式化
+    const num = localValue === '' ? 0 : parseInt(localValue, 10);
+    const validNum = Math.min(Math.max(0, num), max);
+    onChange(validNum);
+    setLocalValue(validNum.toString().padStart(2, '0'));
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsEditing(true);
+    // 聚焦时选中所有内容
+    setTimeout(() => e.target.select(), 0);
   };
 
   return (
-    <div className="flex flex-col items-center gap-0.5">
-      <button
-        onClick={handleIncrement}
-        type="button"
-        className="flex size-5 items-center justify-center rounded-md text-white transition-colors hover:bg-[#2DC3D9]/20"
-      >
-        <svg className="size-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-        </svg>
-      </button>
+    <div
+      className="flex flex-col items-center gap-1"
+      onMouseDown={(e) => {
+        e.stopPropagation();
+        // 在 mousedown 时就聚焦
+        requestAnimationFrame(() => {
+          inputRef.current?.focus();
+        });
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+    >
       <input
+        ref={inputRef}
         type="text"
         inputMode="numeric"
-        value={value.toString().padStart(2, '0')}
-        onChange={handleInputChange}
-        className="h-7 w-10 rounded-lg border border-[#2DC3D9] bg-transparent text-center text-sm text-white focus:border-[#2DC3D9] focus:outline-none"
+        maxLength={2}
+        value={localValue}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        onFocus={handleFocus}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        tabIndex={0}
+        className="relative z-[10001] h-10 w-12 cursor-text rounded-lg border-2 border-[#2DC3D9] bg-[#0B041E] text-center text-base font-medium text-white transition-colors hover:border-[#60A5FA] focus:border-[#60A5FA] focus:outline-none focus:ring-2 focus:ring-[#60A5FA]/50"
+        style={{
+          pointerEvents: 'auto',
+          touchAction: 'manipulation',
+          userSelect: 'text',
+          WebkitUserSelect: 'text',
+        }}
       />
-      <button
-        onClick={handleDecrement}
-        type="button"
-        className="flex size-5 items-center justify-center rounded-md text-white transition-colors hover:bg-[#2DC3D9]/20"
-      >
-        <svg className="size-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      <span className="text-[9px] text-gray-500">{label}</span>
+      <span className="text-[10px] text-gray-400">{label}</span>
     </div>
   );
+};
+
+/**
+ * 获取时区偏移量字符串（如 UTC+8, UTC-5）
+ */
+const getTimezoneOffset = (): string => {
+  const offset = -new Date().getTimezoneOffset() / 60; // 转换为小时偏移
+  if (offset === 0) {
+    return 'UTC';
+  }
+  const sign = offset > 0 ? '+' : '-';
+  return `UTC${sign}${Math.abs(offset)}`;
 };
 
 /**
@@ -85,9 +126,16 @@ const TimeSelector: React.FC<{
   onMinutesChange: (m: number) => void;
   onSecondsChange: (s: number) => void;
 }> = ({ hours, minutes, seconds, onHoursChange, onMinutesChange, onSecondsChange }) => {
+  const timezoneOffset = getTimezoneOffset();
+
   return (
-    <div className="mt-2 border-t border-[#2DC3D9]/20 pt-2">
-      <div className="mb-1 text-[10px] text-gray-400">Time</div>
+    <div
+      className="mt-2 border-t border-[#2DC3D9]/20 pt-2"
+    >
+      <div className="mb-1 flex items-center justify-center gap-2">
+        <span className="text-[10px] text-gray-400">Time</span>
+        <span className="text-[10px] text-[#2DC3D9]">{timezoneOffset}</span>
+      </div>
       <div className="flex items-center justify-center gap-1.5 pb-1">
         <TimeUnit value={hours} onChange={onHoursChange} max={23} label="HH" />
         <span className="text-sm text-white">:</span>
@@ -128,46 +176,6 @@ export const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
   );
   const pickerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
-  const [popupPosition, setPopupPosition] = useState<{
-    top: number;
-    left: number;
-  } | null>(null);
-
-  // 计算弹出层位置，确保在视口内可见
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      const rect = inputRef.current.getBoundingClientRect();
-      const isMobile = window.innerWidth < 768;
-      const popupHeight = isMobile ? 370 : 400; // 优化后的高度
-      const popupWidth = isMobile ? Math.min(340, window.innerWidth - 32) : 320;
-      const viewportHeight = window.innerHeight;
-      const viewportWidth = window.innerWidth;
-
-      // 计算垂直位置
-      let top = rect.bottom + window.scrollY + 8;
-      if (rect.bottom + popupHeight + 8 > viewportHeight) {
-        top = rect.top + window.scrollY - popupHeight - 8;
-        if (top < window.scrollY) {
-          top = window.scrollY + 16;
-        }
-      }
-
-      // 计算水平位置
-      let left = rect.left + window.scrollX;
-      if (isMobile) {
-        left = (viewportWidth - popupWidth) / 2 + window.scrollX;
-      } else {
-        if (left + popupWidth > viewportWidth + window.scrollX) {
-          left = viewportWidth + window.scrollX - popupWidth - 16;
-        }
-        if (left < window.scrollX) {
-          left = window.scrollX + 16;
-        }
-      }
-
-      setPopupPosition({ top, left });
-    }
-  }, [isOpen, currentMonth]);
 
   // 关闭选择器当点击外部时
   useEffect(() => {
@@ -179,7 +187,16 @@ export const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
         inputRef.current &&
         !inputRef.current.contains(target)
       ) {
-        setIsOpen(false);
+        // 先触发当前聚焦元素的 blur，确保时间输入值被保存
+        const activeElement = document.activeElement as HTMLElement;
+        if (activeElement && pickerRef.current.contains(activeElement)) {
+          activeElement.blur();
+        }
+
+        // 延迟关闭，让 blur 事件处理完成
+        setTimeout(() => {
+          setIsOpen(false);
+        }, 10);
       }
     };
 
@@ -211,9 +228,41 @@ export const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
     }
   }, [value]);
 
+  // 当时分秒改变时，如果已有选中的日期，立即更新并触发 onChange
+  useEffect(() => {
+    if (selectedDateTime && isValid(selectedDateTime)) {
+      const newDate = new Date(
+        selectedDateTime.getFullYear(),
+        selectedDateTime.getMonth(),
+        selectedDateTime.getDate(),
+        hours,
+        minutes,
+        seconds,
+      );
+
+      // 验证是否在有效范围内
+      if (minDateTime && newDate < minDateTime) {
+        return;
+      }
+      if (maxDateTime && newDate > maxDateTime) {
+        return;
+      }
+
+      setSelectedDateTime(newDate);
+      onChange(formatDateTime(newDate));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hours, minutes, seconds]);
+
   const formatDateTime = (date: Date | null): string => {
     if (!date || !isValid(date)) return '';
     return format(date, 'yyyy-MM-dd HH:mm:ss');
+  };
+
+  const formatDateTimeWithTimezone = (date: Date | null): string => {
+    if (!date || !isValid(date)) return '';
+    const dateTimeStr = format(date, 'yyyy-MM-dd HH:mm:ss');
+    return `${dateTimeStr} ${getTimezoneOffset()}`;
   };
 
   const getDaysInMonth = (date: Date): number => {
@@ -234,17 +283,10 @@ export const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
       seconds,
     );
 
-    // 验证是否在有效范围内
-    if (minDateTime && newDate < minDateTime) {
-      return;
-    }
-    if (maxDateTime && newDate > maxDateTime) {
-      return;
-    }
-
+    // 直接更新选中的日期时间，验证留给表单提交时处理
     setSelectedDateTime(newDate);
     onChange(formatDateTime(newDate));
-    setIsOpen(false);
+    // 不自动关闭弹窗，让用户可以继续调整时间
   };
 
   const handlePrevMonth = () => {
@@ -326,40 +368,59 @@ export const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
 
   // 检查日期时间是否在有效范围内
   const isDateTimeInRange = (day: number): boolean => {
-    const dateTime = new Date(
-      currentMonth.getFullYear(),
-      currentMonth.getMonth(),
-      day,
-      hours,
-      minutes,
-      seconds,
-    );
+    // 只比较日期部分，不比较时间
+    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
 
-    // 使用168小时（7天）限制
-    const now = new Date();
-    const maxTime = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    // 获取今天的日期（时间归零到00:00:00）
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    // 如果提供了自定义范围，使用自定义范围
-    const minTime = minDateTime || now;
-    const maxLimit = maxDateTime || maxTime;
+    // 7天后的日期（时间归零）
+    const maxDate = new Date(today);
+    maxDate.setDate(maxDate.getDate() + 7);
 
-    return dateTime > minTime && dateTime <= maxLimit;
+    // 如果有自定义范围，也需要归零时间部分
+    let minDate = today;
+    if (minDateTime) {
+      minDate = new Date(minDateTime);
+      minDate.setHours(0, 0, 0, 0);
+    }
+
+    let maxLimit = maxDate;
+    if (maxDateTime) {
+      maxLimit = new Date(maxDateTime);
+      maxLimit.setHours(0, 0, 0, 0);
+    }
+
+    // 使用 >= 允许选择今天
+    return date >= minDate && date <= maxLimit;
   };
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const popupContent = isOpen && popupPosition && typeof window !== 'undefined' && (
+
+  // 计算弹出层位置（显示在输入框上方）
+  const getPopupStyle = (): React.CSSProperties => {
+    if (!inputRef.current) return {};
+    const rect = inputRef.current.getBoundingClientRect();
+    const popupHeight = isMobile ? 370 : 500;
+    return {
+      position: 'fixed',
+      bottom: `${window.innerHeight - rect.top + 8}px`,
+      left: `${rect.left}px`,
+      width: isMobile ? `${Math.min(rect.width, window.innerWidth - 32)}px` : '320px',
+      maxHeight: `${popupHeight}px`,
+    };
+  };
+
+  const popupContent = isOpen && (
     <div
       ref={pickerRef}
       data-date-picker
-      className={`fixed z-[10000] ${isMobile ? 'w-[calc(100vw-32px)] max-w-[340px]' : 'w-[320px]'} overflow-y-auto rounded-2xl border border-[#2DC3D9] bg-[#0B041E] p-3 shadow-xl md:p-4`}
+      className={`z-[10000] overflow-y-auto rounded-2xl border border-[#2DC3D9] bg-[#0B041E] p-3 shadow-xl md:p-4`}
       onClick={(e) => {
         e.stopPropagation();
       }}
-      style={{
-        top: `${popupPosition.top - (isMobile ? 10 : 20)}px`,
-        left: `${popupPosition.left}px`,
-        maxHeight: isMobile ? `${Math.min(370, window.innerHeight - 32)}px` : undefined,
-      }}
+      style={getPopupStyle()}
     >
       {/* 月份导航和Today按钮 */}
       <div className="mb-3 flex items-center justify-between md:mb-4">
@@ -473,7 +534,7 @@ export const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
   );
 
   return (
-    <div className={`relative ${className}`} data-date-picker>
+    <div className={`relative ${className}`} data-date-picker style={{ overflow: 'visible' }}>
       {/* 输入框 */}
       <div
         ref={inputRef}
@@ -486,12 +547,12 @@ export const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
         <input
           type="text"
           readOnly
-          value={formatDateTime(selectedDateTime)}
+          value={formatDateTimeWithTimezone(selectedDateTime)}
           placeholder={placeholder}
           className="w-full bg-transparent text-base text-white outline-none placeholder:text-gray-500"
         />
         <svg
-          className="size-5 text-[#2DC3D9]"
+          className="size-5 shrink-0 text-[#2DC3D9]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -505,11 +566,8 @@ export const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
         </svg>
       </div>
 
-      {/* 使用 Portal 渲染到 body，确保 z-index 正确 */}
-      {typeof window !== 'undefined' &&
-        isOpen &&
-        popupPosition &&
-        createPortal(popupContent, document.body)}
+      {/* 直接渲染在当前位置，不使用 Portal */}
+      {popupContent}
     </div>
   );
 };
