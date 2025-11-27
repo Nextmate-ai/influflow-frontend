@@ -42,6 +42,28 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
     useMarketCreation();
   const { balance: tokenBalance } = useTokenBalance();
 
+  // 重置表单的函数
+  const resetForm = () => {
+    setTitle('');
+    setRules('');
+    setOption1('Yes');
+    setOption2('No');
+    setClosingDate(format(new Date(), 'yyyy-MM-dd HH:mm:ss'));
+    setBidAmount('');
+    setSelectedSide(1);
+  };
+
+  // 监听模态框关闭，重置表单
+  useEffect(() => {
+    if (!isOpen) {
+      // 延迟重置，让关闭动画完成
+      const timer = setTimeout(() => {
+        resetForm();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   // 监听成功状态，自动关闭
   useEffect(() => {
     if (currentStep === 'success') {
@@ -300,7 +322,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
       backdrop="blur"
       className="dark"
       hideCloseButton
-      isDismissable={false}
+      isDismissable={!isPending}
       isKeyboardDismissDisabled={isPending}
       classNames={{
         wrapper: 'md:p-4 !p-0',
@@ -308,15 +330,8 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
         backdrop: 'backdrop-blur-sm',
       }}
     >
-      <ModalContent 
+      <ModalContent
         className="h-full max-h-screen overflow-y-auto rounded-none border-2 border-[#60A5FA] bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl"
-        onClick={(e) => {
-          // 如果点击的是日期选择器，不关闭 Modal
-          const target = e.target as HTMLElement;
-          if (target.closest('[data-date-picker]')) {
-            e.stopPropagation();
-          }
-        }}
       >
         {(onClose) => (
           <div className="relative flex h-full flex-col">
@@ -425,7 +440,7 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                     maxDateTime={addDays(new Date(), 7)}
                   />
                   <p className="mt-1 text-xs text-slate-400">
-                    Select a date and time within the next 7 days (168 hours from now)
+                    Select a date and time within the next 7 days
                     {closingDate && endTime > BigInt(0) && (
                       <>
                         {Number(endTime) * 1000 <= Date.now() && (
