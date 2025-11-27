@@ -34,39 +34,40 @@ export default function HomePage() {
             A platform where creators turn opinions into prediction markets and
             earn from fan participation.
           </p>
-          <div className="mt-10 flex justify-center">
-            {isAuthenticated ? (
-              <div className="flex flex-col items-center">
-                <Link
-                  href="/launchpad"
-                  className="mr-[12px] rounded-[16px] bg-gradient-to-r from-indigo-400 to-pink-400 px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90"
-                >
+          <div className="mt-10 flex justify-center gap-20">
+            {/* Launch app 按钮 */}
+            <Link
+              href="/launchpad"
+              className="rounded-[12px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90"
+            >
+              <div className="rounded-[10px] bg-[#161A42] px-6 py-2.5">
+                <span className="font-['Poppins'] text-[15px] font-normal text-[#F9FAFB]">
                   Launch app
-                </Link>
-                <Link
-                  className="mt-[20px] h-[24px] rounded-[16px] px-4 py-1 text-[12px] font-medium text-[#0000EE] hover:opacity-90"
-                  href="/home"
-                >
-                  Go to Influxy
-                </Link>
+                </span>
               </div>
+            </Link>
+
+            {/* Go to Influxy 按钮 */}
+            {isAuthenticated ? (
+              <Link
+                href="/home"
+                className="rounded-[12px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90"
+              >
+                <div className="rounded-[10px] bg-[#161A42] px-6 py-2.5">
+                  <span className="font-['Poppins'] text-[15px] font-normal text-[#F9FAFB]">
+                    Go to Influxy
+                  </span>
+                </div>
+              </Link>
             ) : (
-              <div className="flex items-center">
-                <Link
-                  href="/launchpad"
-                  className="mr-[12px] rounded-[16px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90"
-                >
-                  <div className="rounded-[14px] bg-[#161A42] px-8 py-3">
-                    <span className="bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] bg-clip-text text-[16px] font-medium text-transparent">
-                      Launch app
-                    </span>
-                  </div>
-                </Link>
-                <div
-                  className="mr-[12px] cursor-pointer rounded-[16px] bg-[#161A42] px-8 py-3 text-[16px] font-medium text-white shadow-sm hover:opacity-90"
-                  onClick={() => openLoginModal(undefined, true)}
-                >
-                  Go to Influxy
+              <div
+                className="cursor-pointer rounded-[12px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90"
+                onClick={() => openLoginModal(undefined, true)}
+              >
+                <div className="rounded-[10px] bg-[#161A42] px-6 py-2.5">
+                  <span className="font-['Poppins'] text-[21px] font-normal text-[#F9FAFB]">
+                    Go to Influxy
+                  </span>
                 </div>
               </div>
             )}
