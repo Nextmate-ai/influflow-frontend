@@ -50,7 +50,7 @@ export function useTokenClaim() {
             sponsor: true, // 启用 gas sponsorship
             uiOptions: {
               description:
-                'Claim test tokens from the faucet. Each address can claim 1000 tokens per day.',
+                'Claim test tokens from the faucet. Each address can claim 10000 tokens per day.',
               buttonText: 'Claim Tokens',
               transactionInfo: {
                 action: 'Claim Tokens',
