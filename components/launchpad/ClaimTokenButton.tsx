@@ -25,17 +25,17 @@ export function ClaimTokenButton() {
       onSuccess: () => {
         addToast({
           title: 'Success',
-          description: '1000 Test tokens claimed successfully!',
+          description: 'Successfully claimed 10000 test tokens!',
           color: 'success',
         });
         // 刷新余额显示
         refetchBalance();
       },
-      onError: (error) => {
+      onError: (error, waitTime) => {
+        // 使用 hook 中生成的错误消息
         addToast({
-          title: 'Failed',
-          description:
-            'Failed to claim test tokens. Each address can only claim once per day.',
+          title: 'Claim Failed',
+          description: error.message,
           color: 'danger',
         });
       },

@@ -81,7 +81,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
       addToast({
         title: 'Success',
-        description: 'Successfully purchased shares!',
+        description: 'Successfully join!',
         color: 'success',
       });
       onSuccess?.(); // 调用成功回调刷新数据
