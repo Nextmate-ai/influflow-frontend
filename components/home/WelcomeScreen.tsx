@@ -415,10 +415,10 @@ export const WelcomeScreen = ({
       <motion.div
         key="simple-mode"
         id="textarea-ref-simple"
-        className="relative mx-auto mt-[24px] w-[400px]"
-        initial={{ width: 400, borderRadius: '20px' }}
-        animate={{ width: 400, borderRadius: '20px' }}
-        exit={{ width: 640, borderRadius: '16px' }}
+        className="relative mx-auto mt-[24px] w-full max-w-[400px] px-4 sm:px-0"
+        initial={{ borderRadius: '20px' }}
+        animate={{ borderRadius: '20px' }}
+        exit={{ borderRadius: '16px' }}
         transition={{
           duration: 0.3,
           ease: [0.4, 0.0, 0.2, 1],
@@ -473,10 +473,10 @@ export const WelcomeScreen = ({
       <motion.div
         key="complex-mode"
         id="textarea-ref-complex"
-        className="relative mx-auto mt-[24px] w-[640px]"
-        initial={{ width: 640, borderRadius: '16px' }}
-        animate={{ width: 640, borderRadius: '16px' }}
-        exit={{ width: 400, borderRadius: '20px' }}
+        className="relative mx-auto mt-[24px] w-full max-w-[640px] px-4 sm:px-0"
+        initial={{ borderRadius: '16px' }}
+        animate={{ borderRadius: '16px' }}
+        exit={{ borderRadius: '20px' }}
         transition={{
           duration: 0.3,
           ease: [0.4, 0.0, 0.2, 1],
@@ -626,11 +626,11 @@ export const WelcomeScreen = ({
   };
 
   return (
-    <div className="relative size-full min-w-[1000px]">
+    <div className="relative h-full w-screen">
       {/* 主滚动容器 */}
       <div
         ref={scrollContainerRef}
-        className="scroll-container relative h-screen w-full overflow-y-auto"
+        className="scroll-container relative h-screen w-screen overflow-y-auto overflow-x-hidden"
         style={{
           scrollBehavior: 'smooth',
           WebkitOverflowScrolling: 'touch',
@@ -640,7 +640,7 @@ export const WelcomeScreen = ({
         {/* 首页 Section */}
         <motion.div
           ref={homepageRef}
-          className="relative m-3 flex min-h-[94vh] items-center justify-center overflow-hidden rounded-[20px] bg-white"
+          className="relative m-2 flex min-h-[94vh] items-center justify-center overflow-hidden rounded-[12px] bg-white sm:m-3 sm:rounded-[20px]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
@@ -649,9 +649,9 @@ export const WelcomeScreen = ({
             containerClassName="absolute inset-0 -z-10 h-full w-full"
             interactive={true}
           />
-          <div className="relative flex flex-col items-center px-[24px] text-center">
+          <div className="relative flex w-full flex-col items-center px-4 text-center sm:px-6 md:px-[24px]">
             {!isFreshUser && (
-              <h2 className="text-[24px] font-[400] text-black">
+              <h2 className="text-lg font-[400] text-black sm:text-xl md:text-[24px]">
                 Hey {isAuthenticated ? user?.name || 'there' : 'there'}, what
                 would you like to write about today?
               </h2>
@@ -670,7 +670,7 @@ export const WelcomeScreen = ({
             )}
 
             {selectedTweets && selectedTweets.length > 0 && (
-              <div className="mt-[14px] grid max-w-[700px] grid-cols-3 gap-[8px]">
+              <div className="mt-[14px] grid w-full max-w-[700px] grid-cols-1 gap-[8px] px-4 sm:grid-cols-2 sm:px-0 md:grid-cols-3">
                 {selectedTweets.map((tweet, index) => (
                   <div
                     key={tweet.id}
@@ -734,7 +734,7 @@ export const WelcomeScreen = ({
         {/* Trending Topics Section */}
         <motion.div
           ref={trendingRef}
-          className="relative isolate m-3 flex min-h-screen items-center justify-center overflow-hidden rounded-[20px] bg-white"
+          className="relative isolate m-2 flex min-h-screen items-center justify-center overflow-hidden rounded-[12px] bg-white sm:m-3 sm:rounded-[20px]"
           initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}

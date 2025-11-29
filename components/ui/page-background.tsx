@@ -20,7 +20,7 @@ export const PageBackground = ({
       {/* 背景层：所有图片垂直依次展开 */}
       <div className="relative flex size-full flex-col">
         {/* 图片1 */}
-        <div className="relative h-auto w-screen shrink-0">
+        <div className="relative h-auto w-screen shrink-0 mt-[-1px] mt-[-1px]">
           <Image
             src="/home/1.png"
             alt="Background Layer 1"
@@ -33,7 +33,7 @@ export const PageBackground = ({
         </div>
 
         {/* 图片2 */}
-        <div className="relative h-auto w-screen shrink-0">
+        <div className="relative h-auto w-screen shrink-0 mt-[-1px]">
           <Image
             src="/home/2.png"
             alt="Background Layer 2"
@@ -45,7 +45,7 @@ export const PageBackground = ({
         </div>
 
         {/* 图片3 */}
-        <div className="relative h-auto w-screen shrink-0">
+        <div className="relative h-auto w-screen shrink-0 mt-[-1px]">
           <Image
             src="/home/3.png"
             alt="Background Layer 3"
@@ -57,7 +57,7 @@ export const PageBackground = ({
         </div>
 
         {/* 图片4 */}
-        <div className="relative h-auto w-screen shrink-0">
+        <div className="relative h-auto w-screen shrink-0 mt-[-1px]">
           <Image
             src="/home/4.png"
             alt="Background Layer 4"
@@ -69,7 +69,7 @@ export const PageBackground = ({
         </div>
 
         {/* 图片5 */}
-        <div className="relative h-auto w-screen shrink-0">
+        <div className="relative h-auto w-screen shrink-0 mt-[-1px]">
           <Image
             src="/home/5.png"
             alt="Background Layer 5"
