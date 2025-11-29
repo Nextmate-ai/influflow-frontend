@@ -1,5 +1,6 @@
 'use client';
 import { HeroUIProvider } from '@heroui/react';
+import { ToastProvider } from '@heroui/toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
@@ -34,6 +35,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             isOpen={showNoCreditsModal}
             onClose={() => setShowNoCreditsModal(false)}
           />
+          <ToastProvider placement="bottom-center" toastOffset={16} />
         </PrivyProvider>
       </QueryClientProvider>
     </HeroUIProvider>

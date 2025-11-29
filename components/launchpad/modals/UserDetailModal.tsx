@@ -81,7 +81,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
       addToast({
         title: 'Success',
-        description: 'Successfully purchased shares!',
+        description: 'Successfully join!',
         color: 'success',
       });
       onSuccess?.(); // 调用成功回调刷新数据
@@ -675,6 +675,12 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       }
                     />
                   </div>
+                  {/* 余额不足提示 */}
+                  {amountInWei > tokenBalance && tokenBalance > BigInt(0) && (
+                    <p className="mt-2 text-sm text-red-400">
+                      Insufficient balance. Current: ${(Number(tokenBalance) / 1e18).toFixed(2)}
+                    </p>
+                  )}
                 </div>
 
                 {/* Payout if you win */}
@@ -714,7 +720,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       onClick={handleBuyShares}
                       disabled={
                         isPending ||
-                        (authenticated && (!selectedOption || parseFloat(amount) <= 0))
+                        (authenticated && (!selectedOption || parseFloat(amount) <= 0 || amountInWei > tokenBalance))
                       }
                       className="size-full rounded-2xl bg-[#0B041E] text-base font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50 md:text-lg"
                     >

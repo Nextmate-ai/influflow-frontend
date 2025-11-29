@@ -80,7 +80,7 @@ export function useBuyShares() {
 
         if (balance < params.amount) {
           throw new Error(
-            `Insufficient balance. Required ${params.amount.toString()}, current balance ${balance.toString()}`,
+            `Insufficient balance. Required: ${(Number(params.amount) / 1e18).toFixed(2)}, Current: ${(Number(balance) / 1e18).toFixed(2)}`,
           );
         }
 

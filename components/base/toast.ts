@@ -1,4 +1,4 @@
-import { addToast as heroAddToast } from '@heroui/react';
+import { addToast as heroAddToast } from '@heroui/toast';
 
 type HeroToastOptions = Parameters<typeof heroAddToast>[0];
 
