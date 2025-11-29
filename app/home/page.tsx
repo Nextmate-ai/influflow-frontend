@@ -442,7 +442,7 @@ function HomeContent() {
         {/* Main Content */}
         <div
           className={cn(
-            'flex flex-col h-screen overflow-hidden bg-gray-50',
+            'flex flex-col h-screen w-screen overflow-hidden bg-gray-50',
             showContentGeneration && currentTopic ? 'hidden' : 'flex',
             showDraftConfirmation && !hasCreatedContentGeneration
               ? 'hidden'

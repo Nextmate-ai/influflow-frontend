@@ -126,7 +126,7 @@ export function TrendingTopicTweets({
 
   return (
     <div className="w-full shadow-sm">
-      <div className="mb-[16px] flex items-center justify-between">
+      <div className="mb-[12px] flex flex-col gap-2 sm:mb-[16px] sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="mb-1 text-sm font-medium text-black">Viral Tweets</h3>
           <p className="text-xs text-gray-600">
@@ -154,7 +154,7 @@ export function TrendingTopicTweets({
           e.stopPropagation();
         }}
       >
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 md:grid-cols-3">
           {isLoading
             ? // 骨架屏 - 显示6个推文的占位符
               Array.from({ length: 6 }).map((_, index) => (
@@ -320,17 +320,20 @@ export function NewTrendingTopicTweets({
     <div className="w-full shadow-sm">
       {/* 标题 宽度和父级一致*/}
       <div className="flex w-full flex-col">
-        <span className="mb-[12px] text-[16px] text-[#828282]">Topic</span>
+        <span className="mb-2 text-sm text-[#828282] sm:mb-[12px] sm:text-[16px]">
+          Topic
+        </span>
 
-        <div id="suggested-topics" className="mb-[24px] space-y-3">
+        <div id="suggested-topics" className="mb-[16px] space-y-3 sm:mb-[24px]">
           <button
             onClick={() => suggested && onTopicSelect(suggested)}
             className={`
               relative
               w-full rounded-xl bg-white
-              px-[24px] py-[16px] text-left
+              px-4 py-3 text-left
               transition-colors duration-150
               hover:border-blue-400 hover:bg-blue-100
+              sm:px-6 sm:py-4 md:px-[24px] md:py-[16px]
             `}
             style={{
               background: `
@@ -340,7 +343,7 @@ export function NewTrendingTopicTweets({
               backgroundBlendMode: 'multiply',
             }}
           >
-            <span className="block text-[16px] font-medium leading-[27px]">
+            <span className="block pr-8 text-sm font-medium leading-[24px] sm:pr-10 sm:text-base md:text-[16px] md:leading-[27px]">
               {suggested}
             </span>
             <Image
@@ -360,10 +363,10 @@ export function NewTrendingTopicTweets({
         </div>
       </div>
 
-      <div className="mb-[12px] flex items-center justify-between">
+      <div className="mb-[12px] flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           {/* <h3 className="mb-1 text-sm font-medium text-black">Viral Tweets</h3> */}
-          <p className="text-[16px] text-[#828282]">Use As References</p>
+          <p className="text-sm text-[#828282] sm:text-[16px]">Use As References</p>
         </div>
         <Button
           className={`h-[32px] rounded-full ${
@@ -389,7 +392,7 @@ export function NewTrendingTopicTweets({
           e.stopPropagation();
         }}
       >
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 md:grid-cols-3">
           {isLoading
             ? // 骨架屏 - 显示6个推文的占位符
               Array.from({ length: 6 }).map((_, index) => (

@@ -48,12 +48,14 @@ const NewTrendingTopicSkeleton = ({ index }: { index: number }) => (
   <div
     id={index === 0 ? 'trending-topics' : ''}
     className="
-    group relative flex cursor-pointer items-center
-    rounded-[20px] px-12 py-1 transition-colors duration-150
+    group relative flex w-full cursor-pointer items-center
+    rounded-[12px] px-4 py-3 transition-colors duration-150
+    sm:rounded-[16px] sm:px-8
+    md:rounded-[20px] md:px-12
   "
     style={{
-      width: `880px`,
-      height: '171px',
+      minHeight: '120px',
+      height: 'auto',
       background: `
         linear-gradient(to right, #F2F7FF4D 0%, #F2F7FF4D 80%, #F2F7FC 100%),
         linear-gradient(to bottom, #F2F7FF4D 0%, #F2F7FF4D 90%, #F2F7FC 100%)
@@ -62,11 +64,11 @@ const NewTrendingTopicSkeleton = ({ index }: { index: number }) => (
       backgroundClip: 'padding-box',
     }}
   >
-    <Skeleton className="h-[32px] w-[30px] rounded bg-[#F2F7FF]" />
+    <Skeleton className="h-[24px] w-[24px] rounded bg-[#F2F7FF] sm:h-[28px] sm:w-[28px] md:h-[32px] md:w-[30px]" />
 
-    <div className="ml-[48px] flex flex-col justify-center">
-      <Skeleton className="mb-[16px] h-[27px] w-[284px] rounded bg-[#F2F7FF]" />
-      <Skeleton className="h-[84px] w-[684px] rounded bg-[#F2F7FF]" />
+    <div className="ml-4 flex flex-1 flex-col justify-center sm:ml-8 md:ml-[48px]">
+      <Skeleton className="mb-2 h-[22px] w-3/4 rounded bg-[#F2F7FF] sm:mb-3 sm:h-[24px] md:mb-[16px] md:h-[27px] md:w-[284px]" />
+      <Skeleton className="h-[60px] w-full rounded bg-[#F2F7FF] sm:h-[70px] md:h-[84px]" />
     </div>
   </div>
 );
@@ -210,9 +212,10 @@ const NewTrendingTopicItem = ({
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           className={`
-            group relative flex cursor-pointer items-center
-            rounded-[20px] bg-clip-padding py-3 pl-12 pr-3 transition-colors
+            group relative flex w-full cursor-pointer items-center
+            rounded-[12px] bg-clip-padding py-3 pl-4 pr-3 transition-colors
             duration-150
+            sm:rounded-[16px] sm:pl-8 md:rounded-[20px] md:pl-12
             ${
               shouldShowHoveredState
                 ? '[background-image:linear-gradient(to_right,rgba(115,167,255,0.2)_90%,rgba(115,167,255,0.2)_100%)]'
@@ -222,22 +225,22 @@ const NewTrendingTopicItem = ({
             [background-repeat:no-repeat,_no-repeat]
             [background-size:100%_100%,_100%_100%]
           `}
-          style={{ width: '100vw', height: '171px' }}
+          style={{ minHeight: '120px', height: 'auto' }}
         >
-          <p className="text-left text-lg font-medium text-black">
+          <p className="text-left text-base font-medium text-black sm:text-lg">
             #{index + 1}
           </p>
-          <div className="ml-[48px] flex min-w-0 flex-col items-start text-left">
-            <span className="mb-[12px] block text-[18px] font-medium leading-[26px]">
+          <div className="ml-4 flex min-w-0 flex-1 flex-col items-start text-left sm:ml-8 md:ml-[48px]">
+            <span className="mb-2 block text-base font-medium leading-[26px] sm:mb-3 sm:text-[18px]">
               {topic.title}
             </span>
-            <span className="block w-[684px] text-[14px] leading-[22px] text-[#575757]">
+            <span className="block w-full text-sm leading-[20px] text-[#575757] sm:text-[14px] sm:leading-[22px]">
               {topic.description}
             </span>
           </div>
 
           {/* 显示展开/收起图标 */}
-          <div className="absolute right-0 flex items-center gap-[10px] pr-[24px]">
+          <div className="absolute right-2 flex items-center gap-[10px] sm:right-4 md:pr-[24px]">
             <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{
@@ -658,23 +661,24 @@ export function NewTrendingTopicsPage({
   return (
     <div className="size-full overflow-y-auto bg-white">
       <div className="flex min-h-full flex-col">
-        <div className="flex-1 px-[108px] py-12">
+        <div className="flex-1 px-4 py-6 sm:px-8 sm:py-8 md:px-12 md:py-10 lg:px-[108px] lg:py-12">
           <div className="mx-auto w-full max-w-4xl">
             <div className="mb-10">
-              <div className="mb-4 flex items-center justify-between">
-                <p className="text-[20px] font-medium text-black">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-lg font-medium text-black sm:text-[20px]">
                   Trending Topics
                 </p>
                 <button
                   onClick={() => setIsSearchModalOpen(true)}
                   className="
                   flex
-                  w-[200px] items-center gap-1
+                  w-full items-center justify-center gap-1
                   rounded-[12px] border-2 border-[#F7F7F7]
                   px-4 py-1
                   text-[#828282]
                   transition-colors
                   hover:border-[#FFFFFF]
+                  sm:w-[200px]
                 "
                   style={{
                     background: `
@@ -690,7 +694,7 @@ export function NewTrendingTopicsPage({
               </div>
 
               {/* type */}
-              <div id="trending-topics-type" className="mb-4 flex gap-3">
+              <div id="trending-topics-type" className="mb-4 flex flex-wrap gap-2 sm:gap-3">
                 {categories?.map((category: { id: string; label: string }) => (
                   <Button
                     key={category.id}

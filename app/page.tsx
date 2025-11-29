@@ -20,52 +20,52 @@ export default function HomePage() {
       <SharedHeader />
 
       {/* 主体内容 */}
-      <main className="relative z-10 mx-3 min-h-screen flex-1 rounded-[12px] bg-transparent text-[white]">
-        <section className="relative z-10 p-[15%] text-center">
+      <main className="relative z-10 min-h-screen flex-1 bg-transparent text-[white] sm:mx-3 sm:rounded-[12px]">
+        <section className="relative z-10 px-4 py-12 text-center sm:px-8 md:p-[10%] lg:p-[15%]">
           {/* <BackgroundGradientAnimation
             containerClassName="absolute inset-0 -z-10 h-full w-full"
             interactive={true}
           /> */}
-          <p className="h-[100px] text-[65px] leading-[80px]">
+          <p className="h-auto text-[32px] leading-[40px] sm:text-[48px] sm:leading-[60px] md:h-[100px] md:text-[65px] md:leading-[80px]">
             Turn opinions into assets
             {/* <br className="hidden md:block" /> In Your Own Voice */}
           </p>
-          <p className="mx-auto mt-6 w-[590px] text-[20px] leading-[25px]">
+          <p className="mx-auto mt-4 w-full max-w-[590px] px-4 text-[16px] leading-[22px] sm:mt-6 sm:text-[18px] sm:leading-[24px] md:text-[20px] md:leading-[25px]">
             A platform where creators turn opinions into prediction markets and
             earn from fan participation.
           </p>
-          <div className="mt-10 flex justify-center gap-20">
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:mt-8 sm:flex-row sm:gap-4 md:mt-10 md:gap-6">
             {/* Launch app 按钮 */}
             <Link
               href="/launchpad"
-              className="rounded-[12px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90"
+              className="w-full max-w-[280px] rounded-[12px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90 sm:w-auto"
             >
-              <div className="rounded-[10px] bg-[#161A42] px-6 py-2.5">
-                <span className="font-['Poppins'] text-[15px] font-normal text-[#F9FAFB]">
+              <div className="rounded-[10px] bg-[#161A42] px-6 py-2.5 sm:px-8">
+                <span className="font-['Poppins'] text-[15px] font-normal text-[#F9FAFB] sm:text-[16px]">
                   Launch app
                 </span>
               </div>
             </Link>
 
-            {/* Go to Influxy 按钮 */}
+            {/* Go to Influxy 按钮 - 移动端隐藏 */}
             {isAuthenticated ? (
               <Link
                 href="/home"
-                className="rounded-[12px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90"
+                className="hidden w-full max-w-[280px] rounded-[12px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90 sm:block sm:w-auto"
               >
-                <div className="rounded-[10px] bg-[#161A42] px-6 py-2.5">
-                  <span className="font-['Poppins'] text-[15px] font-normal text-[#F9FAFB]">
+                <div className="rounded-[10px] bg-[#161A42] px-6 py-2.5 sm:px-8">
+                  <span className="font-['Poppins'] text-[15px] font-normal text-[#F9FAFB] sm:text-[16px]">
                     Go to Influxy
                   </span>
                 </div>
               </Link>
             ) : (
               <div
-                className="cursor-pointer rounded-[12px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90"
+                className="hidden w-full max-w-[280px] cursor-pointer rounded-[12px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90 sm:block sm:w-auto"
                 onClick={() => openLoginModal(undefined, true)}
               >
-                <div className="rounded-[10px] bg-[#161A42] px-6 py-2.5">
-                  <span className="font-['Poppins'] text-[21px] font-normal text-[#F9FAFB]">
+                <div className="rounded-[10px] bg-[#161A42] px-6 py-2.5 sm:px-8">
+                  <span className="font-['Poppins'] text-[15px] font-normal text-[#F9FAFB] sm:text-[16px]">
                     Go to Influxy
                   </span>
                 </div>
@@ -75,11 +75,11 @@ export default function HomePage() {
           {/* TODO: 跳转链接 */}
         </section>
 
-        <section className="mx-auto px-[15%] pt-[30px]">
-          <p className="mb-[12px] text-center text-[56px] font-medium italic ">
+        <section className="mx-auto px-4 pt-[30px] sm:px-8 md:px-[10%] lg:px-[15%]">
+          <p className="mb-[12px] text-center text-[36px] font-medium italic sm:text-[48px] md:text-[56px]">
             Why Nextmate.fun
           </p>
-          <p className="mx-auto mb-[80px] w-[640px] text-center text-[20px]">
+          <p className="mx-auto mb-[40px] w-full max-w-[640px] px-4 text-center text-[16px] sm:mb-[60px] sm:text-[18px] md:mb-[80px] md:text-[20px]">
             Empowering creators to turn opinions into value.
           </p>
 
@@ -120,22 +120,24 @@ export default function HomePage() {
           /> */}
         </section>
 
-        <section className="mx-auto px-[15%] py-16 pb-[120px] pt-[72px] text-center">
-          <p className="text-[40px] font-semibold italic">Our Vision</p>
-          <p className="mx-auto mt-20 w-[780px] text-center text-[20px]">
-            We’re redefining how creators earn.Instead of relying on ads or
+        <section className="mx-auto px-4 py-12 pb-[60px] pt-[48px] text-center sm:px-8 sm:py-16 sm:pb-[80px] sm:pt-[56px] md:px-[10%] md:pb-[120px] md:pt-[72px] lg:px-[15%]">
+          <p className="text-[32px] font-semibold italic sm:text-[36px] md:text-[40px]">
+            Our Vision
+          </p>
+          <p className="mx-auto mt-12 w-full max-w-[780px] px-4 text-center text-[16px] sm:mt-16 sm:text-[18px] md:mt-20 md:text-[20px]">
+            We're redefining how creators earn.Instead of relying on ads or
             agencies, creators can now turn their opinions into real value — by
             launching prediction events where fans engage, stake, and share
             rewards.
           </p>
-          <p className="mx-auto mt-10 w-[840px] text-center text-[20px]">
+          <p className="mx-auto mt-8 w-full max-w-[840px] px-4 text-center text-[16px] sm:text-[18px] md:mt-10 md:text-[20px]">
             A new era of socialized prediction markets, where expression itself
             becomes an asset.
           </p>
         </section>
 
-        <section className="mx-auto min-h-[722px] px-[15%] pb-6">
-          <p className="py-[80px] text-center text-[40px] font-semibold italic">
+        <section className="mx-auto min-h-[500px] px-4 pb-6 sm:min-h-[600px] sm:px-8 md:min-h-[722px] md:px-[10%] lg:px-[15%]">
+          <p className="py-[48px] text-center text-[32px] font-semibold italic sm:py-[64px] sm:text-[36px] md:py-[80px] md:text-[40px]">
             FAQ
           </p>
           <div className="space-y-3">
@@ -171,51 +173,47 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-5xl px-4 py-16">
-          <p className="mb-8 text-center text-[40px] font-semibold italic">
+        <section className="mx-auto w-full max-w-5xl overflow-hidden rounded-[20px] bg-gradient-to-br from-[#1a1f3a] via-[#2a3150] to-[#1a1f3a] px-4 py-12 sm:py-16">
+          <p className="mb-6 text-center text-[32px] font-semibold italic text-white sm:mb-8 sm:text-[36px] md:text-[40px]">
             Team Background
           </p>
-          <div className="relative mx-auto w-full max-w-3xl">
-            <div className="flex h-[150px] w-full items-center justify-center">
+          <div className="relative mx-auto w-full">
+            {/* Bing Ventures */}
+            <div className="flex h-[100px] w-full items-center justify-center sm:h-[120px] md:h-[150px]">
               <Image
                 src="/home/bing.png"
                 alt="Team Background"
                 width={150}
                 height={120}
-                className="h-[72px] w-auto"
+                className="h-[48px] w-auto sm:h-[60px] md:h-[72px]"
               />
             </div>
 
-            <div className="flex h-[150px] w-full items-center justify-center">
+            {/* Team Members */}
+            <div className="flex min-h-[120px] w-full flex-wrap items-center justify-center gap-4 py-4 sm:min-h-[140px] sm:gap-6 sm:py-0 md:min-h-[150px] md:gap-0">
               <Image
                 src="/home/romeo.png"
-                alt="Team Background"
+                alt="Romeo"
                 width={150}
                 height={150}
-                className="h-[100px] w-auto"
+                className="h-[70px] w-auto sm:h-[80px] md:h-[100px]"
               />
 
               <Image
                 src="/home/jeff.png"
-                alt="Team Background"
+                alt="Jeff"
                 width={150}
                 height={150}
-                className="h-[100px] w-auto"
+                className="h-[70px] w-auto sm:h-[80px] md:h-[100px]"
               />
               <Image
                 src="/home/sing.png"
-                alt="Team Background"
+                alt="Sing"
                 width={150}
                 height={150}
-                className="h-[100px] w-auto"
+                className="h-[70px] w-auto sm:h-[80px] md:h-[100px]"
               />
             </div>
-            {/* <Image
-              src="/home/TeamBg.jpg"
-              alt="Team Background"
-              width={1400}
-              height={200}
-            /> */}
           </div>
         </section>
       </main>
@@ -241,10 +239,10 @@ function Feature({
   openLoginModal,
 }: FeatureProps) {
   const imageColClasses = `relative ${reversed ? 'md:order-2' : ''}`;
-  const textColClasses = `${reversed ? 'md:ml-auto md:mr-[71px]' : 'md:mr-auto md:ml-[71px]'}`;
+  const textColClasses = `${reversed ? 'md:ml-auto md:mr-8 lg:md:mr-[71px]' : 'md:mr-auto md:ml-8 lg:md:ml-[71px]'}`;
 
   return (
-    <div className="mb-[88px] grid items-center md:grid-cols-2">
+    <div className="mb-[48px] grid items-center gap-8 sm:mb-[64px] md:mb-[88px] md:grid-cols-2">
       <div className={imageColClasses}>
         <div className="size-full">
           <Image
@@ -257,9 +255,13 @@ function Feature({
         </div>
       </div>
 
-      <div className={`${textColClasses} w-[350px]`}>
-        <p className="text-[24px] font-semibold">{title}</p>
-        <p className="mt-3 text-[15px] leading-6 ">{description}</p>
+      <div className={`${textColClasses} w-full px-4 sm:w-auto sm:max-w-[350px] sm:px-0`}>
+        <p className="text-[20px] font-semibold sm:text-[22px] md:text-[24px]">
+          {title}
+        </p>
+        <p className="mt-2 text-[14px] leading-6 sm:mt-3 sm:text-[15px]">
+          {description}
+        </p>
         {/* <button
           className="mt-[24px] rounded-[12px] bg-black px-4 py-3 text-[14px] text-white"
           onClick={() => {
@@ -306,15 +308,19 @@ function FAQ({ q, children }: FAQProps) {
         <summary
           className="
         flex cursor-default list-none items-center justify-between
-        py-10 pr-[56px] transition-[padding] duration-300 group-open:pb-6
+        py-6 pr-[40px] transition-[padding] duration-300 group-open:pb-4 sm:py-8 sm:pr-[48px] sm:group-open:pb-5 md:py-10 md:pr-[56px] md:group-open:pb-6
       "
           onClick={(e) => {
             // 阻止默认的点击切换行为
             e.preventDefault();
           }}
         >
-          <span className="pl-[80px] text-[20px] font-medium italic">Q:</span>
-          <span className="mr-auto pl-10 text-[20px] font-medium">{q}</span>
+          <span className="pl-[24px] text-[16px] font-medium italic sm:pl-[40px] sm:text-[18px] md:pl-[80px] md:text-[20px]">
+            Q:
+          </span>
+          <span className="mr-auto pl-4 text-[16px] font-medium sm:pl-6 sm:text-[18px] md:pl-10 md:text-[20px]">
+            {q}
+          </span>
         </summary>
 
         {/* 关键：箭头相对 details 垂直居中 */}
@@ -323,16 +329,18 @@ function FAQ({ q, children }: FAQProps) {
           width={16}
           height={16}
           className="
-        pointer-events-none absolute right-[40px] top-1/2
+        pointer-events-none absolute right-[24px] top-1/2
         -translate-y-1/2 -rotate-90
         transition-transform
-        group-open:rotate-0 
+        group-open:rotate-0 sm:right-[32px] md:right-[40px]
       "
         />
 
-        <div className="mb-10 flex w-[820px] items-baseline text-sm leading-7 md:text-base">
-          <span className="pl-[80px] text-[20px] font-medium italic">A:</span>
-          <div className="mr-auto pl-10 text-[20px] font-medium leading-8">
+        <div className="mb-6 flex w-full items-baseline px-4 text-sm leading-6 sm:mb-8 sm:px-0 sm:text-base sm:leading-7 md:mb-10 md:w-[820px]">
+          <span className="pl-[24px] text-[16px] font-medium italic sm:pl-[40px] sm:text-[18px] md:pl-[80px] md:text-[20px]">
+            A:
+          </span>
+          <div className="mr-auto pl-4 text-[16px] font-medium leading-6 sm:pl-6 sm:text-[18px] sm:leading-7 md:pl-10 md:text-[20px] md:leading-8">
             {children}
           </div>
         </div>
