@@ -83,7 +83,7 @@ export function useMarketCreation() {
 
         if (balance < params.creatorBet) {
           throw new Error(
-            `Insufficient balance. Required ${params.creatorBet.toString()}, current balance ${balance.toString()}`,
+            `Insufficient balance. Required: ${(Number(params.creatorBet) / 1e18).toFixed(2)}, Current: ${(Number(balance) / 1e18).toFixed(2)}`,
           );
         }
 
