@@ -105,6 +105,26 @@ export const predictionMarketABI = [
     inputs: [{ name: 'marketId', type: 'uint256' }],
     outputs: [{ name: 'amount', type: 'uint256' }],
   },
+  {
+    type: 'function',
+    name: 'resolveMarket',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'marketId', type: 'uint256' },
+      { name: 'outcome', type: 'uint8' },
+    ],
+    outputs: [],
+  },
+  {
+    type: 'function',
+    name: 'hasRole',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'role', type: 'bytes32' },
+      { name: 'account', type: 'address' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  },
 ] as const;
 
 /**

@@ -9,9 +9,11 @@ import { useReadContract } from 'wagmi';
 import { addToast } from '@/components/base/toast';
 import { useBuyShares } from '@/hooks/useBuyShares';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
+import { useOperatorRole } from '@/hooks/useOperatorRole';
 import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
 
 import { StatCard } from '../shared/StatCard';
+import { ResolveMarketModal } from './ResolveMarketModal';
 
 interface UserDetailModalProps {
   isOpen: boolean;
@@ -60,6 +62,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState(false);
 
+  // Resolve Market 弹窗状态(仅测试环境)
+  const [showResolveModal, setShowResolveModal] = useState(false);
+
   // 钱包和购买份额 hook
   const { authenticated, login } = usePrivy();
   const { wallets } = useWallets();
@@ -67,6 +72,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const { buySharesWithApproval, isPending, currentStep, error } =
     useBuyShares();
   const { balance: tokenBalance } = useTokenBalance();
+
+  // 检查用户是否有 operator 权限 (会自动缓存,避免重复调用合约)
+  const { hasOperatorRole } = useOperatorRole();
 
   const successHandledRef = useRef(false);
   const errorHandledRef = useRef(false);
@@ -294,6 +302,28 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       setSuccessMessage(null);
     }
   }, [isOpen]);
+
+  // 处理 Resolve Market 按钮点击
+  const handleResolveMarket = () => {
+    if (!authenticated) {
+      onClose(); // 先关闭模态框，避免遮挡 Privy 登录界面
+      login();
+      return;
+    }
+
+    // 检查是否有 operator 权限
+    if (!hasOperatorRole) {
+      addToast({
+        title: 'Permission Denied',
+        description: 'You do not have operator permission to resolve this market',
+        color: 'danger',
+      });
+      return;
+    }
+
+    // 有权限则打开 Resolve Market 弹窗
+    setShowResolveModal(true);
+  };
 
   // 使用批量交易：一次性完成 approve 和 buyShares
   const handleBuyShares = async () => {
@@ -594,9 +624,20 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
               <div className="flex flex-1 flex-col overflow-hidden p-4 md:p-[40px]">
                 {/* My Bid 标题和关闭按钮 */}
                 <div className="mb-6 flex items-center justify-between md:mb-8">
-                  <h3 className="text-xl font-semibold text-white md:text-2xl">
-                    My Bid
-                  </h3>
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <h3 className="text-xl font-semibold text-white md:text-2xl">
+                      My Bid
+                    </h3>
+                    {/* Resolve Market 按钮 (仅 operator 可见) */}
+                    {hasOperatorRole === true && (
+                      <button
+                        onClick={handleResolveMarket}
+                        className="h-8 rounded-xl border border-[#FFB800] bg-transparent px-3 text-xs font-semibold text-[#FFB800] transition-all duration-200 hover:bg-[#FFB800]/10 md:h-9 md:px-4 md:text-sm"
+                      >
+                        Resolve Market
+                      </button>
+                    )}
+                  </div>
                   <button
                     onClick={onClose}
                     disabled={isPending}
@@ -746,6 +787,17 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
           </div>
         )}
       </ModalContent>
+
+      {/* Resolve Market 弹窗 (仅 operator 可见) */}
+      {hasOperatorRole === true && (
+        <ResolveMarketModal
+          isOpen={showResolveModal}
+          onClose={() => setShowResolveModal(false)}
+          marketId={prediction.id}
+          marketTitle={prediction.title}
+          onSuccess={onSuccess}
+        />
+      )}
     </Modal>
   );
 };
