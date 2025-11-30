@@ -17,7 +17,7 @@ export interface MarketReadableRow {
   question_title?: string;
   question_description?: string;
   creator?: string;
-  end_time?: string | number;
+  end_time?: string; // ISO 字符串格式，如 "2025-12-01T06:36:06+00:00"
   state?: number | string; // 支持字符串类型(如 "Active", "Resolved")
   outcome?: number | string; // 支持字符串类型(如 "Yes", "No", "None")
   yes_pool_total?: number | string;
@@ -244,6 +244,7 @@ function mapMarketRowToPredictionCard(
     totalVolume,
     timeRemaining,
     option: '',
+    endTime: row.end_time, // 添加 endTime 字段
     // 保存完整的原始数据
     rawData: row as Record<string, any>,
   };
@@ -271,20 +272,13 @@ function formatVolume(volume: number | string | undefined): string {
 /**
  * 计算剩余时间
  */
-function calculateTimeRemaining(endTime: string | number | undefined): string {
+function calculateTimeRemaining(endTime: string | undefined): string {
   if (!endTime) {
     return 'N/A';
   }
 
-  let endTimestamp: number;
-
-  if (typeof endTime === 'string') {
-    // 如果是 ISO 字符串，转换为时间戳
-    endTimestamp = new Date(endTime).getTime() / 1000;
-  } else {
-    // 如果已经是时间戳（秒），直接使用
-    endTimestamp = endTime;
-  }
+  // ISO 字符串转换为时间戳（秒）
+  const endTimestamp = new Date(endTime).getTime() / 1000;
 
   const now = Math.floor(Date.now() / 1000);
   const remaining = endTimestamp - now;
