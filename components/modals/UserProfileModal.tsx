@@ -73,6 +73,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }
   };
 
+  // 跳转到区块链浏览器
+  const handleViewOnExplorer = () => {
+    if (walletAddress) {
+      window.open(
+        `https://sepolia.basescan.org/address/${walletAddress}`,
+        '_blank',
+      );
+    }
+  };
+
   const handleParticipations = () => {
     onParticipationsClick?.();
     onClose();
@@ -279,9 +289,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     )}
                     {/* 钱包地址和复制按钮 */}
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-gray-400 md:text-sm">
+                      <button
+                        onClick={handleViewOnExplorer}
+                        className="cursor-pointer text-xs font-medium text-gray-400 transition-colors hover:text-[#86FDE8] md:text-sm"
+                        title="View on BaseScan"
+                      >
                         {formattedAddress}
-                      </span>
+                      </button>
                       <button
                         onClick={handleCopyAddress}
                         className="cursor-pointer text-[#86FDE8] transition-colors hover:text-[#60A5FA]"
