@@ -741,8 +741,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   {/* 余额不足提示 */}
                   {amountInWei > tokenBalance && tokenBalance > BigInt(0) && (
                     <p className="mt-2 text-sm text-red-400">
-                      Insufficient balance. Current: $
-                      {(Number(tokenBalance) / 1e18).toFixed(2)}
+                      Insufficient balance. Current: ${(Number(tokenBalance) / 1e18).toFixed(2)}
                     </p>
                   )}
                 </div>
@@ -757,6 +756,12 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       ${payoutIfWin}
                     </span>
                   </div>
+                  {/* 余额为 0 时的 Faucet 引导 */}
+                  {tokenBalance === BigInt(0) && (
+                    <p className="mt-2 text-xs text-yellow-400">
+                      Insufficient balance ($0.00). Get tokens: Profile icon (top-right) → My Wallet → Faucet to claim 10,000 tokens (once/24h).
+                    </p>
+                  )}
                 </div>
 
                 {/* 状态提示 */}
