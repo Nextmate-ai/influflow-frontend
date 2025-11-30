@@ -25,7 +25,7 @@ export const ResolveMarketModal: React.FC<ResolveMarketModalProps> = ({
   marketTitle,
   onSuccess,
 }) => {
-  const [selectedOutcome, setSelectedOutcome] = useState<1 | 2 | null>(null);
+  const [selectedOutcome, setSelectedOutcome] = useState<0 | 1 | 2 | null>(null);
   const { resolveMarket, isPending, currentStep, error } = useResolveMarket();
 
   const successHandledRef = useRef(false);
@@ -79,7 +79,7 @@ export const ResolveMarketModal: React.FC<ResolveMarketModalProps> = ({
   }, [isOpen]);
 
   const handleResolve = async () => {
-    if (!selectedOutcome) {
+    if (selectedOutcome === null) {
       addToast({
         title: 'Error',
         description: 'Please select an outcome',
@@ -129,11 +129,11 @@ export const ResolveMarketModal: React.FC<ResolveMarketModalProps> = ({
             <div className="mb-3 text-sm font-medium text-[#58C0CE]">
               Select Outcome:
             </div>
-            <div className="flex gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <button
                 onClick={() => setSelectedOutcome(1)}
                 disabled={isPending}
-                className={`h-12 flex-1 rounded-2xl text-base font-semibold transition-all duration-200 ${
+                className={`h-12 rounded-2xl text-base font-semibold transition-all duration-200 ${
                   selectedOutcome === 1
                     ? 'border-2 border-[#07B6D4] text-white'
                     : 'border-2 border-gray-600 bg-transparent text-gray-400 hover:border-gray-500'
@@ -152,7 +152,7 @@ export const ResolveMarketModal: React.FC<ResolveMarketModalProps> = ({
               <button
                 onClick={() => setSelectedOutcome(2)}
                 disabled={isPending}
-                className={`h-12 flex-1 rounded-2xl text-base font-semibold transition-all duration-200 ${
+                className={`h-12 rounded-2xl text-base font-semibold transition-all duration-200 ${
                   selectedOutcome === 2
                     ? 'border-2 border-[#CB30E0] text-white'
                     : 'border-2 border-gray-600 bg-transparent text-gray-400 hover:border-gray-500'
@@ -167,6 +167,25 @@ export const ResolveMarketModal: React.FC<ResolveMarketModalProps> = ({
                 }}
               >
                 No
+              </button>
+              <button
+                onClick={() => setSelectedOutcome(0)}
+                disabled={isPending}
+                className={`h-12 rounded-2xl text-base font-semibold transition-all duration-200 ${
+                  selectedOutcome === 0
+                    ? 'border-2 border-[#FFA500] text-white'
+                    : 'border-2 border-gray-600 bg-transparent text-gray-400 hover:border-gray-500'
+                } disabled:cursor-not-allowed disabled:opacity-50`}
+                style={{
+                  ...(selectedOutcome === 0
+                    ? {
+                        background:
+                          'linear-gradient(to right, #FF8C00, #FF6347)',
+                      }
+                    : {}),
+                }}
+              >
+                Void
               </button>
             </div>
           </div>
@@ -189,7 +208,7 @@ export const ResolveMarketModal: React.FC<ResolveMarketModalProps> = ({
             >
               <button
                 onClick={handleResolve}
-                disabled={isPending || !selectedOutcome}
+                disabled={isPending || selectedOutcome === null}
                 className="size-full rounded-2xl bg-[#0B041E] text-base font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isPending ? 'Resolving...' : 'Resolve'}

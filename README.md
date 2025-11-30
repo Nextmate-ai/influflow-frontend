@@ -1,217 +1,298 @@
-# InfluFlow Web（Frontend）—— AI 内容创作与分发平台 Web 客户端
+# Influflow Frontend - 双项目共享仓库
 
-面向 KOL/创作者的智能写作与分发工具。基于 Next.js App Router + Supabase + React Query + Tailwind/HeroUI 构建，提供从话题洞察、草案确认、流式生成、编辑优化到发布管理的一站式体验。
+本仓库包含两个独立但共享基础设施的 Web 应用:
 
-> 风格对齐后端 readme-be.md：本 Readme 以“高层概览 + 快速落地 + 架构与规范”为核心，覆盖功能说明、技术栈、环境变量、开发与部署、目录结构与扩展指南。
+## 🎨 influxy - AI 内容创作平台
+面向 KOL/创作者的智能写作与分发工具,提供从话题洞察、草案确认、流式生成、编辑优化到发布管理的一站式体验。
+
+## 🎯 nextmate.fun - Web3 预测市场
+基于区块链的预测市场平台,用户可以创建市场、购买份额、参与预测并获得收益。
 
 ---
 
 ## ✨ 核心功能
 
-- 🤖 生成编排：Generation Orchestrator 统一调度“草案确认 ➜ 内容生成”两阶段流程（支持不同 Mode）
-- 🧭 趋势洞察：话题趋势与推荐（搜索/选择热门推文增强上下文）
-- 🧠 思维导图编辑：可视化结构编辑，驱动重新生成（Mindmap）
-- ✍️ 智能润色：段落级 AI 编辑（基于 TipTap/ProseMirror 的富文本体验）
-- 🖼️ 配图生成/上传：本地上传（Supabase Storage）或 AI 生成
-- 🔁 流式会话：基于 SSE 的 Agent Chat（稳定重连与完成态处理）
-- 👤 用户体系：Supabase Auth（Twitter/X OAuth、Email Dev 模式）
-- 💳 订阅与积分：积分校验弹窗、套餐/额度映射与同步
-- 📦 BFF 代理：Next API Route 统一代理后端 API（含长耗时与 SSE 场景）
-- 📱 响应式 UI：Tailwind CSS + HeroUI + Framer Motion 动效
+### influxy
+- 🤖 **多模式 AI 生成**: Draft/Lite/Analysis 三种生成模式
+- 🧭 **话题洞察**: 趋势推文搜索与热门话题推荐
+- 🧠 **思维导图**: 可视化结构编辑,驱动重新生成
+- ✍️ **智能编辑**: 段落级 AI 润色 (TipTap/ProseMirror)
+- 🖼️ **配图管理**: 本地上传或 AI 生成
+- 🔁 **流式对话**: 基于 SSE 的稳定会话
+- 💳 **订阅系统**: 积分校验、套餐管理
+- 🔗 **推荐系统**: 推荐码生成与奖励追踪
+
+### nextmate.fun
+- 🎲 **预测市场**: 完整的市场创建和管理流程
+- 🔗 **智能合约**: Wagmi + Viem 集成
+- 👛 **钱包认证**: Privy 去中心化认证
+- 💰 **交易管理**: 份额交易、收益领取、创作者费用
+- 👥 **权限管理**: 操作员角色与市场管理
+- 📊 **参与历史**: 用户完整的交易记录
+
+### 共享基础
+- 👤 **用户体系**: Supabase Auth (Twitter OAuth)
+- 📦 **API 代理**: Next.js API Route 统一代理
+- 📱 **响应式 UI**: Tailwind CSS + HeroUI + Framer Motion
 
 ---
 
-## 🧱 技术栈与关键依赖
+## 🧱 技术栈
 
-- 应用框架：Next.js 15（App Router, React 19, Turbopack Dev）
-- 组件与样式：Tailwind CSS 3 + HeroUI（@heroui/react）
-- 状态与数据：@tanstack/react-query, Zustand
-- 富文本/渲染：TipTap/ProseMirror, Markdown（unified/remark）
-- 流式通信：@microsoft/fetch-event-source（SSE），Next API 代理转发
-- 鉴权与数据：Supabase（SSR/Browser Client，Storage 上传）
-- 动效与交互：framer-motion, lottie-react, driver.js 引导
-- 其他：ESLint 9 + Prettier + Husky/Lint-Staged；TypeScript 5
+### 核心框架
+- **Next.js 15** - App Router + React 19 + Turbopack
+- **TypeScript 5** - Strict 模式
+
+### 状态与数据
+- **Zustand 5** - 轻量级状态管理
+- **TanStack Query 5** - 异步数据获取与缓存
+- **Jotai 2** - 原子化状态管理
+
+### Web3 (nextmate.fun)
+- **Privy 3** - 钱包认证与管理
+- **Wagmi 2** - React Hooks for Ethereum
+- **Viem 2** - TypeScript Ethereum 库
+- **RainbowKit 2** - 钱包连接 UI
+
+### UI 与样式
+- **Tailwind CSS 3** - 原子化 CSS
+- **HeroUI 2** - React 组件库
+- **Framer Motion 11** - 动画库
+- **Lucide React** - 图标库
+
+### 富文本 (influxy)
+- **TipTap 2** - 富文本编辑器
+- **ProseMirror** - 编辑器核心
+- **Remark/Unified 11** - Markdown 处理
+
+### 可视化
+- **ReactFlow 11** - 思维导图
+- **Recharts 2** - 图表库
+
+### 后端集成
+- **Supabase 2** - 认证、数据库、存储
+- **Stripe 18** - 支付集成 (influxy)
+- **@microsoft/fetch-event-source 2** - SSE 流式通信
 
 ---
 
 ## 🚀 快速开始
 
-### 1) 环境准备
+### 1. 环境准备
+- Node.js ≥ 18 (推荐 20)
+- PNPM 9
 
-- Node.js ≥ 18（推荐 20）
-- PNPM（项目已声明 `packageManager: pnpm@9`）
-
-### 2) 安装依赖
-
+### 2. 安装依赖
 ```bash
 pnpm install
 ```
 
-### 3) 配置环境变量（必需）
-
-在项目根目录创建 `.env.local`，示例：
+### 3. 配置环境变量
+在项目根目录创建 `.env.local`:
 
 ```bash
-# 运行环境（控制 API 代理逻辑）
+# 运行环境
 NEXT_PUBLIC_ENV=local # local | test | production
 
-# 后端 API（非 local 环境下直连）
+# 后端 API
 NEXT_PUBLIC_API_BASE_URL=https://influflow-api.up.railway.app
 
-# Supabase（浏览器/服务端）
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_KEY=your_supabase_service_key  # 仅服务端使用
 
-# 可选：仅在服务端 Route 使用（切勿泄露到浏览器）
-SUPABASE_SERVICE_KEY=your_supabase_service_key
-
-# 站点与登录
+# 站点配置
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 NEXT_PUBLIC_EMAIL_AUTH_ENABLED=false
 ```
 
-说明：
-- 本地开发时若 `NEXT_PUBLIC_ENV=local`，前端会走 `/api/proxy` 由 Next 路由转发到后端，以便支持长耗时与自定义超时；否则直连 `NEXT_PUBLIC_API_BASE_URL`。
-- `SUPABASE_SERVICE_KEY` 仅在 `app/api/upload/image` 服务端上传图片时使用，必须安全注入（如 Vercel/平台 Secrets），严禁暴露到客户端。
+**重要提示:**
+- `local` 环境: 请求走 `/api/proxy` 代理到后端
+- `test/production` 环境: 直连 `NEXT_PUBLIC_API_BASE_URL`
+- `SUPABASE_SERVICE_KEY` 仅在 API Route 使用,严禁暴露到客户端
 
-### 4) 本地运行
-
+### 4. 本地运行
 ```bash
 pnpm dev
 ```
 
-打开 http://localhost:3000 即可预览。
+访问 http://localhost:3000
 
 ---
 
 ## 🧪 开发脚本
 
-- `pnpm dev`：启动开发（Turbopack）
-- `pnpm build`：生产构建
-- `pnpm start`：启动生产服务
-- `pnpm format`：Prettier + ESLint + TypeCheck（组合）
-- `pnpm lint`：ESLint 校验并修复
-- `pnpm tsc`：TypeScript 类型检查
+```bash
+pnpm dev          # 启动开发服务器 (Turbopack)
+pnpm build        # 生产构建
+pnpm start        # 启动生产服务
+pnpm format       # 格式化: prettier + lint + tsc
+pnpm lint         # ESLint 检查
+pnpm tsc          # TypeScript 类型检查
+```
 
-提交前（husky + lint-staged）会自动格式化并校验 `*.ts, *.tsx`。
-
----
-
-## 🔧 环境变量清单
-
-必需：
-- `NEXT_PUBLIC_SUPABASE_URL`：Supabase 项目 URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`：Supabase 匿名 Key
-- `NEXT_PUBLIC_ENV`：`local | test | production`
-- `NEXT_PUBLIC_API_BASE_URL`：后端 API 基地址（非 local 下使用）
-
-可选：
-- `SUPABASE_SERVICE_KEY`：服务端使用的 Supabase Service Key（仅 API Route 使用）
-- `NEXT_PUBLIC_SITE_URL`：站点地址（OAuth 回跳用）
-- `NEXT_PUBLIC_EMAIL_AUTH_ENABLED`：开发环境下是否显示 Email 登录
+提交前会自动运行 Husky + lint-staged 格式化和校验。
 
 ---
 
 ## 🗂️ 目录结构
 
 ```
-app/                      # Next.js App Router（页面 & API 路由）
-  api/                    # BFF 与服务端功能（SSE/代理/上传/回调等）
-  article-tutorial/       # 指南页（驱动 Onboarding）
-  profile/                # 个人资料页
-  referral/[code]/        # 邀请码登录落地页
-  subscription/           # 订阅/套餐页
-components/               # UI 组件与业务组件
-  generation/             # 生成编排（新架构入口）
-  Renderer/               # 内容渲染器（TipTap/Markdown/Mindmap 等）
-  layout/                 # 布局/Sidebar/Topbar/Providers
-  trending/               # 趋势与话题相关组件
-  draft/                  # 草案确认与对话
-lib/
-  api/                    # REST 客户端封装、SSE、异步任务轮询
-  supabase/               # Supabase SSR/Browser 客户端
-  markdown/               # Markdown 解析工具
-constants/                # 环境变量等
-public/                   # 静态资源（图标/字体/图片/Lottie）
-styles/                   # 全局样式（Tailwind）
+app/                      # Next.js App Router
+  api/                    # API Routes
+    agent/                # [influxy] SSE 流式 API
+    twitter/              # [influxy] Twitter 集成
+    upload/               # [influxy] 文件上传
+    privy/                # [nextmate.fun] Privy 钱包集成
+    proxy/                # [共享] REST API 代理
+    auth/                 # [共享] 认证回调
+  home/                   # [influxy] 首页
+  subscription/           # [influxy] 订阅管理
+  referral/               # [influxy] 推荐系统
+  launchpad/              # [nextmate.fun] 预测市场
+  profile/                # [共享] 用户资料
+
+components/               # React 组件
+  generation/             # [influxy] 生成编排
+  Renderer/               # [influxy] 内容渲染
+  editorPro/              # [influxy] 富文本编辑器
+  draft/                  # [influxy] 草稿确认
+  trending/               # [influxy] 话题趋势
+  subscription/           # [influxy] 订阅组件
+  referral/               # [influxy] 推荐组件
+  launchpad/              # [nextmate.fun] 预测市场组件
+  providers/              # [nextmate.fun] Privy Provider
+  layout/                 # [共享] 布局组件
+  auth/                   # [共享] 认证组件
+
+hooks/                    # 自定义 Hooks (31个)
+  [influxy] 生成相关      # 5个
+  [influxy] 内容管理      # 3个
+  [influxy] Twitter       # 5个
+  [influxy] 聊天          # 1个
+  [nextmate.fun] 预测市场 # 6个
+  [nextmate.fun] Web3     # 7个
+  [共享] 工具             # 4个
+
+lib/                      # 核心工具库
+  api/                    # API 客户端
+  supabase/               # Supabase 集成
+  contracts/              # [nextmate.fun] 智能合约
+  markdown/               # [influxy] Markdown 解析
+  stripe.ts               # [influxy] Stripe 支付
+
+stores/                   # Zustand 状态管理
+  authStore.ts            # [共享] 认证状态
+  subscriptionStore.ts    # [influxy] 订阅状态
+  contentStore.ts         # [influxy] 内容编辑
+  articleStore.ts         # [influxy] 文章状态
+
+types/                    # TypeScript 类型 (9个)
+services/                 # 业务服务层
+utils/                    # 工具函数 (11个)
+config/                   # 配置文件
+constants/                # 常量定义
 ```
 
 ---
 
-## 🧭 架构与关键设计
+## 🧭 架构设计
 
-### 前端运行时
-- Next.js App Router（React 19）
-- Providers：HeroUI + React Query + Toaster + AuthProvider + SubscriptionSync
-- 动态导入与禁 SSR：部分编辑/渲染组件使用 `next/dynamic({ ssr:false })`
+### API 代理策略
+- **本地环境**: 请求走 `/api/proxy/[...slug]` 代理,解决长耗时请求超时
+- **生产环境**: 直连后端 API
+- **SSE 流式**: `/api/agent/chat/stream` 专用代理 (nodejs runtime)
 
-### BFF/API 代理
-- `/app/api/proxy/[...slug]`：统一代理到 `API_BASE_URL`，解决 Next rewrites 无法配置超时的问题（AI 接口 10~30s）
-- `/app/api/agent/chat/stream`：SSE 代理与稳定连接（nodejs runtime, force-dynamic）
-- `/app/api/upload/image`：服务端使用 `createAdminClient()` 直传 Supabase Storage（类型/大小校验）
-- `/app/api/auth/callback`：Supabase OAuth 回调（自动创建用户 profile + 调用后端 sign-up 初始化）
+### 生成编排 (influxy)
+- `GenerationOrchestrator` 统一调度两阶段流程
+- 草稿确认 → 内容生成
+- 支持 Draft/Lite/Analysis 三种模式
 
-### 数据与状态
-- React Query 统一管理异步请求/缓存；Zustand 管理认证与订阅状态
-- Token 刷新：401 时通过 `supabase.auth.refreshSession()` 自动更新并重试
-- Credits：后端返回 `code=42000` 时触发弹窗提醒
+### 状态管理
+- **Zustand**: 全局状态 (认证、订阅、内容)
+- **React Query**: 异步数据缓存
+- **401 自动重试**: Token 刷新机制
+- **积分检测**: `code=42000` 触发弹窗
 
-### 生成编排（新架构）
-- `components/generation/GenerationOrchestrator` 编排“草案确认 ➜ 生成”两阶段
-- `useGenerateThread / useAsyncThreadGeneration` 支持同步/异步模式、长任务轮询与持久化读取
-
-### 富文本与可视化
-- TipTap/ProseMirror 作为编辑内核；Markdown 渲染与 GFM 支持
-- Mindmap 可视化结构编辑（React Flow + dagre/elkjs 布局）
+### Web3 集成 (nextmate.fun)
+- **Privy**: 钱包认证
+- **Wagmi**: 智能合约交互
+- **交易管理**: Gas、签名、确认自动处理
 
 ---
 
-## 🔌 与后端的交互
+## 🛡️ 安全考虑
 
-- 基础 REST：`/api/twitter/*`（生成、修改、图片生成、趋势、Job 状态等）
-- SSE：`/api/agent/chat/stream?chat_thread_id=...`（流式事件，多段消息，`chat.done` 结束）
-- 认证：Supabase OAuth（Twitter/X）；开发模式可开启 Email 登录
-
-> 开发提示：本地（`NEXT_PUBLIC_ENV=local`）优先走 `/api/proxy`，生产/测试直连 `NEXT_PUBLIC_API_BASE_URL`。
-
----
-
-## 🛡️ 安全与合规
-
-- `SUPABASE_SERVICE_KEY` 仅在服务端路由中使用，严禁暴露到客户端
-- API Proxy 会剥离 `Content-Encoding/Length` 等潜在问题 Header，避免中间层兼容风险
-- SSE 稳定性：心跳/空事件过滤；完成态后主动关闭；限制最大重连次数
-- OAuth 回调：失败时统一 `/?error=...` 参数回传并展示登录弹窗
+- ✅ `SUPABASE_SERVICE_KEY` 仅在服务端使用
+- ✅ API 请求自动携带 Supabase Token
+- ✅ 智能合约调用前检查余额和授权
+- ✅ 用户输入使用 zod 验证
+- ✅ OAuth 回调失败统一处理
 
 ---
 
 ## 🚢 部署指南
 
-- 目标平台：Vercel 或任意 Node.js 平台
-- Node Runtime：SSE 路由显式设置 `export const runtime = 'nodejs'`
-- 环境变量：通过平台 Secret 注入（尤其是 `SUPABASE_SERVICE_KEY`）
-- 构建启动：`pnpm build && pnpm start`
+### Vercel (推荐)
+1. 连接 GitHub 仓库
+2. 配置环境变量 (平台 Secrets)
+3. 自动构建部署
+
+### 手动部署
+```bash
+pnpm build
+pnpm start
+```
+
+**注意事项:**
+- SSE 路由需要 `nodejs` runtime
+- 环境变量通过平台 Secret 注入
+- `SUPABASE_SERVICE_KEY` 严禁暴露到客户端
 
 ---
 
-## 🧰 调试与排障
+## 🧰 调试建议
 
-- 代理/超时：长耗时接口使用 `/app/api/proxy`，避免 Next rewrites 超时限制
-- Token 过期：401 自动刷新；若刷新失败将登出并提示重新登录
-- 图片上传：仅允许 `image/*`，最大 10MB；上传成功会返回公开 URL
-- 趋势搜索：若频繁调用，请关注后端限流策略
+| 问题 | 解决方案 |
+|------|---------|
+| 代理/超时 | 本地环境确保使用 `/api/proxy` |
+| Token 过期 | 401 自动刷新,检查 Supabase 配置 |
+| 图片上传 | 最大 10MB, 使用 `SUPABASE_SERVICE_KEY` |
+| 积分不足 | `code=42000` 自动触发弹窗 |
+| Web3 交易失败 | 检查钱包余额、授权状态 |
 
 ---
 
-## 🤝 贡献与规范
+## 🤝 贡献指南
 
-1. 分支：feature/*、fix/*、chore/*
-2. 提交：建议遵循 Conventional Commits
-3. 代码：通过 `pnpm format` 与 `pnpm tsc` 保持风格与类型稳定
-4. PR：附上功能截图/录屏与测试说明
+1. **分支规范**: `feature/*`, `fix/*`, `chore/*`
+2. **提交规范**: 遵循 Conventional Commits
+3. **代码质量**: 运行 `pnpm format` 和 `pnpm tsc`
+4. **项目区分**: 标注是 [influxy] 还是 [nextmate.fun] 功能
+5. **PR 要求**: 附上功能截图/录屏和测试说明
+
+---
+
+## 📚 相关文档
+
+- **项目指南**: [CLAUDE.md](./CLAUDE.md) - 完整的项目结构和开发指南
+- **nextmate.fun 文档**:
+  - [LAUNCHPAD_GUIDE.md](./LAUNCHPAD_GUIDE.md) - 功能指南
+  - [LAUNCHPAD_DESIGN_SYSTEM.md](./LAUNCHPAD_DESIGN_SYSTEM.md) - 设计系统
+  - [LAUNCHPAD_QUICK_REFERENCE.md](./LAUNCHPAD_QUICK_REFERENCE.md) - 快速参考
 
 ---
 
 ## 📝 License
 
-本仓库为 InfluFlow 前端子项目，遵循与主项目一致的授权策略（如无特别声明，默认 MIT）。
+MIT License (如无特别声明)
+
+---
+
+**最后更新**: 2025-11-30
+
+**维护建议**:
+- 修改代码时注意区分 influxy 和 nextmate.fun 功能
+- 共享部分修改需同时测试两个项目
+- 建议使用不同 git 分支开发不同项目功能

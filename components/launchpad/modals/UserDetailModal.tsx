@@ -28,6 +28,7 @@ interface UserDetailModalProps {
     totalVolume: string;
     timeRemaining: string;
     option: string;
+    endTime?: string; // 市场结束时间（ISO 字符串格式，如 "2025-12-01T06:36:06+00:00"）
     rawData?: Record<string, any>; // 完整的原始数据
     creatorInfo?: {
       address: string;
@@ -312,12 +313,18 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     }
 
     // 检查是否有 operator 权限
-    if (!hasOperatorRole) {
+    // 明确检查 false 以区分 "loading" (undefined) 和 "no permission" (false) 状态
+    if (hasOperatorRole === false) {
       addToast({
         title: 'Permission Denied',
         description: 'You do not have operator permission to resolve this market',
         color: 'danger',
       });
+      return;
+    }
+
+    // 如果权限状态还在加载中（undefined），不执行任何操作
+    if (hasOperatorRole === undefined) {
       return;
     }
 
@@ -350,6 +357,20 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
         color: 'danger',
       });
       return;
+    }
+
+    // 检查市场是否已结束（使用 endTime 字段）
+    if (prediction.endTime) {
+      const endTimestamp = new Date(prediction.endTime).getTime() / 1000; // 转换为秒级时间戳
+      const now = Math.floor(Date.now() / 1000);
+      if (endTimestamp <= now) {
+        addToast({
+          title: 'Error',
+          description: 'This market has ended',
+          color: 'danger',
+        });
+        return;
+      }
     }
 
     // 检查余额

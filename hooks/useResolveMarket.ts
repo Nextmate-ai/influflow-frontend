@@ -15,7 +15,7 @@ import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
  */
 export interface ResolveMarketParams {
   marketId: bigint; // 市场 ID
-  outcome: 1 | 2; // 1 = Yes, 2 = No
+  outcome: 0 | 1 | 2; // 0 = Void (流局), 1 = Yes, 2 = No
 }
 
 /**
@@ -57,6 +57,7 @@ export function useResolveMarket() {
         });
 
         // 使用 Privy 的 sendTransaction 并启用 gas sponsorship
+        const outcomeText = params.outcome === 0 ? 'Void' : params.outcome === 1 ? 'Yes' : 'No';
         const resolveTxResult = await sendTransaction(
           {
             to: predictionMarketContract.address,
@@ -66,7 +67,7 @@ export function useResolveMarket() {
           {
             sponsor: true, // 启用 gas sponsorship
             uiOptions: {
-              description: `Resolve market with outcome: ${params.outcome === 1 ? 'Yes' : 'No'}`,
+              description: `Resolve market with outcome: ${outcomeText}`,
               buttonText: 'Resolve Market',
               transactionInfo: {
                 action: 'Resolve Market',

@@ -35,6 +35,7 @@ export interface PredictionCardData {
   totalVolume: string;
   timeRemaining: string;
   option: string;
+  endTime?: string; // 市场结束时间（ISO 字符串格式，如 "2025-12-01T06:36:06+00:00"）
   // 完整的原始数据，用于详情弹窗
   rawData?: Record<string, any>;
   // 创建者信息（包含 X/Twitter 信息）
@@ -154,6 +155,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
         totalVolume,
         timeRemaining,
         option: '',
+        endTime: rawData?.end_time, // 传递 endTime 字段
         rawData, // 传递完整的原始数据
         creatorInfo, // 传递创建者信息
       });
