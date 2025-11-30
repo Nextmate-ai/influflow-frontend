@@ -54,8 +54,8 @@ export function WalletUserInfo({ onClick }: WalletUserInfoProps) {
         ) : (
           <div className="flex size-full items-center justify-center bg-gradient-to-br from-purple-400 to-pink-400">
             <span className="text-lg font-semibold text-white">
-              {authInfo?.username?.charAt(0).toUpperCase() || 
-               authInfo?.name?.charAt(0).toUpperCase() || 
+              {authInfo?.username?.charAt(0).toUpperCase() ||
+               authInfo?.name?.charAt(0).toUpperCase() ||
                (address ? address.slice(2, 4).toUpperCase() : 'W')}
             </span>
           </div>
@@ -64,11 +64,17 @@ export function WalletUserInfo({ onClick }: WalletUserInfoProps) {
       {/* 用户信息 - 优先显示 X/Twitter username */}
       <div className="flex flex-col items-start">
         <span className="text-sm font-medium text-white">
-          {isLoadingAuth ? '...' : 
-           authInfo?.username ? `@${authInfo.username}` : 
+          {isLoadingAuth ? '...' :
+           authInfo?.username ? `@${authInfo.username}` :
            authInfo?.name || formattedAddress}
         </span>
         <span className="text-xs text-[#86FDE8]">{formattedAddress}</span>
+      </div>
+      {/* 三个点图标 */}
+      <div className="ml-2 flex flex-col gap-1">
+        <div className="size-1 rounded-full bg-[#6B55F1]"></div>
+        <div className="size-1 rounded-full bg-[#6B55F1]"></div>
+        <div className="size-1 rounded-full bg-[#6B55F1]"></div>
       </div>
     </button>
   );
