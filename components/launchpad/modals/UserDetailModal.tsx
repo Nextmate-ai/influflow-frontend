@@ -427,7 +427,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
         backdrop: 'backdrop-blur-sm',
       }}
     >
-      <ModalContent className="h-full max-h-screen overflow-hidden rounded-none bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl">
+      <ModalContent className="h-full max-h-screen overflow-hidden rounded-none md:border border-[#60A5FA] bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl">
         {(onClose) => (
           <div className="relative flex h-full flex-col">
             {/* 移动端顶部返回按钮区域 */}
@@ -643,7 +643,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
               <div className="my-10 hidden w-px bg-[#60A5FA] md:block"></div>
 
               {/* 右侧面板 - My Bid */}
-              <div className="flex flex-1 flex-col overflow-hidden p-4 md:p-[40px]">
+              <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden p-4 md:overflow-hidden md:p-[40px]">
                 {/* My Bid 标题和关闭按钮 */}
                 <div className="mb-6 flex items-center justify-between md:mb-8">
                   <div className="flex items-center gap-2 md:gap-3">
