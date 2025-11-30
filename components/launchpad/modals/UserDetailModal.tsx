@@ -8,8 +8,8 @@ import { useReadContract } from 'wagmi';
 
 import { addToast } from '@/components/base/toast';
 import { useBuyShares } from '@/hooks/useBuyShares';
-import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { useOperatorRole } from '@/hooks/useOperatorRole';
+import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
 
 import { StatCard } from '../shared/StatCard';
@@ -317,7 +317,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     if (hasOperatorRole === false) {
       addToast({
         title: 'Permission Denied',
-        description: 'You do not have operator permission to resolve this market',
+        description:
+          'You do not have operator permission to resolve this market',
         color: 'danger',
       });
       return;
@@ -426,7 +427,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
         backdrop: 'backdrop-blur-sm',
       }}
     >
-      <ModalContent className="h-full max-h-screen overflow-hidden rounded-none border-2 border-[#60A5FA] bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl">
+      <ModalContent className="h-full max-h-screen overflow-hidden rounded-none bg-[#0B041E] p-0 md:h-auto md:max-h-[90vh] md:rounded-2xl">
         {(onClose) => (
           <div className="relative flex h-full flex-col">
             {/* 移动端顶部返回按钮区域 */}
@@ -740,7 +741,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   {/* 余额不足提示 */}
                   {amountInWei > tokenBalance && tokenBalance > BigInt(0) && (
                     <p className="mt-2 text-sm text-red-400">
-                      Insufficient balance. Current: ${(Number(tokenBalance) / 1e18).toFixed(2)}
+                      Insufficient balance. Current: $
+                      {(Number(tokenBalance) / 1e18).toFixed(2)}
                     </p>
                   )}
                 </div>
@@ -782,7 +784,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       onClick={handleBuyShares}
                       disabled={
                         isPending ||
-                        (authenticated && (!selectedOption || parseFloat(amount) <= 0 || amountInWei > tokenBalance))
+                        (authenticated &&
+                          (!selectedOption ||
+                            parseFloat(amount) <= 0 ||
+                            amountInWei > tokenBalance))
                       }
                       className="size-full rounded-2xl bg-[#0B041E] text-base font-semibold text-white transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50 md:text-lg"
                     >
