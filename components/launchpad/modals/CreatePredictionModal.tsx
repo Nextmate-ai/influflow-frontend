@@ -484,19 +484,26 @@ export const CreatePredictionModal: React.FC<CreatePredictionModalProps> = ({
                   />
                   <p className="mt-1 text-xs text-slate-400">
                     Minimum bid amount: $10.00
-                    {tokenBalance > BigInt(0) && (
-                      <span className="ml-2 text-slate-400">
-                        | Balance: ${(Number(tokenBalance) / 1e18).toFixed(2)}
-                      </span>
-                    )}
-                    {creatorBet > BigInt(0) && creatorBet < BigInt(10 * 1e18) && (
+                    {/* 始终显示余额，即使为 0 */}
+                    <span className="ml-2 text-slate-400">
+                      | Balance: ${(Number(tokenBalance) / 1e18).toFixed(2)}
+                    </span>
+                    {/* 金额过低提示 - 包括为 0 的情况 */}
+                    {bidAmount.trim() !== '' && creatorBet < BigInt(10 * 1e18) && (
                       <span className="ml-2 text-red-400">
-                        (Amount too low: ${(Number(creatorBet) / 1e18).toFixed(2)})
+                        (Amount too low: ${(Number(creatorBet) / 1e18).toFixed(2)}, minimum $10.00 required)
                       </span>
                     )}
-                    {creatorBet > tokenBalance && tokenBalance > BigInt(0) && (
+                    {/* 余额不足提示 - 移除 tokenBalance > BigInt(0) 条件 */}
+                    {creatorBet > tokenBalance && (
                       <span className="ml-2 text-red-400">
                         (Insufficient balance)
+                      </span>
+                    )}
+                    {/* 余额为 0 时的 Faucet 引导 */}
+                    {tokenBalance === BigInt(0) && (
+                      <span className="mt-1 block text-yellow-400">
+                        Insufficient balance ($0.00). Get tokens: Profile icon (top-right) → My Wallet → Faucet to claim 10,000 tokens (once/24h).
                       </span>
                     )}
                   </p>
