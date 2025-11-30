@@ -39,7 +39,7 @@ export default function LaunchPadDashboard() {
       />
       {currentView === 'dashboard' ? (
         <div className="mx-auto w-full max-w-[1440px] flex-1 px-[20px] md:px-[40px]">
-          <div className="my-[80px] text-center text-[24px] text-white md:text-[36px]">
+          <div className="my-[40px] md:[my-80px] text-center text-[24px] text-white md:text-[36px]">
             Turn your opinions into earnings.
           </div>
           <DashboardContent />

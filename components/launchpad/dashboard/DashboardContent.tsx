@@ -172,13 +172,13 @@ export const DashboardContent: React.FC = () => {
 
   return (
     <div>
-      <div className="mb-4 flex flex-col items-stretch justify-between gap-3 md:mb-[40px] md:flex-row md:items-center md:gap-0">
+      <div className="mb-4 flex flex-row items-center justify-between gap-2 md:mb-[40px] md:gap-0">
         <div className="flex items-center gap-2 md:gap-4">
           {/* Radio 切换按钮 */}
-          <div className="flex h-[48px] items-center gap-1 rounded-[10px] bg-[#0B041E] p-1 md:gap-2">
+          <div className="flex h-[40px] items-center gap-1 rounded-[10px] bg-[#0B041E] p-1 md:h-[48px] md:gap-2">
             <button
               onClick={() => setFilterStatus('live')}
-              className={`flex h-full w-[150px] items-center justify-center rounded-lg text-sm font-semibold transition-all duration-200 md:text-base ${
+              className={`flex h-full w-[70px] items-center justify-center rounded-lg text-xs font-semibold transition-all duration-200 md:w-[150px] md:text-base ${
                 filterStatus === 'live'
                   ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
                   : 'bg-transparent text-gray-400 hover:text-white'
@@ -188,7 +188,7 @@ export const DashboardContent: React.FC = () => {
             </button>
             <button
               onClick={() => setFilterStatus('finished')}
-              className={`flex h-full w-[150px] items-center justify-center rounded-lg text-sm font-semibold transition-all duration-200 md:text-base ${
+              className={`flex h-full w-[70px] items-center justify-center rounded-lg text-xs font-semibold transition-all duration-200 md:w-[150px] md:text-base ${
                 filterStatus === 'finished'
                   ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
                   : 'bg-transparent text-gray-400 hover:text-white'
@@ -200,9 +200,9 @@ export const DashboardContent: React.FC = () => {
         </div>
         <button
           onClick={handleCreateClick}
-          className="h-[48px] w-[150px] rounded-[10px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] p-[2px] transition-all hover:shadow-lg hover:shadow-cyan-500/50"
+          className="h-[40px] w-[80px] rounded-[10px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] p-[2px] transition-all hover:shadow-lg hover:shadow-cyan-500/50 md:h-[48px] md:w-[150px]"
         >
-          <div className="flex size-full items-center justify-center rounded-[8px] bg-[#0B041E] px-4 text-sm font-semibold text-white md:px-[24px] md:text-base">
+          <div className="flex size-full items-center justify-center rounded-[8px] bg-[#0B041E] px-2 text-xs font-semibold text-white md:px-[24px] md:text-base">
             Create
           </div>
         </button>

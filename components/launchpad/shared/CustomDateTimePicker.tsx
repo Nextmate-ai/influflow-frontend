@@ -90,7 +90,7 @@ const TimeUnit: React.FC<{
           e.stopPropagation();
         }}
         tabIndex={0}
-        className="relative z-[10001] h-10 w-12 cursor-text rounded-lg border-2 border-[#2DC3D9] bg-[#0B041E] text-center text-base font-medium text-white transition-colors hover:border-[#60A5FA] focus:border-[#60A5FA] focus:outline-none focus:ring-2 focus:ring-[#60A5FA]/50"
+        className="relative z-[10001] h-12 w-14 cursor-text rounded-lg border-2 border-[#2DC3D9] bg-[#0B041E] text-center text-lg font-medium text-white transition-colors hover:border-[#60A5FA] focus:border-[#60A5FA] focus:outline-none focus:ring-2 focus:ring-[#60A5FA]/50 md:h-10 md:w-12 md:text-base"
         style={{
           pointerEvents: 'auto',
           touchAction: 'manipulation',
@@ -98,7 +98,7 @@ const TimeUnit: React.FC<{
           WebkitUserSelect: 'text',
         }}
       />
-      <span className="text-[10px] text-gray-400">{label}</span>
+      <span className="text-[10px] text-gray-400 md:text-[10px]">{label}</span>
     </div>
   );
 };
@@ -398,30 +398,51 @@ export const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-  // 计算弹出层位置（显示在输入框上方）
+  // 计算弹出层位置（移动端显示在屏幕底部，桌面端显示在输入框上方）
   const getPopupStyle = (): React.CSSProperties => {
     if (!inputRef.current) return {};
     const rect = inputRef.current.getBoundingClientRect();
-    const popupHeight = isMobile ? 370 : 500;
-    return {
-      position: 'fixed',
-      bottom: `${window.innerHeight - rect.top + 8}px`,
-      left: `${rect.left}px`,
-      width: isMobile ? `${Math.min(rect.width, window.innerWidth - 32)}px` : '320px',
-      maxHeight: `${popupHeight}px`,
-    };
+    const popupHeight = isMobile ? 480 : 500;
+
+    if (isMobile) {
+      // 移动端：固定在屏幕底部，全宽显示
+      return {
+        position: 'fixed',
+        bottom: '0',
+        left: '0',
+        right: '0',
+        width: '100%',
+        maxHeight: `${Math.min(popupHeight, window.innerHeight * 0.75)}px`,
+        borderRadius: '20px 20px 0 0', // 只有顶部圆角
+      };
+    } else {
+      // 桌面端：显示在输入框上方
+      return {
+        position: 'fixed',
+        bottom: `${window.innerHeight - rect.top + 8}px`,
+        left: `${rect.left}px`,
+        width: '320px',
+        maxHeight: `${popupHeight}px`,
+      };
+    }
   };
 
   const popupContent = isOpen && (
     <div
       ref={pickerRef}
       data-date-picker
-      className={`z-[10000] overflow-y-auto rounded-2xl border border-[#2DC3D9] bg-[#0B041E] p-3 shadow-xl md:p-4`}
+      className={`z-[10000] overflow-y-auto border border-[#2DC3D9] bg-[#0B041E] p-4 shadow-xl md:rounded-2xl md:p-4 ${isMobile ? 'rounded-t-2xl' : ''}`}
       onClick={(e) => {
         e.stopPropagation();
       }}
       style={getPopupStyle()}
     >
+      {/* 移动端顶部拖动条 */}
+      {isMobile && (
+        <div className="mb-3 flex justify-center">
+          <div className="h-1 w-12 rounded-full bg-gray-600" />
+        </div>
+      )}
       {/* 月份导航和Today按钮 */}
       <div className="mb-3 flex items-center justify-between md:mb-4">
         <button
@@ -489,10 +510,10 @@ export const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
       </div>
 
       {/* 日期网格 */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1 md:gap-1">
         {days.map((day, index) => {
           if (day === null) {
-            return <div key={index} className="h-8 md:h-10" />;
+            return <div key={index} className="h-10 md:h-10" />;
           }
 
           const isTodayDate = isToday(day);
@@ -505,7 +526,7 @@ export const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
               onClick={() => isInRange && handleDateTimeSelect(day)}
               disabled={!isInRange}
               type="button"
-              className={`h-8 rounded-lg text-xs font-medium transition-all md:h-10 md:text-sm ${
+              className={`h-10 rounded-lg text-sm font-medium transition-all md:h-10 md:text-sm ${
                 !isInRange
                   ? 'cursor-not-allowed text-gray-600 opacity-30'
                   : isSelectedDate
