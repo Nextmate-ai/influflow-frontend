@@ -180,6 +180,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
           totalVolume,
           timeRemaining,
           option: 'yes',
+          endTime: rawData?.end_time, // 传递 endTime 字段
           rawData, // 传递完整的原始数据
           creatorInfo, // 传递创建者信息
         },
@@ -206,6 +207,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
           totalVolume,
           timeRemaining,
           option: 'no',
+          endTime: rawData?.end_time, // 传递 endTime 字段
           rawData, // 传递完整的原始数据
           creatorInfo, // 传递创建者信息
         },
