@@ -1,5 +1,6 @@
 'use client';
 
+import { ShareIcon } from '@heroicons/react/24/outline';
 import { Input, Modal, ModalContent } from '@heroui/react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import Image from 'next/image';
@@ -11,6 +12,7 @@ import { useBuyShares } from '@/hooks/useBuyShares';
 import { useOperatorRole } from '@/hooks/useOperatorRole';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { predictionMarketContract } from '@/lib/contracts/predictionMarket';
+import { copyMarketShareLink } from '@/utils/shareUtils';
 
 import { StatCard } from '../shared/StatCard';
 import { ResolveMarketModal } from './ResolveMarketModal';
@@ -333,6 +335,24 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     setShowResolveModal(true);
   };
 
+  // 处理分享按钮点击
+  const handleShare = async () => {
+    const success = await copyMarketShareLink(prediction.id);
+    if (success) {
+      addToast({
+        title: 'Success',
+        description: 'Market link copied!',
+        color: 'success',
+      });
+    } else {
+      addToast({
+        title: 'Error',
+        description: 'Failed to copy link',
+        color: 'danger',
+      });
+    }
+  };
+
   // 使用批量交易：一次性完成 approve 和 buyShares
   const handleBuyShares = async () => {
     if (!authenticated) {
@@ -507,10 +527,20 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   )}
                 </div>
 
-                {/* 预测问题 */}
-                <h2 className="mb-4 text-lg font-semibold leading-tight text-white md:mb-6 md:text-2xl">
-                  {prediction.title}
-                </h2>
+                {/* 预测问题和分享按钮 */}
+                <div className="mb-4 flex items-start justify-between gap-3 md:mb-6">
+                  <h2 className="flex-1 text-lg font-semibold leading-tight text-white md:text-2xl">
+                    {prediction.title}
+                  </h2>
+                  {/* 分享按钮 */}
+                  <button
+                    onClick={handleShare}
+                    className="flex shrink-0 items-center justify-center text-gray-400 transition-colors hover:text-cyan-400"
+                    title="Share this market"
+                  >
+                    <ShareIcon className="size-5 md:size-6" />
+                  </button>
+                </div>
 
                 {/* 交易量和剩余时间 - 使用 StatCard */}
                 <div className="mb-6 flex items-center gap-3 md:mb-8 md:gap-4">

@@ -1,7 +1,11 @@
 'use client';
 
+import { ShareIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import React, { useState } from 'react';
+
+import { addToast } from '@/components/base/toast';
+import { copyMarketShareLink } from '@/utils/shareUtils';
 
 import { GradientSlider } from '../shared/GradientSlider';
 import { StatCard } from '../shared/StatCard';
@@ -216,6 +220,24 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
     }
   };
 
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // 阻止事件冒泡，避免触发卡片点击
+    const success = await copyMarketShareLink(id);
+    if (success) {
+      addToast({
+        title: 'Success',
+        description: 'Link copied to clipboard!',
+        color: 'success',
+      });
+    } else {
+      addToast({
+        title: 'Error',
+        description: 'Failed to copy link',
+        color: 'danger',
+      });
+    }
+  };
+
   return (
     <div
       onClick={handleCardClick}
@@ -340,33 +362,14 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
 
       {/* 统计信息 */}
       <div className="mt-auto flex items-center justify-between space-x-2 text-xs">
-        <div className="line-clamp-2 text-sm leading-[24px] text-white md:text-base md:leading-[32px]">
-          {creatorInfo?.xUsername ? (
-            <a
-              href={`https://x.com/${creatorInfo.xUsername.replace('@', '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="inline-block transition-opacity hover:opacity-80"
-            >
-              <Image
-                src="/images/twitter_card.png"
-                alt="Twitter"
-                width={20}
-                height={20}
-                className="cursor-pointer md:size-6"
-              />
-            </a>
-          ) : (
-            <Image
-              src="/images/twitter_card.png"
-              alt="Twitter"
-              width={20}
-              height={20}
-              className="md:size-6"
-            />
-          )}
-        </div>
+        {/* 分享按钮 */}
+        <button
+          onClick={handleShare}
+          className="flex items-center justify-center text-gray-400 transition-colors hover:text-cyan-400"
+          title="Share this market"
+        >
+          <ShareIcon className="size-5 md:size-6" />
+        </button>
 
         <div className="flex items-center gap-3 md:gap-[24px]">
           <StatCard
