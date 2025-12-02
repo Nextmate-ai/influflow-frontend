@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { usePredictionMarkets } from '@/hooks/usePredictionMarkets';
+import { usePredictionMarkets, MarketSortBy, StateFilter } from '@/hooks/usePredictionMarkets';
 
 import { CreatePredictionModal } from '../modals/CreatePredictionModal';
 import { UserDetailModal } from '../modals/UserDetailModal';
@@ -75,14 +75,14 @@ const MOCK_PREDICTIONS = [
  *
  * 从 Supabase 的 markets_readable 表读取数据
  */
-type FilterStatus = 'live' | 'finished';
+type FilterStatus = 'trending' | 'new' | 'finished';
 
 export const DashboardContent: React.FC = () => {
   const [selectedPrediction, setSelectedPrediction] =
     useState<PredictionCardData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>('live');
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('trending');
 
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -99,8 +99,18 @@ export const DashboardContent: React.FC = () => {
     };
   }, []);
 
+  // 根据 filterStatus 计算排序方式
+  const sortBy: MarketSortBy =
+    filterStatus === 'trending' ? 'volume' :
+    filterStatus === 'new' ? 'created_at' :
+    'end_time';
+
+  // 根据 filterStatus 计算状态过滤
+  const stateFilter: StateFilter =
+    filterStatus === 'trending' || filterStatus === 'new' ? 'active' : 'finished';
+
   // 从 Supabase 读取市场数据
-  const { predictions, isLoading, error, refresh } = usePredictionMarkets();
+  const { predictions, isLoading, error, refresh } = usePredictionMarkets(sortBy, stateFilter);
 
   // 处理分享链接：自动打开对应的 market Modal
   useEffect(() => {
@@ -145,32 +155,7 @@ export const DashboardContent: React.FC = () => {
     }, 5000);
   }, [refresh]);
 
-  // 根据筛选状态过滤预测
-  const filteredPredictions = predictions.filter((prediction) => {
-    const state = prediction.rawData?.state;
-    const stateStr = String(state || '').toLowerCase();
-    
-    if (filterStatus === 'live') {
-      // Live: 显示 Active 状态
-      return (
-        state === 0 ||
-        state === '0' ||
-        stateStr === 'active'
-      );
-    } else if (filterStatus === 'finished') {
-      // Finished: 显示 Resolved 或 Void 状态
-      return (
-        state === 1 ||
-        state === '1' ||
-        stateStr === 'resolved' ||
-        state === 2 ||
-        state === '2' ||
-        stateStr === 'void' ||
-        stateStr === 'voided'
-      );
-    }
-    return true;
-  });
+  // 不需要客户端过滤了，Supabase 已经根据 stateFilter 过滤了数据
 
   const handlePredictionClick = (
     prediction: PredictionCardData,
@@ -210,21 +195,31 @@ export const DashboardContent: React.FC = () => {
     <div>
       <div className="mb-4 flex flex-row items-center justify-between gap-2 md:mb-[40px] md:gap-0">
         <div className="flex items-center gap-2 md:gap-4">
-          {/* Radio 切换按钮 */}
+          {/* Radio 切换按钮 - 3个标签 */}
           <div className="flex h-[40px] items-center gap-1 rounded-[10px] bg-[#0B041E] p-1 md:h-[48px] md:gap-2">
             <button
-              onClick={() => setFilterStatus('live')}
-              className={`flex h-full w-[70px] items-center justify-center rounded-lg text-xs font-semibold transition-all duration-200 md:w-[150px] md:text-base ${
-                filterStatus === 'live'
+              onClick={() => setFilterStatus('trending')}
+              className={`flex h-full w-[70px] items-center justify-center rounded-lg text-xs font-semibold transition-all duration-200 md:w-[100px] md:text-base ${
+                filterStatus === 'trending'
                   ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
                   : 'bg-transparent text-gray-400 hover:text-white'
               }`}
             >
-              Live
+              Trending
+            </button>
+            <button
+              onClick={() => setFilterStatus('new')}
+              className={`flex h-full w-[70px] items-center justify-center rounded-lg text-xs font-semibold transition-all duration-200 md:w-[100px] md:text-base ${
+                filterStatus === 'new'
+                  ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
+                  : 'bg-transparent text-gray-400 hover:text-white'
+              }`}
+            >
+              New
             </button>
             <button
               onClick={() => setFilterStatus('finished')}
-              className={`flex h-full w-[70px] items-center justify-center rounded-lg text-xs font-semibold transition-all duration-200 md:w-[150px] md:text-base ${
+              className={`flex h-full w-[70px] items-center justify-center rounded-lg text-xs font-semibold transition-all duration-200 md:w-[100px] md:text-base ${
                 filterStatus === 'finished'
                   ? 'bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] text-white'
                   : 'bg-transparent text-gray-400 hover:text-white'
@@ -244,11 +239,17 @@ export const DashboardContent: React.FC = () => {
         </button>
       </div>
 
-      <AuctionGrid
-        predictions={filteredPredictions}
-        onPredictionClick={handlePredictionClick}
-        filterStatus={filterStatus}
-      />
+      <div
+        className="transition-opacity duration-300"
+        style={{ opacity: isLoading && predictions.length === 0 ? 0.3 : 1 }}
+      >
+        <AuctionGrid
+          key={filterStatus}
+          predictions={predictions}
+          onPredictionClick={handlePredictionClick}
+          filterStatus={filterStatus}
+        />
+      </div>
 
       {selectedPrediction && (
         <UserDetailModal
