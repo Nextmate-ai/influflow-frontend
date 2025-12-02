@@ -26,7 +26,7 @@ interface PredictionCardProps {
     xName?: string;
     xAvatarUrl?: string;
   };
-  filterStatus?: 'live' | 'finished';
+  filterStatus?: 'trending' | 'new' | 'finished';
 }
 
 export interface PredictionCardData {
@@ -115,9 +115,9 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
   const getMarketStatus = () => {
     const state = rawData?.state;
     const stateStr = String(state || '').toLowerCase();
-    
-    // 如果是 live 视图，不显示 active 状态
-    if (filterStatus === 'live') {
+
+    // 如果是 trending 或 new 视图，不显示 active 状态
+    if (filterStatus === 'trending' || filterStatus === 'new') {
       return { label: null, color: '', isActive: true };
     }
     

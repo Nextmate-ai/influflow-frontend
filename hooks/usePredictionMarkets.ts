@@ -8,6 +8,21 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useCreatorXInfo } from './useCreatorXInfo';
 
 /**
+ * 市场排序方式
+ * - volume: 按交易量降序（Trending）
+ * - created_at: 按创建时间降序（New）
+ * - end_time: 按结束时间降序（Finished）
+ */
+export type MarketSortBy = 'volume' | 'created_at' | 'end_time';
+
+/**
+ * 市场状态过滤
+ * - active: 只获取 Active 状态的市场（state = 0）
+ * - finished: 只获取 Resolved/Void 状态的市场（state = 1 或 2）
+ */
+export type StateFilter = 'active' | 'finished';
+
+/**
  * Supabase markets_readable 表的数据结构
  * 根据实际表结构可能需要调整
  */
@@ -34,7 +49,10 @@ export interface MarketReadableRow {
 /**
  * 从 Supabase 读取预测市场列表
  */
-export function usePredictionMarkets() {
+export function usePredictionMarkets(
+  sortBy: MarketSortBy = 'volume',
+  stateFilter: StateFilter = 'active'
+) {
   const [basePredictions, setBasePredictions] = useState<PredictionCardData[]>(
     [],
   );
@@ -44,6 +62,9 @@ export function usePredictionMarkets() {
 
   // 使用 ref 来跟踪请求状态，避免状态更新延迟导致的问题
   const isFetchingRef = useRef(false);
+  // 保存上一次的 sortBy 和 stateFilter，用于判断是否是 tab 切换
+  const prevSortByRef = useRef(sortBy);
+  const prevStateFilterRef = useRef(stateFilter);
 
   const fetchMarkets = async () => {
     // 防止重复请求 - 使用 ref 而不是 state
@@ -62,12 +83,34 @@ export function usePredictionMarkets() {
       console.log('Fetching markets from Supabase...');
 
       // 从 nextmate schema 的 markets_readable 表读取数据
-      const { data, error: queryError } = await supabase
+      let query = supabase
         .schema('nextmate')
         .from('markets_readable')
-        .select('*')
-        .order('total_volume_usd', { ascending: false })
-        .limit(100);
+        .select('*');
+
+      // 根据 stateFilter 添加状态过滤
+      if (stateFilter === 'active') {
+        // Active 状态
+        query = query.eq('state', 'Active');
+      } else {
+        // Finished 状态：非 Active 的所有状态
+        query = query.not('state', 'eq', 'Active');
+      }
+
+      // 根据 sortBy 添加排序
+      switch (sortBy) {
+        case 'volume':
+          query = query.order('total_volume_usd', { ascending: false });
+          break;
+        case 'created_at':
+          query = query.order('created_at', { ascending: false });
+          break;
+        case 'end_time':
+          query = query.order('end_time', { ascending: false });
+          break;
+      }
+
+      const { data, error: queryError } = await query.limit(100);
 
       if (queryError) {
         console.error('Supabase query error:', queryError);
@@ -101,9 +144,17 @@ export function usePredictionMarkets() {
   };
 
   useEffect(() => {
+    // 如果 sortBy 或 stateFilter 改变（tab 切换），立即清空数据
+    // 如果只是 refreshKey 改变（buy shares / create market 刷新），不清空数据
+    if (sortBy !== prevSortByRef.current || stateFilter !== prevStateFilterRef.current) {
+      setBasePredictions([]);
+      prevSortByRef.current = sortBy;
+      prevStateFilterRef.current = stateFilter;
+    }
+
     fetchMarkets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshKey]);
+  }, [refreshKey, sortBy, stateFilter]);
 
   // 提取所有 creator 地址
   // React Query 会自动处理去重和缓存，无需手动优化

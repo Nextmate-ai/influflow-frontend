@@ -22,7 +22,7 @@ interface AuctionGridProps {
     };
   }>;
   onPredictionClick?: (prediction: PredictionCardData) => void;
-  filterStatus?: 'live' | 'finished';
+  filterStatus?: 'trending' | 'new' | 'finished';
 }
 
 /**
