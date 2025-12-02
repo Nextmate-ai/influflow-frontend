@@ -66,7 +66,7 @@ export function usePredictionMarkets() {
         .schema('nextmate')
         .from('markets_readable')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('total_volume_usd', { ascending: false })
         .limit(100);
 
       if (queryError) {
