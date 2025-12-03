@@ -53,7 +53,7 @@ export function useClaimCreatorFees() {
             uiOptions: {
               description: 'Claim your creator fees from the prediction market.',
               buttonText: 'Claim Creator Fees',
-              showWalletUIs: true,
+              showWalletUIs: false,
               transactionInfo: {
                 action: 'Claim Creator Fees',
                 contractInfo: {

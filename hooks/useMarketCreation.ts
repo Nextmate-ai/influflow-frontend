@@ -123,7 +123,7 @@ export function useMarketCreation() {
                 description:
                   'Before creating a market, you need to authorize the contract.',
                 buttonText: 'Approve',
-                showWalletUIs: true,
+                showWalletUIs: false,
                 transactionInfo: {
                   action: 'Approve Token',
                   contractInfo: {
@@ -171,7 +171,7 @@ export function useMarketCreation() {
             uiOptions: {
               description: 'Create a new market.',
               buttonText: 'Create Market',
-              showWalletUIs: true,
+              showWalletUIs: false,
               transactionInfo: {
                 action: 'Create Market',
                 contractInfo: {

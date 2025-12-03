@@ -124,7 +124,7 @@ export function useBuyShares() {
                 description:
                   'Before buying shares, you need to authorize the contract.',
                 buttonText: 'Approve',
-                showWalletUIs: true,
+                showWalletUIs: false,
                 transactionInfo: {
                   action: 'Approve Token',
                   contractInfo: {
@@ -167,7 +167,7 @@ export function useBuyShares() {
               description:
                 'Buy shares of the selected side',
               buttonText: 'Buy Shares',
-              showWalletUIs: true,
+              showWalletUIs: false,
               transactionInfo: {
                 action: 'Buy Shares',
                 contractInfo: {

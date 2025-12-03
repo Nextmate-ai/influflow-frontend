@@ -53,7 +53,7 @@ export function useClaimPayout() {
             uiOptions: {
               description: 'Claim your payout from the market.',
               buttonText: 'Claim Payout',
-              showWalletUIs: true,
+              showWalletUIs: false,
               transactionInfo: {
                 action: 'Claim Payout',
                 contractInfo: {
