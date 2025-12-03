@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 
+import { addToast } from '@/components/base/toast';
 import { useClaimCreatorFees } from '@/hooks/useClaimCreatorFees';
 import { useClaimPayout } from '@/hooks/useClaimPayout';
 
@@ -57,11 +58,23 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
     try {
       await claimPayout({ marketId: BigInt(marketId) });
       setIsClaimSuccess(true);
+      addToast({
+        title: 'Success',
+        description: 'Payout claimed successfully!',
+        color: 'success',
+      });
       // 立即调用回调，父组件会处理乐观更新和延迟刷新
       onClaimSuccess?.();
     } catch (error) {
       console.error('Claim failed:', error);
-      // 这里可以添加 toast 通知
+      addToast({
+        title: 'Error',
+        description:
+          error instanceof Error
+            ? error.message || 'Failed to claim payout'
+            : 'Failed to claim payout',
+        color: 'danger',
+      });
     }
   };
 
@@ -71,11 +84,23 @@ export const ParticipationRow: React.FC<ParticipationRowProps> = ({
 
     try {
       await claimCreatorFees({ marketId: BigInt(marketId) });
+      addToast({
+        title: 'Success',
+        description: 'Creator fees claimed successfully!',
+        color: 'success',
+      });
       // 立即调用回调，父组件会处理乐观更新和延迟刷新
       onClaimSuccess?.();
     } catch (error) {
       console.error('Claim creator fees failed:', error);
-      // 这里可以添加 toast 通知
+      addToast({
+        title: 'Error',
+        description:
+          error instanceof Error
+            ? error.message || 'Failed to claim creator fees'
+            : 'Failed to claim creator fees',
+        color: 'danger',
+      });
     }
   };
   // 计算实际的 outcome 显示: Win/Loss/-
