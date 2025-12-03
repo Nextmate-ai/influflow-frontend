@@ -100,6 +100,7 @@ export function useTokenClaim() {
               description:
                 'Claim test tokens from the faucet. Each address can claim 10000 tokens per day.',
               buttonText: 'Claim Tokens',
+              showWalletUIs: false,
               transactionInfo: {
                 action: 'Claim Tokens',
                 contractInfo: {

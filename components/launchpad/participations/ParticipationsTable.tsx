@@ -2,6 +2,7 @@
 
 import React from 'react';
 
+import { addToast } from '@/components/base/toast';
 import { useClaimCreatorFees } from '@/hooks/useClaimCreatorFees';
 import { useClaimPayout } from '@/hooks/useClaimPayout';
 import { useUserParticipations } from '@/hooks/useUserParticipations';
@@ -80,8 +81,24 @@ export const ParticipationsTable: React.FC<ParticipationsTableProps> = ({
       // 立即更新本地状态（乐观更新）
       const recordKey = `${marketId}-${opinion || 'all'}`;
       setClaimedRecords((prev) => new Set(prev).add(recordKey));
+      addToast({
+        title: 'Success',
+        description:
+          viewType === 'participations'
+            ? 'Payout claimed successfully!'
+            : 'Creator fees claimed successfully!',
+        color: 'success',
+      });
     } catch (error) {
       console.error('Claim failed:', error);
+      addToast({
+        title: 'Error',
+        description:
+          error instanceof Error
+            ? error.message || 'Failed to claim'
+            : 'Failed to claim',
+        color: 'danger',
+      });
     }
   };
 
