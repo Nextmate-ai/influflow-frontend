@@ -199,6 +199,7 @@ export function usePredictionMarkets(
 
   return {
     predictions,
+    basePredictions, // 导出基础数据，用于快速查找（不等待 X 信息）
     isLoading: isLoading || isLoadingXInfo,
     error,
     refresh,
