@@ -626,11 +626,11 @@ export const WelcomeScreen = ({
   };
 
   return (
-    <div className="relative h-full w-screen">
+    <div className="relative h-full w-full">
       {/* 主滚动容器 */}
       <div
         ref={scrollContainerRef}
-        className="scroll-container relative h-screen w-screen overflow-y-auto overflow-x-hidden"
+        className="scroll-container relative h-screen w-full overflow-y-auto overflow-x-hidden"
         style={{
           scrollBehavior: 'smooth',
           WebkitOverflowScrolling: 'touch',
