@@ -118,7 +118,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       backdrop="transparent"
       className="dark"
       hideCloseButton
-      isDismissable={false}
+      isDismissable={true}
       classNames={{
         wrapper:
           'md:justify-end md:items-center !overflow-hidden !items-start md:!items-center !justify-start md:!justify-end',
