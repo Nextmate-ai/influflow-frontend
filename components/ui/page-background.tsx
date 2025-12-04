@@ -17,8 +17,22 @@ export const PageBackground = ({
         containerClassName,
       )}
     >
-      {/* 背景层：所有图片垂直依次展开 */}
-      <div className="relative flex size-full flex-col">
+      {/* 移动端：使用单个长图背景 */}
+      <div className="absolute inset-0 md:hidden">
+        <div className="absolute inset-0 min-h-screen w-full">
+          <Image
+            src="/home/mobile-bg.png"
+            alt="Mobile Background"
+            fill
+            className="object-cover object-top"
+            priority
+            sizes="100vw"
+          />
+        </div>
+      </div>
+
+      {/* 桌面端：使用拼接的多个图片 */}
+      <div className="relative hidden size-full flex-col md:flex">
         {/* 图片1 */}
         <div className="relative h-auto w-screen shrink-0 mt-[-1px] mt-[-1px]">
           <Image

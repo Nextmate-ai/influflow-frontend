@@ -15,12 +15,12 @@ export default function HomePage() {
   return (
     <>
       {/* 移动端: 显示阻断页面 */}
-      <div className="md:hidden">
+      {/* <div className="md:hidden">
         <MobileBlocker />
-      </div>
+      </div> */}
 
       {/* 桌面端: 正常显示首页 */}
-      <div className="relative hidden min-h-screen flex-col bg-transparent text-white md:flex">
+      <div className="relative min-h-screen flex flex-col bg-transparent text-white">
       {/* 背景组件 */}
       <PageBackground containerClassName="z-0" />
 
@@ -148,8 +148,8 @@ export default function HomePage() {
           <p className="py-[48px] text-center text-[32px] font-semibold italic sm:py-[64px] sm:text-[36px] md:py-[80px] md:text-[40px]">
             FAQ
           </p>
-          <div className="space-y-3">
-            <FAQ q="What is Nextmate.fun?">
+          <FAQList>
+            <FAQ id="1" q="What is Nextmate.fun?">
               Nextmate.fun is a platform where creators turn opinions into
               prediction events and earn from fan participation. Creators can
               publish articles, launch prediction events, and earn commissions.
@@ -157,28 +157,28 @@ export default function HomePage() {
               for accurate predictions — creating a user-driven economy that
               rewards both creators and fans.
             </FAQ>
-            <FAQ q="How to earn Nextmate.fun points? ">
+            <FAQ id="2" q="How to earn Nextmate.fun points? ">
               Points are earned by participating in prediction events, creating
               markets, subscribing to Influxy, and other engagement activities.
               These points will serve as a key reference for future token
               airdrops.
             </FAQ>
-            <FAQ q="What is Influxy?">
+            <FAQ id="3" q="What is Influxy?">
               More than a writing tool, Influxy is an all-in-one AI workspace
               that models your unique style. It helps you work smarter, not
               harder — creating content that sounds like you, only sharper.
             </FAQ>
-            <FAQ q="Who can use Influxy?">
+            <FAQ id="4" q="Who can use Influxy?">
               Influxy is designed for creators, influencers, researchers, and
               knowledge workers who want to turn their expertise and influence
               into lasting value.
             </FAQ>
-            <FAQ q="How is Influxy different from other AI writing tools?">
+            <FAQ id="5" q="How is Influxy different from other AI writing tools?">
               Unlike generic AI tools, Influxy learns your unique style and
               context. It doesn't just generate text — it helps you create
               authentic, branded content that truly sounds like you.
             </FAQ>
-          </div>
+          </FAQList>
         </section>
 
         <section className="mx-auto w-full max-w-5xl overflow-hidden rounded-[20px] bg-gradient-to-br from-[#1a1f3a] via-[#2a3150] to-[#1a1f3a] px-4 py-12 sm:py-16">
@@ -187,7 +187,7 @@ export default function HomePage() {
           </p>
           <div className="relative mx-auto w-full">
             {/* Bing Ventures */}
-            <div className="flex h-[100px] w-full items-center justify-center sm:h-[120px] md:h-[150px]">
+            <div className="flex h-[100px] w-full items-center md:justify-center pl-10 sm:h-[120px] md:h-[150px]">
               <Image
                 src="/home/bing.png"
                 alt="Team Background"
@@ -197,8 +197,34 @@ export default function HomePage() {
               />
             </div>
 
-            {/* Team Members */}
-            <div className="flex min-h-[120px] w-full flex-wrap items-center justify-center gap-4 py-4 sm:min-h-[140px] sm:gap-6 sm:py-0 md:min-h-[150px] md:gap-0">
+            {/* Team Members - 移动端：垂直排列，左对齐 */}
+            <div className="flex min-h-[120px] w-full flex-col items-start justify-center gap-4 py-4 pl-10 sm:min-h-[140px] sm:gap-6 sm:py-0 sm:pl-12 md:hidden">
+              <Image
+                src="/home/romeo.png"
+                alt="Romeo"
+                width={150}
+                height={150}
+                className="h-[70px] w-auto sm:h-[80px]"
+              />
+
+              <Image
+                src="/home/jeff.png"
+                alt="Jeff"
+                width={150}
+                height={150}
+                className="h-[70px] w-auto sm:h-[80px]"
+              />
+              <Image
+                src="/home/sing.png"
+                alt="Sing"
+                width={150}
+                height={150}
+                className="h-[70px] w-auto sm:h-[80px]"
+              />
+            </div>
+
+            {/* Team Members - 桌面端：水平排列 */}
+            <div className="hidden min-h-[120px] w-full items-center justify-center gap-4 sm:min-h-[140px] sm:gap-6 md:flex md:min-h-[150px] md:gap-0">
               <Image
                 src="/home/romeo.png"
                 alt="Romeo"
@@ -288,41 +314,92 @@ function Feature({
   );
 }
 
+// FAQ列表上下文，用于移动端手风琴模式
+const FAQContext = React.createContext<{
+  openId: string | null;
+  setOpenId: (id: string | null) => void;
+}>({
+  openId: null,
+  setOpenId: () => {},
+});
+
+function FAQList({ children }: { children: React.ReactNode }) {
+  const [openId, setOpenId] = React.useState<string | null>(null);
+
+  return (
+    <FAQContext.Provider value={{ openId, setOpenId }}>
+      <div className="space-y-3">{children}</div>
+    </FAQContext.Provider>
+  );
+}
+
 type FAQProps = {
+  id: string;
   q: string;
   children: React.ReactNode;
 };
 
-function FAQ({ q, children }: FAQProps) {
+function FAQ({ id, q, children }: FAQProps) {
+  const { openId, setOpenId } = React.useContext(FAQContext);
   const [isOpen, setIsOpen] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  // 检测是否为移动端
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.matchMedia('(max-width: 767px)').matches);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // 移动端：使用上下文管理，实现手风琴模式
+  // PC端：使用本地状态，支持hover展开
+  const isActuallyOpen = isMobile ? openId === id : isOpen;
+
+  const handleToggle = () => {
+    if (isMobile) {
+      // 移动端：手风琴模式，点击当前项则关闭，点击其他项则切换
+      setOpenId(openId === id ? null : id);
+    } else {
+      // PC端：独立切换
+      setIsOpen(!isOpen);
+    }
+  };
 
   return (
     <div
-      className={`rounded-[20px] transition-all duration-300 ${
-        isOpen
-          ? 'border-0 bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px]'
-          : 'border border-[#252525]'
+      className={`rounded-[20px] p-[2px] transition-colors duration-300 ${
+        isActuallyOpen
+          ? 'border-0 bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB]'
+          : 'border-[2px] border-transparent'
       }`}
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
+      onMouseEnter={() => {
+        // PC端：hover时展开
+        if (!isMobile && window.matchMedia('(hover: hover)').matches) {
+          setIsOpen(true);
+        }
+      }}
+      onMouseLeave={() => {
+        // PC端：离开时收起
+        if (!isMobile && window.matchMedia('(hover: hover)').matches) {
+          setIsOpen(false);
+        }
+      }}
     >
-      <details
+      <div
         className="
         group relative overflow-hidden
         rounded-[18px] bg-[#161A42]
-        transition-all duration-300 hover:shadow-sm
       "
-        open={isOpen}
       >
-        <summary
+        <div
           className="
-        flex cursor-default list-none items-center justify-between
-        py-6 pr-[40px] transition-[padding] duration-300 group-open:pb-4 sm:py-8 sm:pr-[48px] sm:group-open:pb-5 md:py-10 md:pr-[56px] md:group-open:pb-6
+        flex cursor-pointer list-none items-center justify-between
+        py-6 pr-[40px] sm:py-8 sm:pr-[48px] md:py-10 md:pr-[56px]
       "
-          onClick={(e) => {
-            // 阻止默认的点击切换行为
-            e.preventDefault();
-          }}
+          onClick={handleToggle}
         >
           <span className="pl-[24px] text-[16px] font-medium italic sm:pl-[40px] sm:text-[18px] md:pl-[80px] md:text-[20px]">
             Q:
@@ -330,30 +407,36 @@ function FAQ({ q, children }: FAQProps) {
           <span className="mr-auto pl-4 text-[16px] font-medium sm:pl-6 sm:text-[18px] md:pl-10 md:text-[20px]">
             {q}
           </span>
-        </summary>
+        </div>
 
-        {/* 关键：箭头相对 details 垂直居中 */}
+        {/* 关键：箭头相对容器垂直居中 */}
         <img
           src="/icons/lsicon_down-outline.svg"
           width={16}
           height={16}
-          className="
-        pointer-events-none absolute right-[24px] top-1/2
-        -translate-y-1/2 -rotate-90
-        transition-transform
-        group-open:rotate-0 sm:right-[32px] md:right-[40px]
-      "
+          className={`pointer-events-none absolute right-[24px] top-6 -translate-y-1/2 transition-transform duration-300 ease-in-out sm:right-[32px] sm:top-8 md:right-[40px] md:top-10 ${
+            isActuallyOpen ? 'rotate-0' : '-rotate-90'
+          }`}
         />
 
-        <div className="mb-6 flex w-full items-baseline px-4 text-sm leading-6 sm:mb-8 sm:px-0 sm:text-base sm:leading-7 md:mb-10 md:w-[820px]">
-          <span className="pl-[24px] text-[16px] font-medium italic sm:pl-[40px] sm:text-[18px] md:pl-[80px] md:text-[20px]">
-            A:
-          </span>
-          <div className="mr-auto pl-4 text-[16px] font-medium leading-6 sm:pl-6 sm:text-[18px] sm:leading-7 md:pl-10 md:text-[20px] md:leading-8">
-            {children}
+        {/* 内容区域：使用max-height和opacity实现平滑动画 */}
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+            isActuallyOpen
+              ? 'max-h-[1000px] opacity-100'
+              : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="mb-6 flex w-full items-baseline px-4 text-sm leading-6 sm:mb-8 sm:px-0 sm:text-base sm:leading-7 md:mb-10 md:w-[820px]">
+            <span className="pl-[24px] text-[16px] font-medium italic sm:pl-[40px] sm:text-[18px] md:pl-[80px] md:text-[20px]">
+              A:
+            </span>
+            <div className="mr-auto pl-4 text-[16px] font-medium leading-6 sm:pl-6 sm:text-[18px] sm:leading-7 md:pl-10 md:text-[20px] md:leading-8">
+              {children}
+            </div>
           </div>
         </div>
-      </details>
+      </div>
     </div>
   );
 }
