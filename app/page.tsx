@@ -5,6 +5,7 @@ import Link from 'next/link';
 import React from 'react';
 
 import { SharedHeader } from '@/components/layout/SharedHeader';
+import { MobileBlocker } from '@/components/launchpad/MobileBlocker';
 import { PageBackground } from '@/components/ui/page-background';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -12,7 +13,14 @@ export default function HomePage() {
   const { isAuthenticated, openLoginModal } = useAuthStore();
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-transparent text-white">
+    <>
+      {/* 移动端: 显示阻断页面 */}
+      <div className="md:hidden">
+        <MobileBlocker />
+      </div>
+
+      {/* 桌面端: 正常显示首页 */}
+      <div className="relative hidden min-h-screen flex-col bg-transparent text-white md:flex">
       {/* 背景组件 */}
       <PageBackground containerClassName="z-0" />
 
@@ -217,7 +225,8 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-    </div>
+      </div>
+    </>
   );
 }
 
