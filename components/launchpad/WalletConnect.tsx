@@ -3,17 +3,15 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
+import { WalletUserInfoSkeleton } from './skeletons/WalletUserInfoSkeleton';
+
 // 动态导入 WalletConnectInner 组件，禁用 SSR
 // 这样可以确保 QueryClientProvider 和 ConnectButton 都在客户端正确初始化
 const WalletConnectInner = dynamic(
   () => import('./WalletConnectInner').then((mod) => mod.WalletConnectInner),
   {
     ssr: false,
-    loading: () =>
-      // <div className="rounded-lg bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] px-6 py-2 font-semibold text-white opacity-50">
-      //   加载中...
-      // </div>
-      null,
+    loading: () => <WalletUserInfoSkeleton />,
   },
 );
 
@@ -39,12 +37,9 @@ export function WalletConnect({
     setMounted(true);
   }, []);
 
-  // 在客户端挂载前不渲染
+  // 在客户端挂载前显示骨架屏
   if (!mounted) {
-    return null;
-    // <div className="rounded-lg bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#6155F5] px-6 py-2 font-semibold text-white opacity-50">
-    //   加载中...
-    // </div>
+    return <WalletUserInfoSkeleton />;
   }
 
   return (

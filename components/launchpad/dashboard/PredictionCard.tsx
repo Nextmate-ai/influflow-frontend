@@ -71,17 +71,16 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
   const [isHovering, setIsHovering] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
 
-  // 获取显示的头像和名称
-  const displayAvatar =
-    avatarError || !creatorInfo?.xAvatarUrl
-      ? '/images/avatar_bg.png'
-      : creatorInfo.xAvatarUrl;
+  // 获取显示的名称
   const displayName =
     creatorInfo?.xName ||
     creatorInfo?.xUsername ||
     (creatorInfo?.address
       ? `${creatorInfo.address.slice(0, 6)}...${creatorInfo.address.slice(-4)}`
       : 'Unknown');
+
+  // 判断是否有有效的头像
+  const hasValidAvatar = !avatarError && !!creatorInfo?.xAvatarUrl;
 
   // 从 rawData 中提取 yes_invested_ratio 和 no_invested_ratio
   const yesInvestedRatio =
@@ -255,7 +254,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
             onClick={(e) => e.stopPropagation()}
             className="relative size-12 shrink-0 cursor-pointer overflow-hidden rounded-full transition-colors hover:opacity-80 group-hover:border-cyan-400 md:size-16"
           >
-            {creatorInfo?.xAvatarUrl && !avatarError ? (
+            {hasValidAvatar ? (
               <img
                 src={creatorInfo.xAvatarUrl}
                 alt={displayName}
@@ -263,17 +262,12 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
                 onError={() => setAvatarError(true)}
               />
             ) : (
-              <Image
-                src={displayAvatar}
-                alt={displayName}
-                fill
-                className="object-cover"
-              />
+              <div className="size-full animate-pulse bg-gray-700" />
             )}
           </a>
         ) : (
           <div className="relative size-12 shrink-0 overflow-hidden rounded-full transition-colors group-hover:border-cyan-400 md:size-16">
-            {creatorInfo?.xAvatarUrl && !avatarError ? (
+            {hasValidAvatar ? (
               <img
                 src={creatorInfo.xAvatarUrl}
                 alt={displayName}
@@ -281,12 +275,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
                 onError={() => setAvatarError(true)}
               />
             ) : (
-              <Image
-                src={displayAvatar}
-                alt={displayName}
-                fill
-                className="object-cover"
-              />
+              <div className="size-full animate-pulse bg-gray-700" />
             )}
           </div>
         )}

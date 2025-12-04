@@ -7,6 +7,7 @@ import { usePredictionMarkets, MarketSortBy, StateFilter } from '@/hooks/usePred
 
 import { CreatePredictionModal } from '../modals/CreatePredictionModal';
 import { UserDetailModal } from '../modals/UserDetailModal';
+import { DashboardContentSkeleton } from '../skeletons/DashboardContentSkeleton';
 
 import { AuctionGrid } from './AuctionGrid';
 import { PredictionCardData } from './PredictionCard';
@@ -239,17 +240,17 @@ export const DashboardContent: React.FC = () => {
         </button>
       </div>
 
-      <div
-        className="transition-opacity duration-300"
-        style={{ opacity: isLoading && predictions.length === 0 ? 0.3 : 1 }}
-      >
+      {/* 加载状态：显示骨架屏 */}
+      {isLoading && predictions.length === 0 ? (
+        <DashboardContentSkeleton />
+      ) : (
         <AuctionGrid
           key={filterStatus}
           predictions={predictions}
           onPredictionClick={handlePredictionClick}
           filterStatus={filterStatus}
         />
-      </div>
+      )}
 
       {selectedPrediction && (
         <UserDetailModal

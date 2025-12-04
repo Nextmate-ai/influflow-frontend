@@ -5,6 +5,7 @@ import Link from 'next/link';
 import React from 'react';
 
 import { SharedHeader } from '@/components/layout/SharedHeader';
+import { MobileBlocker } from '@/components/launchpad/MobileBlocker';
 import { PageBackground } from '@/components/ui/page-background';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -12,7 +13,14 @@ export default function HomePage() {
   const { isAuthenticated, openLoginModal } = useAuthStore();
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-transparent text-white">
+    <>
+      {/* 移动端: 显示阻断页面 */}
+      <div className="md:hidden">
+        <MobileBlocker />
+      </div>
+
+      {/* 桌面端: 正常显示首页 */}
+      <div className="relative hidden min-h-screen flex-col bg-transparent text-white md:flex">
       {/* 背景组件 */}
       <PageBackground containerClassName="z-0" />
 
@@ -26,10 +34,10 @@ export default function HomePage() {
             containerClassName="absolute inset-0 -z-10 h-full w-full"
             interactive={true}
           /> */}
-          <p className="h-auto text-[32px] leading-[40px] sm:text-[48px] sm:leading-[60px] md:h-[100px] md:text-[65px] md:leading-[80px]">
+          <h1 className="min-h-[80px] text-[32px] leading-[40px] sm:min-h-[120px] sm:text-[48px] sm:leading-[60px] md:min-h-[100px] md:text-[65px] md:leading-[80px]">
             Turn opinions into assets
             {/* <br className="hidden md:block" /> In Your Own Voice */}
-          </p>
+          </h1>
           <p className="mx-auto mt-4 w-full max-w-[590px] px-4 text-[16px] leading-[22px] sm:mt-6 sm:text-[18px] sm:leading-[24px] md:text-[20px] md:leading-[25px]">
             A platform where creators turn opinions into prediction markets and
             earn from fan participation.
@@ -217,7 +225,8 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-    </div>
+      </div>
+    </>
   );
 }
 
