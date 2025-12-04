@@ -57,13 +57,6 @@ export const MainContent = ({
         duration: 0.3,
         ease: 'easeInOut',
       }}
-      style={{
-        // 在移动端和平板上忽略 marginLeft，只在桌面端应用
-        marginLeft:
-          isAuthenticated && !sidebarCollapsed
-            ? 'clamp(0px, calc((100vw - 1024px) * 999), 320px)'
-            : 0,
-      }}
     >
       {isAuthenticated && sidebarCollapsed && (
         <Button
@@ -71,7 +64,7 @@ export const MainContent = ({
           size="sm"
           variant="light"
           onPress={onToggleSidebar}
-          className="fixed left-2 top-2 z-50 bg-white text-gray-600 shadow-md hover:text-gray-900 sm:left-3 sm:top-3 lg:absolute lg:left-4 lg:top-4"
+          className="absolute left-4 top-4 z-50 bg-white text-gray-600 shadow-md hover:text-gray-900"
         >
           <Image
             src={'/icons/doubleArrowRounded.svg'}
