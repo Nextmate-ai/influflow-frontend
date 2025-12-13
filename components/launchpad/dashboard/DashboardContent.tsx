@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { usePredictionMarkets, MarketSortBy, StateFilter } from '@/hooks/usePredictionMarkets';
@@ -86,13 +86,10 @@ export const DashboardContent: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('trending');
 
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hasInitializedFromUrl = useRef(false);
 
-  // 获取 URL 参数和路由
+  // 获取 URL 参数
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  const marketIdParam = searchParams.get('market_id');
+  const marketIdParam = searchParams.get('marketId');
 
   useEffect(() => {
     return () => {
@@ -114,53 +111,19 @@ export const DashboardContent: React.FC = () => {
     filterStatus === 'trending' || filterStatus === 'new' ? 'active' : 'finished';
 
   // 从 Supabase 读取市场数据
-  const { predictions, isLoading, error, refresh, basePredictions } = usePredictionMarkets(sortBy, stateFilter);
+  const { predictions, isLoading, error, refresh } = usePredictionMarkets(sortBy, stateFilter);
 
-  // 更新 URL 查询参数的辅助函数
-  const updateUrlParams = useCallback(
-    (marketId: string | null) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (marketId) {
-        params.set('market_id', marketId);
-      } else {
-        params.delete('market_id');
-      }
-      const newUrl = params.toString()
-        ? `${pathname}?${params.toString()}`
-        : pathname;
-      router.replace(newUrl, { scroll: false });
-    },
-    [searchParams, pathname, router],
-  );
-
-  // 处理分享链接：自动打开对应的 market Modal（仅在页面加载时执行一次）
-  // 优化：使用 basePredictions 而不是 predictions，这样不需要等待 X 信息加载完成
+  // 处理分享链接：自动打开对应的 market Modal
   useEffect(() => {
-    // 如果已经初始化过，或没有 market_id 参数，或 Modal 已打开，则不处理
-    if (hasInitializedFromUrl.current || !marketIdParam || isModalOpen) {
+    // 如果没有 marketId 参数，或数据还在加载，或 predictions 为空，或 Modal 已打开，则不处理
+    if (!marketIdParam || isLoading || !predictions.length || isModalOpen) {
       return;
     }
 
-    // 如果基础数据还在加载，等待
-    if (isLoading && !basePredictions.length) {
-      return;
-    }
-
-    // 如果基础数据已加载但为空，说明没有数据，移除查询参数
-    if (!isLoading && !basePredictions.length) {
-      updateUrlParams(null);
-      hasInitializedFromUrl.current = true;
-      return;
-    }
-
-    // 在基础数据中查找对应的 prediction（不需要等待 X 信息）
-    const targetPrediction = basePredictions.find((p) => p.id === marketIdParam);
+    // 查找对应的 prediction
+    const targetPrediction = predictions.find((p) => p.id === marketIdParam);
     if (!targetPrediction) {
-      // 如果数据已加载完成但没找到，移除查询参数
-      if (!isLoading) {
-        updateUrlParams(null);
-        hasInitializedFromUrl.current = true;
-      }
+      // marketId 不存在，静默处理
       return;
     }
 
@@ -169,22 +132,17 @@ export const DashboardContent: React.FC = () => {
     const isActive =
       state === 0 || state === '0' || state === 'Active' || state === undefined;
     if (!isActive) {
-      // 市场已结束，移除查询参数
-      updateUrlParams(null);
-      hasInitializedFromUrl.current = true;
+      // 市场已结束，不打开 Modal
       return;
     }
 
-    // 立即打开 Modal（使用基础数据，X 信息会在 predictions 中异步更新）
-    setSelectedPrediction({
-      ...targetPrediction,
-      rawData: targetPrediction.rawData,
-      option: '',
-    });
-    setIsModalOpen(true);
-    hasInitializedFromUrl.current = true;
+    // 打开 Modal
+    handlePredictionClick(targetPrediction);
+
+    // 清除 URL 参数（保持 URL 清洁）
+    window.history.replaceState({}, '', '/launchpad');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [marketIdParam, basePredictions, isModalOpen, isLoading, updateUrlParams]);
+  }, [marketIdParam, predictions, isModalOpen, isLoading]);
 
   // 使用 useCallback 包装 refresh 回调，避免每次渲染都创建新函数
   const handleSuccess = useCallback(() => {
@@ -224,8 +182,6 @@ export const DashboardContent: React.FC = () => {
       option: option || '',
     });
     setIsModalOpen(true);
-    // 更新 URL 添加 market_id 参数
-    updateUrlParams(prediction.id);
   };
 
   const handleCreateClick = useCallback(() => {
@@ -301,8 +257,6 @@ export const DashboardContent: React.FC = () => {
           isOpen={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
-            // 移除 URL 中的 market_id 参数
-            updateUrlParams(null);
             setTimeout(() => setSelectedPrediction(null), 300);
           }}
           prediction={selectedPrediction}
