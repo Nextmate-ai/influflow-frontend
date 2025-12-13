@@ -5,7 +5,13 @@ export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // 如果是 influxy.xyz 域名且访问根路径,重定向到 /home
-  if (hostname.includes('influxy.xyz') && pathname === '/') {
+  // 使用精确域名匹配，避免误匹配恶意域名
+  const isInfluxyDomain =
+    hostname === 'influxy.xyz' ||
+    hostname === 'www.influxy.xyz' ||
+    hostname.endsWith('.influxy.xyz');
+
+  if (isInfluxyDomain && pathname === '/') {
     return NextResponse.redirect(new URL('/home', request.url));
   }
 
