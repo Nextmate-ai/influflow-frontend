@@ -57,8 +57,8 @@ export default function HomePage() {
 
             {/* Go to Influxy 按钮 - 移动端隐藏 */}
             {isAuthenticated ? (
-              <Link
-                href="/home"
+              <a
+                href="https://influxy.xyz/home"
                 className="hidden w-full max-w-[280px] rounded-[12px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90 sm:block sm:w-auto"
               >
                 <div className="rounded-[10px] bg-[#161A42] px-6 py-2.5 sm:px-8">
@@ -66,18 +66,18 @@ export default function HomePage() {
                     Go to Influxy
                   </span>
                 </div>
-              </Link>
+              </a>
             ) : (
-              <div
+              <a
+                href="https://influxy.xyz/home"
                 className="hidden w-full max-w-[280px] cursor-pointer rounded-[12px] bg-gradient-to-r from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] p-[2px] shadow-sm hover:opacity-90 sm:block sm:w-auto"
-                onClick={() => openLoginModal(undefined, true)}
               >
                 <div className="rounded-[10px] bg-[#161A42] px-6 py-2.5 sm:px-8">
                   <span className="font-['Poppins'] text-[15px] font-normal text-[#F9FAFB] sm:text-[16px]">
                     Go to Influxy
                   </span>
                 </div>
-              </div>
+              </a>
             )}
           </div>
           {/* TODO: 跳转链接 */}
