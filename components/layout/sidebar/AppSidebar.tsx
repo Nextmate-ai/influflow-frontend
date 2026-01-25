@@ -11,7 +11,6 @@ import {
   useState,
 } from 'react';
 
-import { ReferralModal } from '@/components/referral';
 import { useArticleStore } from '@/stores/articleStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -42,8 +41,6 @@ export interface AppSidebarRef {
 export const AppSidebar = forwardRef<AppSidebarRef, AppSidebarProps>(
   ({ onItemClick, selectedId, collapsed = false, onToggleCollapse }, ref) => {
     const { user, isAuthenticated } = useAuthStore();
-    const [showReferralModal, setShowReferralModal] = useState(false);
-    const [showRulesModal, setShowRulesModal] = useState(false);
 
     const { showLowCreditsBanner } = useSubscriptionStore();
     const { setArticles, setSelectedArticleId, setHasMore } = useArticleStore();
@@ -170,30 +167,6 @@ export const AppSidebar = forwardRef<AppSidebarRef, AppSidebarProps>(
           </div>
         </div>
 
-        <div className="px-3 pb-3">
-          {/*Invite to Earn*/}
-          <Button
-            className="h-[37px] w-full rounded-xl border-none bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 shadow-lg transition-all duration-300 hover:shadow-xl"
-            style={{
-              background:
-                'linear-gradient(90deg, #478afe 0%, #a392d1 50%, #fd999d 100%)',
-            }}
-            onPress={() => setShowReferralModal(true)}
-          >
-            <div className="flex items-center gap-3">
-              <Image
-                src={'/icons/add_account.svg'}
-                width={20}
-                height={20}
-                className="brightness-0 invert"
-              />
-              <span className="text-[14px] font-medium leading-[21px] text-white">
-                Invite to Earn
-              </span>
-            </div>
-          </Button>
-        </div>
-
         <div
           ref={scrollContainerRef}
           className="scrollbar-hide relative flex-1 overflow-y-auto"
@@ -250,12 +223,6 @@ export const AppSidebar = forwardRef<AppSidebarRef, AppSidebarProps>(
             <span className="text-[14px]  text-black">Style</span>
           </Link>
         </div>
-
-        {/* Referral Modals */}
-        <ReferralModal
-          isOpen={showReferralModal}
-          onClose={() => setShowReferralModal(false)}
-        />
       </div>
     );
   },
