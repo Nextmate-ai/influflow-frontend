@@ -2,7 +2,6 @@
 
 import { usePathname } from 'next/navigation';
 
-import { ShutdownBanner } from '@/components/layout/ShutdownBanner';
 import { Topbar } from '@/components/layout/Topbar';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -17,7 +16,6 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <ShutdownBanner />
       {!isAuthenticated && !isHomePage && !isLaunchPadPage && <Topbar />}
       {children}
     </>

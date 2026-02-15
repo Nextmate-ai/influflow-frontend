@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import NoCreditsModal from '@/components/modals/NoCreditsModal';
-import ShutdownNoticeModal from '@/components/modals/ShutdownNoticeModal';
 import PrivyProvider from '@/components/providers/PrivyProvider';
 import { SubscriptionSync } from '@/components/subscription/SubscriptionSync';
 import { OperatorRoleSync } from '@/components/launchpad/OperatorRoleSync';
@@ -38,7 +37,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
             isOpen={showNoCreditsModal}
             onClose={() => setShowNoCreditsModal(false)}
           />
-          <ShutdownNoticeModal />
           <ToastProvider placement="bottom-center" toastOffset={16} />
         </PrivyProvider>
       </QueryClientProvider>
