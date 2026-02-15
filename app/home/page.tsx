@@ -11,6 +11,8 @@ import {
   GenerationProvider,
 } from '@/components/generation';
 import CreditBanner from '@/components/home/CreditBanner';
+import { ShutdownBanner } from '@/components/layout/ShutdownBanner';
+import ShutdownNoticeModal from '@/components/modals/ShutdownNoticeModal';
 import { MainContent } from '@/components/home/MainContent';
 import { ScrollProgressIndicator } from '@/components/home/ScrollProgressIndicator';
 import {
@@ -374,6 +376,7 @@ function HomeContent() {
 
   return (
     <GenerationProvider initialMode={currentMode}>
+      <ShutdownNoticeModal />
       <div className="relative h-screen overflow-hidden">
         {/* 滚动进度指示器 - 仅在首页显示 */}
         {isShowingHomePage && scrollProgress && (
@@ -450,6 +453,7 @@ function HomeContent() {
             showGenerationOrchestrator ? 'hidden' : 'flex',
           )}
         >
+          <ShutdownBanner />
           <CreditBanner />
 
           <div className="relative flex h-full flex-1 overflow-hidden">
